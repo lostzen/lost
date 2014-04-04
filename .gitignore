@@ -1,0 +1,20 @@
+# Maven
+target/
+pom.xml.*
+release.properties
+gen-external-apklibs/
+
+# IntelliJ
+out/
+.idea/
+*.iml
+classes
+
+# Mac
+.DS_Store
+
+# Misc
+tmp/
+*.*~
+*.apk
+com_crashlytics_export_strings.xml
