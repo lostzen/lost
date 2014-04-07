@@ -4,6 +4,7 @@ import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.util.List;
 
@@ -11,6 +12,8 @@ import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 
 public class LocationClient {
+    public static final String TAG = LocationClient.class.getSimpleName();
+
     private final Context context;
     private final ConnectionCallbacks connectionCallbacks;
 
@@ -88,7 +91,12 @@ public class LocationClient {
             }
         };
 
-        locationManager.requestLocationUpdates(GPS_PROVIDER, interval, displacement, gpsListener);
+        try {
+            locationManager.requestLocationUpdates(GPS_PROVIDER, interval, displacement,
+                    gpsListener);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Unable to register for GPS updates.", e);
+        }
     }
 
     private void initNetworkListener(long interval, float displacement) {
@@ -114,8 +122,12 @@ public class LocationClient {
             }
         };
 
-        locationManager.requestLocationUpdates(NETWORK_PROVIDER, interval, displacement,
-                networkListener);
+        try {
+            locationManager.requestLocationUpdates(NETWORK_PROVIDER, interval, displacement,
+                    networkListener);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Unable to register for network updates.", e);
+        }
     }
 
     private void throwIfNotConnected() {
