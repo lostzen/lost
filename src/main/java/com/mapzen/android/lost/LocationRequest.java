@@ -1,4 +1,4 @@
-package com.mapzen.android.ps.location;
+package com.mapzen.android.lost;
 
 public final class LocationRequest {
     static final long DEFAULT_INTERVAL_IN_MS = 3600000;
