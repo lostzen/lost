@@ -1,13 +1,10 @@
-package com.mapzen.android.ps.location;
+package com.mapzen.android.lost;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import static com.mapzen.android.ps.location.LocationRequest.DEFAULT_FASTEST_INTERVAL_IN_MS;
-import static com.mapzen.android.ps.location.LocationRequest.DEFAULT_INTERVAL_IN_MS;
-import static com.mapzen.android.ps.location.LocationRequest.DEFAULT_SMALLEST_DISPLACEMENT_IN_METERS;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
@@ -26,10 +23,11 @@ public class LocationRequestTest {
 
     @Test
     public void create_shouldSetDefaultValues() throws Exception {
-        assertThat(locationRequest.getInterval()).isEqualTo(DEFAULT_INTERVAL_IN_MS);
-        assertThat(locationRequest.getFastestInterval()).isEqualTo(DEFAULT_FASTEST_INTERVAL_IN_MS);
+        assertThat(locationRequest.getInterval()).isEqualTo(LocationRequest.DEFAULT_INTERVAL_IN_MS);
+        assertThat(locationRequest.getFastestInterval()).isEqualTo(
+                LocationRequest.DEFAULT_FASTEST_INTERVAL_IN_MS);
         assertThat(locationRequest.getSmallestDisplacement())
-                .isEqualTo(DEFAULT_SMALLEST_DISPLACEMENT_IN_METERS);
+                .isEqualTo(LocationRequest.DEFAULT_SMALLEST_DISPLACEMENT_IN_METERS);
     }
 
     @Test
