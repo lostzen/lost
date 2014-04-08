@@ -1,4 +1,4 @@
-package com.mapzen.android.ps.location;
+package com.mapzen.android.lost;
 
 import android.location.Location;
 

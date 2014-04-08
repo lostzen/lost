@@ -1,4 +1,4 @@
-package com.mapzen.android.ps.location;
+package com.mapzen.android.lost;
 
 import org.junit.Before;
 import org.junit.Test;
