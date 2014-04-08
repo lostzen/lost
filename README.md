@@ -1,5 +1,5 @@
-# Player Services
+# LOST
 
-Location utils and services for Android.
+Location Open Source Tracker
 
-A collection of location utilites that make calls directly to the LocationManager. Player Services implements the same API as Google Play Services LocationClient yet only depends on the Android SDK.
+LOST is a drop-in replacement for Google Play Services LocationClient that makes calls directly to the LocationManger.
