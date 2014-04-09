@@ -16,6 +16,8 @@
 package com.example.lost;
 
 import com.mapzen.android.lost.LocationClient;
+import com.mapzen.android.lost.LocationListener;
+import com.mapzen.android.lost.LocationRequest;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -29,15 +31,28 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
     LocationFragment fragment;
     LocationClient client;
+
     LocationClient.ConnectionCallbacks callbacks = new LocationClient.ConnectionCallbacks() {
         @Override
         public void onConnected(Bundle connectionHint) {
             Location location = client.getLastLocation();
             fragment.setLastKnownLocation(location);
+
+            LocationRequest locationRequest = LocationRequest.create();
+            locationRequest.setInterval(5000);
+            locationRequest.setSmallestDisplacement(0);
+            client.requestLocationUpdates(locationRequest, listener);
         }
 
         @Override
         public void onDisconnected() {
+        }
+    };
+
+    LocationListener listener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            fragment.updateLocation(location);
         }
     };
 
@@ -79,6 +94,12 @@ public class MainActivity extends Activity {
         public void setLastKnownLocation(Location location) {
             TextView lastLocation = (TextView) getView().findViewById(R.id.last_location_value);
             lastLocation.setText(location.toString());
+        }
+
+        public void updateLocation(Location location) {
+            TextView textView = new TextView(getActivity());
+            textView.setText(location.toString());
+            ((ViewGroup) getView().findViewById(R.id.container)).addView(textView);
         }
     }
 }
