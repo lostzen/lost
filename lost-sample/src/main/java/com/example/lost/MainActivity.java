@@ -48,7 +48,6 @@ public class MainActivity extends Activity {
 
         fragment = new LocationFragment();
         client = new LocationClient(this, callbacks);
-        client.connect();
 
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
@@ -57,20 +56,29 @@ public class MainActivity extends Activity {
         }
     }
 
-    public static class LocationFragment extends Fragment {
-        private Location lastKnownLocation;
+    @Override
+    protected void onResume() {
+        super.onResume();
+        client.connect();
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        client.disconnect();
+    }
+
+    public static class LocationFragment extends Fragment {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             View view = inflater.inflate(R.layout.fragment_main, container, false);
-            TextView lastLocation = (TextView) view.findViewById(R.id.last_location_value);
-            lastLocation.setText(lastKnownLocation.toString());
             return view;
         }
 
         public void setLastKnownLocation(Location location) {
-            lastKnownLocation = location;
+            TextView lastLocation = (TextView) getView().findViewById(R.id.last_location_value);
+            lastLocation.setText(location.toString());
         }
     }
 }
