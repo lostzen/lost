@@ -15,31 +15,62 @@
  */
 package com.example.lost;
 
+import com.mapzen.android.lost.LocationClient;
+
 import android.app.Activity;
 import android.app.Fragment;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
+    LocationFragment fragment;
+    LocationClient client;
+    LocationClient.ConnectionCallbacks callbacks = new LocationClient.ConnectionCallbacks() {
+        @Override
+        public void onConnected(Bundle connectionHint) {
+            Location location = client.getLastLocation();
+            fragment.setLastKnownLocation(location);
+        }
+
+        @Override
+        public void onDisconnected() {
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        fragment = new LocationFragment();
+        client = new LocationClient(this, callbacks);
+        client.connect();
+
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, new LocationFragment())
+                    .add(R.id.container, fragment)
                     .commit();
         }
     }
 
     public static class LocationFragment extends Fragment {
+        private Location lastKnownLocation;
+
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.fragment_main, container, false);
+            View view = inflater.inflate(R.layout.fragment_main, container, false);
+            TextView lastLocation = (TextView) view.findViewById(R.id.last_location_value);
+            lastLocation.setText(lastKnownLocation.toString());
+            return view;
+        }
+
+        public void setLastKnownLocation(Location location) {
+            lastKnownLocation = location;
         }
     }
 }
