@@ -26,6 +26,7 @@
 
     <modules>
         <module>lost</module>
+        <module>lost-sample</module>
     </modules>
 
     <properties>
