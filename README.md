@@ -39,4 +39,4 @@ compile 'com.mapzen.android:lost:0.1'
 [1]: https://developer.android.com/reference/com/google/android/gms/location/LocationClient.html
 [2]: https://developer.android.com/reference/android/location/LocationManager.html
 [3]: http://developer.android.com/google/play-services/location.html
-[4]: #
+[4]: http://search.maven.org/remotecontent?filepath=com/mapzen/android/lost/0.1/lost-0.1.jar
