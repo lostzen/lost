@@ -13,4 +13,4 @@ dependencies:
 
 test:
   override:
-    - mvn verify
+    - mvn install
