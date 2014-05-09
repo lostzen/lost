@@ -1,6 +1,6 @@
 # LOST
 
-[![Build Status](https://travis-ci.org/mapzen/LOST.svg?branch=master)](https://travis-ci.org/mapzen/LOST)
+[![Circle CI Build Status](https://circleci.com/gh/mapzen/LOST.png?circle-token=87063f053ef960fa184031157ec01aa5549fd4ce)](https://circleci.com/gh/mapzen/LOST)
 
 Location Open Source Tracker for Android
 
