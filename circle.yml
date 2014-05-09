@@ -14,4 +14,4 @@ dependencies:
 
 test:
   override:
-    - mvn verify -f lost/pom.xml
+    - mvn install
