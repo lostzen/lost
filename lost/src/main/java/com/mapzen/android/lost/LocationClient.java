@@ -147,6 +147,14 @@ public class LocationClient {
         }
     }
 
+    public boolean isGPSEnabled() {
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+    public LocationManager getLocationManager() {
+        return locationManager;
+    }
+
     public boolean isConnected() {
         return locationManager != null;
     }

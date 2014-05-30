@@ -240,6 +240,20 @@ public class LocationClientTest {
         assertThat(locationClient.isConnected()).isFalse();
     }
 
+    @Test
+    public void shouldReturnGPSStateAsOn() {
+        ShadowLocationManager manager = shadowOf(locationClient.getLocationManager());
+        manager.setProviderEnabled(LocationManager.GPS_PROVIDER, true);
+        assertThat(locationClient.isGPSEnabled()).isTrue();
+    }
+
+    @Test
+    public void shouldReturnGPSStateAsOff() {
+        ShadowLocationManager manager = shadowOf(locationClient.getLocationManager());
+        manager.setProviderEnabled(LocationManager.GPS_PROVIDER, false);
+        assertThat(locationClient.isGPSEnabled()).isFalse();
+    }
+
     private static Location getTestLocation(String provider, float lat, float lng, long time) {
         Location location = new Location(provider);
         location.setLatitude(lat);
