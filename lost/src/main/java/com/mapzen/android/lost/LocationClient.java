@@ -103,6 +103,10 @@ public class LocationClient {
     }
 
     private void connectGpsListener(long interval, float displacement) {
+        if (gpsListener == null) {
+            return;
+        }
+
         try {
             locationManager.requestLocationUpdates(GPS_PROVIDER, interval, displacement,
                     gpsListener);
@@ -143,6 +147,10 @@ public class LocationClient {
     }
 
     private void connectNetworkListener(long interval, float displacement) {
+        if (networkListener == null) {
+            return;
+        }
+
         try {
             locationManager.requestLocationUpdates(NETWORK_PROVIDER, interval, displacement,
                     networkListener);
