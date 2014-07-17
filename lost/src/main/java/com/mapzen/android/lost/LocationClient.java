@@ -25,6 +25,9 @@ public class LocationClient {
 
     private float gpsAccuracy = Float.MAX_VALUE;
     private float networkAccuracy = Float.MAX_VALUE;
+    private long fastestInterval;
+    private float smallestDisplacement;
+    private boolean mockMode;
 
     public LocationClient(Context context, ConnectionCallbacks connectionCallbacks) {
         this.context = context;
@@ -61,14 +64,21 @@ public class LocationClient {
         throwIfNotConnected();
         this.locationListener = locationListener;
 
-        final long interval = request.getFastestInterval();
-        final float displacement = request.getSmallestDisplacement();
+        fastestInterval = request.getFastestInterval();
+        smallestDisplacement = request.getSmallestDisplacement();
 
-        initGpsListener(interval, displacement);
-        initNetworkListener(interval, displacement);
+        initGpsListener(fastestInterval, smallestDisplacement);
+        initNetworkListener(fastestInterval, smallestDisplacement);
     }
 
     private void initGpsListener(long interval, float displacement) {
+        createGpsListener();
+        if (!mockMode) {
+            connectGpsListener(interval, displacement);
+        }
+    }
+
+    private void createGpsListener() {
         this.gpsListener = new android.location.LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
@@ -90,7 +100,9 @@ public class LocationClient {
             public void onProviderDisabled(String provider) {
             }
         };
+    }
 
+    private void connectGpsListener(long interval, float displacement) {
         try {
             locationManager.requestLocationUpdates(GPS_PROVIDER, interval, displacement,
                     gpsListener);
@@ -100,6 +112,13 @@ public class LocationClient {
     }
 
     private void initNetworkListener(long interval, float displacement) {
+        createNetworkListener();
+        if (!mockMode) {
+            connectNetworkListener(interval, displacement);
+        }
+    }
+
+    private void createNetworkListener() {
         this.networkListener = new android.location.LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
@@ -121,7 +140,9 @@ public class LocationClient {
             public void onProviderDisabled(String provider) {
             }
         };
+    }
 
+    private void connectNetworkListener(long interval, float displacement) {
         try {
             locationManager.requestLocationUpdates(NETWORK_PROVIDER, interval, displacement,
                     networkListener);
@@ -157,6 +178,16 @@ public class LocationClient {
 
     public boolean isConnected() {
         return locationManager != null;
+    }
+
+    public void setMockMode(boolean isMockMode) {
+        mockMode = isMockMode;
+        if (mockMode) {
+            removeLocationUpdates(locationListener);
+        } else {
+            connectGpsListener(fastestInterval, smallestDisplacement);
+            connectNetworkListener(fastestInterval, smallestDisplacement);
+        }
     }
 
     public static interface ConnectionCallbacks {

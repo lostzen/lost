@@ -254,6 +254,34 @@ public class LocationClientTest {
         assertThat(locationClient.isGPSEnabled()).isFalse();
     }
 
+    @Test
+    public void enableMockMode_shouldUnregisterAllListeners() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        locationClient.requestLocationUpdates(request, listener);
+        locationClient.setMockMode(true);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
+    }
+
+    @Test
+    public void disableMockMode_shouldRegisterListenersAgain() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        locationClient.requestLocationUpdates(request, listener);
+        locationClient.setMockMode(true);
+        locationClient.setMockMode(false);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isNotEmpty();
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldNotRegisterListenersWithMockModeOn() throws Exception {
+        locationClient.setMockMode(true);
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        locationClient.requestLocationUpdates(request, listener);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
+    }
+
     private static Location getTestLocation(String provider, float lat, float lng, long time) {
         Location location = new Location(provider);
         location.setLatitude(lat);

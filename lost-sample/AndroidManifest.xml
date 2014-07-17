@@ -28,5 +28,9 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:label="@string/settings"
+            android:name=".SettingsActivity" />
+
     </application>
 </manifest>

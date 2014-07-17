@@ -21,20 +21,32 @@ import com.mapzen.android.lost.LocationRequest;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
     LocationFragment fragment;
     LocationClient client;
+    SharedPreferences sharedPreferences;
 
     LocationClient.ConnectionCallbacks callbacks = new LocationClient.ConnectionCallbacks() {
         @Override
         public void onConnected(Bundle connectionHint) {
+            Toast.makeText(getApplication(), "Location client connected",
+                    Toast.LENGTH_SHORT).show();
+
+            client.setMockMode(isMockMode());
+
             Location location = client.getLastLocation();
             fragment.setLastKnownLocation(location);
 
@@ -46,6 +58,8 @@ public class MainActivity extends Activity {
 
         @Override
         public void onDisconnected() {
+            Toast.makeText(getApplication(), "Location client disconnected",
+                    Toast.LENGTH_SHORT).show();
         }
     };
 
@@ -69,6 +83,8 @@ public class MainActivity extends Activity {
                     .add(R.id.container, fragment)
                     .commit();
         }
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
     }
 
     @Override
@@ -83,12 +99,27 @@ public class MainActivity extends Activity {
         client.disconnect();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        startActivity(new Intent(this, SettingsActivity.class));
+        return true;
+    }
+
+    private boolean isMockMode() {
+        return sharedPreferences.getBoolean(getString(R.string.mock_mode_key), false);
+    }
+
     public static class LocationFragment extends Fragment {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            View view = inflater.inflate(R.layout.fragment_main, container, false);
-            return view;
+            return inflater.inflate(R.layout.fragment_main, container, false);
         }
 
         public void setLastKnownLocation(Location location) {
