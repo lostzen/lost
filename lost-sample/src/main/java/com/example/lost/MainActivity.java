@@ -21,6 +21,7 @@ import com.mapzen.android.lost.LocationRequest;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -35,7 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
-    LocationFragment fragment;
+    LostFragment fragment;
     LocationClient client;
     SharedPreferences sharedPreferences;
 
@@ -73,17 +74,15 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        fragment = new LocationFragment();
-        client = new LocationClient(this, callbacks);
-
-        if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.container, fragment)
-                    .commit();
+        final FragmentManager fragmentManager = getFragmentManager();
+        fragment = (LostFragment) fragmentManager.findFragmentByTag(LostFragment.TAG);
+        if (fragment == null) {
+            fragment = new LostFragment();
+            fragmentManager.beginTransaction().add(android.R.id.content, fragment,
+                    LostFragment.TAG).commit();
         }
 
+        client = new LocationClient(this, callbacks);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
     }
 
@@ -115,11 +114,19 @@ public class MainActivity extends Activity {
         return sharedPreferences.getBoolean(getString(R.string.mock_mode_key), false);
     }
 
-    public static class LocationFragment extends Fragment {
+    public static class LostFragment extends Fragment {
+        public static final String TAG = LostFragment.class.getSimpleName();
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setRetainInstance(true);
+        }
+
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.fragment_main, container, false);
+            return inflater.inflate(R.layout.fragment_lost, container, false);
         }
 
         public void setLastKnownLocation(Location location) {
