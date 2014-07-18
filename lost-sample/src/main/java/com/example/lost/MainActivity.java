@@ -20,8 +20,9 @@ import com.mapzen.android.lost.LocationListener;
 import com.mapzen.android.lost.LocationRequest;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.ListFragment;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -32,8 +33,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 public class MainActivity extends Activity {
     LostFragment fragment;
@@ -80,6 +85,7 @@ public class MainActivity extends Activity {
             fragment = new LostFragment();
             fragmentManager.beginTransaction().add(android.R.id.content, fragment,
                     LostFragment.TAG).commit();
+            fragment.setListAdapter(new LostAdapter(this));
         }
 
         client = new LocationClient(this, callbacks);
@@ -114,7 +120,7 @@ public class MainActivity extends Activity {
         return sharedPreferences.getBoolean(getString(R.string.mock_mode_key), false);
     }
 
-    public static class LostFragment extends Fragment {
+    private static class LostFragment extends ListFragment {
         public static final String TAG = LostFragment.class.getSimpleName();
 
         @Override
@@ -126,7 +132,10 @@ public class MainActivity extends Activity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.fragment_lost, container, false);
+            final View view = inflater.inflate(R.layout.fragment_lost, container, false);
+            final ListView listView = (ListView) view.findViewById(android.R.id.list);
+            listView.addHeaderView(inflater.inflate(R.layout.list_header, null));
+            return view;
         }
 
         public void setLastKnownLocation(Location location) {
@@ -135,9 +144,44 @@ public class MainActivity extends Activity {
         }
 
         public void updateLocation(Location location) {
-            TextView textView = new TextView(getActivity());
-            textView.setText(location.toString());
-            ((ViewGroup) getView().findViewById(R.id.container)).addView(textView);
+            final LostAdapter adapter = (LostAdapter) getListAdapter();
+            adapter.addLocation(location);
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    private static class LostAdapter extends BaseAdapter {
+        private final ArrayList<Location> locations = new ArrayList<Location>();
+        private final Context context;
+
+        public LostAdapter(Context context) {
+            this.context = context;
+        }
+
+        public void addLocation(Location location) {
+            locations.add(location);
+        }
+
+        @Override
+        public int getCount() {
+            return locations.size();
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return locations.get(i);
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return i;
+        }
+
+        @Override
+        public View getView(int i, View view, ViewGroup viewGroup) {
+            final TextView textView = new TextView(context);
+            textView.setText(locations.get(i).toString());
+            return textView;
         }
     }
 }
