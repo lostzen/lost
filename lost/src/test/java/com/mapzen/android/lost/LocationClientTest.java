@@ -274,6 +274,15 @@ public class LocationClientTest {
     }
 
     @Test
+    public void setMockMode_shouldSetFlagAndReturnIfDisconnectedToPreventNPE() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        locationClient.requestLocationUpdates(request, listener);
+        locationClient.disconnect();
+        locationClient.setMockMode(true);
+    }
+
+    @Test
     public void requestLocationUpdates_shouldNotRegisterListenersWithMockModeOn() throws Exception {
         locationClient.setMockMode(true);
         TestLocationListener listener = new TestLocationListener();

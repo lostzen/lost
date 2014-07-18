@@ -190,6 +190,11 @@ public class LocationClient {
 
     public void setMockMode(boolean isMockMode) {
         mockMode = isMockMode;
+
+        if (locationManager == null) {
+            return;
+        }
+
         if (mockMode) {
             removeLocationUpdates(locationListener);
         } else {
