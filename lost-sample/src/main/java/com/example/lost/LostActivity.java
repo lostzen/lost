@@ -119,7 +119,17 @@ public class LostActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        startActivity(new Intent(this, SettingsActivity.class));
+        switch (item.getItemId()) {
+            case R.id.reset:
+                client.disconnect();
+                fragment.reset();
+                client.connect();
+                break;
+            case R.id.settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                break;
+        }
+
         return true;
     }
 
@@ -127,7 +137,7 @@ public class LostActivity extends Activity {
         return sharedPreferences.getBoolean(getString(R.string.mock_mode_key), false);
     }
 
-    public static void populateLocationView(Location location, View view) {
+    public static void populateLocationView(View view, Location location) {
         final TextView provider = (TextView) view.findViewById(R.id.provider);
         final TextView coordinates = (TextView) view.findViewById(R.id.coordinates);
         final TextView accuracy = (TextView) view.findViewById(R.id.accuracy);
@@ -137,6 +147,18 @@ public class LostActivity extends Activity {
         coordinates.setText(location.getLatitude() + ", " + location.getLongitude());
         accuracy.setText("within " + Math.round(location.getAccuracy()) + " meters");
         time.setText(new Date(location.getTime()).toString());
+    }
+
+    public static void clearLocationView(View view) {
+        final TextView provider = (TextView) view.findViewById(R.id.provider);
+        final TextView coordinates = (TextView) view.findViewById(R.id.coordinates);
+        final TextView accuracy = (TextView) view.findViewById(R.id.accuracy);
+        final TextView time = (TextView) view.findViewById(R.id.time);
+
+        provider.setText("");
+        coordinates.setText("");
+        accuracy.setText("");
+        time.setText("");
     }
 
     /**
@@ -164,20 +186,27 @@ public class LostActivity extends Activity {
             listView.addHeaderView(headerView);
             listView.setHeaderDividersEnabled(false);
             if (lastKnownLocation != null) {
-                populateLocationView(lastKnownLocation, headerView);
+                populateLocationView(headerView, lastKnownLocation);
             }
             return view;
         }
 
         public void setLastKnownLocation(Location location) {
             lastKnownLocation = location;
-            populateLocationView(location, headerView);
+            populateLocationView(headerView, location);
         }
 
         public void updateLocation(Location location) {
             final LostAdapter adapter = (LostAdapter) getListAdapter();
             adapter.addLocation(location);
             adapter.notifyDataSetChanged();
+        }
+
+        public void reset() {
+            final LostAdapter adapter = (LostAdapter) getListAdapter();
+            adapter.clear();
+            clearLocationView(headerView);
+            lastKnownLocation = null;
         }
     }
 
@@ -194,6 +223,11 @@ public class LostActivity extends Activity {
 
         public void addLocation(Location location) {
             locations.add(location);
+        }
+
+        public void clear() {
+            locations.clear();
+            notifyDataSetChanged();
         }
 
         @Override
@@ -217,7 +251,7 @@ public class LostActivity extends Activity {
                 view = View.inflate(context, R.layout.list_item, null);
             }
 
-            populateLocationView(locations.get(i), view);
+            populateLocationView(view, locations.get(i));
             return view;
         }
     }
