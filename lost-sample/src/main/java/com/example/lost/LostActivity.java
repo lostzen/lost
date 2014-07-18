@@ -39,6 +39,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * LOST Activity
@@ -54,10 +55,9 @@ public class LostActivity extends Activity {
             Toast.makeText(getApplication(), "Location client connected",
                     Toast.LENGTH_SHORT).show();
 
-            client.setMockMode(isMockMode());
-
-            Location location = client.getLastLocation();
-            fragment.setLastKnownLocation(location);
+            if (fragment.lastKnownLocation == null) {
+                fragment.setLastKnownLocation(client.getLastLocation());
+            }
 
             LocationRequest locationRequest = LocationRequest.create();
             locationRequest.setInterval(5000);
@@ -89,15 +89,19 @@ public class LostActivity extends Activity {
             fragmentManager.beginTransaction().add(android.R.id.content, fragment,
                     LostFragment.TAG).commit();
             fragment.setListAdapter(new LostAdapter(this));
+            client = new LocationClient(this, callbacks);
+            fragment.client = client;
+        } else {
+            client = fragment.client;
         }
 
-        client = new LocationClient(this, callbacks);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        client.setMockMode(isMockModePrefEnabled());
         client.connect();
     }
 
@@ -119,8 +123,20 @@ public class LostActivity extends Activity {
         return true;
     }
 
-    private boolean isMockMode() {
+    private boolean isMockModePrefEnabled() {
         return sharedPreferences.getBoolean(getString(R.string.mock_mode_key), false);
+    }
+
+    public static void populateLocationView(Location location, View view) {
+        final TextView provider = (TextView) view.findViewById(R.id.provider);
+        final TextView coordinates = (TextView) view.findViewById(R.id.coordinates);
+        final TextView accuracy = (TextView) view.findViewById(R.id.accuracy);
+        final TextView time = (TextView) view.findViewById(R.id.time);
+
+        provider.setText(location.getProvider() + " provider");
+        coordinates.setText(location.getLatitude() + ", " + location.getLongitude());
+        accuracy.setText("within " + Math.round(location.getAccuracy()) + " meters");
+        time.setText(new Date(location.getTime()).toString());
     }
 
     /**
@@ -128,6 +144,10 @@ public class LostActivity extends Activity {
      */
     private static class LostFragment extends ListFragment {
         public static final String TAG = LostFragment.class.getSimpleName();
+
+        private LocationClient client;
+        private Location lastKnownLocation;
+        private View headerView;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -140,15 +160,18 @@ public class LostActivity extends Activity {
                 Bundle savedInstanceState) {
             final View view = inflater.inflate(R.layout.fragment_lost, container, false);
             final ListView listView = (ListView) view.findViewById(android.R.id.list);
-            listView.addHeaderView(inflater.inflate(R.layout.list_header_last_location, null));
-            listView.addHeaderView(inflater.inflate(R.layout.list_header_location_updates, null));
+            headerView = inflater.inflate(R.layout.list_header, null);
+            listView.addHeaderView(headerView);
             listView.setHeaderDividersEnabled(false);
+            if (lastKnownLocation != null) {
+                populateLocationView(lastKnownLocation, headerView);
+            }
             return view;
         }
 
         public void setLastKnownLocation(Location location) {
-            TextView lastLocation = (TextView) getView().findViewById(R.id.last_location_value);
-            lastLocation.setText(location.toString());
+            lastKnownLocation = location;
+            populateLocationView(location, headerView);
         }
 
         public void updateLocation(Location location) {
@@ -190,9 +213,12 @@ public class LostActivity extends Activity {
 
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
-            final TextView textView = new TextView(context);
-            textView.setText(locations.get(i).toString());
-            return textView;
+            if (view == null) {
+                view = View.inflate(context, R.layout.list_item, null);
+            }
+
+            populateLocationView(locations.get(i), view);
+            return view;
         }
     }
 }
