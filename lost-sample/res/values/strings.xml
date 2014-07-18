@@ -7,5 +7,7 @@
     <string name="mock_mode_key">mock_mode_key</string>
     <string name="mock_mode_title">Mock Mode</string>
     <string name="mock_mode_summary">Enable mock locations</string>
+    <string name="last_known_location">Last Known Location</string>
+    <string name="location_updates">Location Updates</string>
 
 </resources>

@@ -40,7 +40,10 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-public class MainActivity extends Activity {
+/**
+ * LOST Activity
+ */
+public class LostActivity extends Activity {
     LostFragment fragment;
     LocationClient client;
     SharedPreferences sharedPreferences;
@@ -120,6 +123,9 @@ public class MainActivity extends Activity {
         return sharedPreferences.getBoolean(getString(R.string.mock_mode_key), false);
     }
 
+    /**
+     * LOST Fragment
+     */
     private static class LostFragment extends ListFragment {
         public static final String TAG = LostFragment.class.getSimpleName();
 
@@ -134,7 +140,9 @@ public class MainActivity extends Activity {
                 Bundle savedInstanceState) {
             final View view = inflater.inflate(R.layout.fragment_lost, container, false);
             final ListView listView = (ListView) view.findViewById(android.R.id.list);
-            listView.addHeaderView(inflater.inflate(R.layout.list_header, null));
+            listView.addHeaderView(inflater.inflate(R.layout.list_header_last_location, null));
+            listView.addHeaderView(inflater.inflate(R.layout.list_header_location_updates, null));
+            listView.setHeaderDividersEnabled(false);
             return view;
         }
 
@@ -150,6 +158,9 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * LOST Adapter
+     */
     private static class LostAdapter extends BaseAdapter {
         private final ArrayList<Location> locations = new ArrayList<Location>();
         private final Context context;
