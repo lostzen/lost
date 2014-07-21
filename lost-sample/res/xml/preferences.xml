@@ -23,4 +23,15 @@
         android:key="@string/mock_accuracy_key"
         android:title="@string/mock_accuracy_title" />
 
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="@string/mock_mode_gpx_key"
+        android:summary="@string/mock_mode_gpx_summary"
+        android:title="@string/mock_mode_gpx_title" />
+
+    <EditTextPreference
+        android:defaultValue="lost.gpx"
+        android:key="@string/mock_gpx_file_key"
+        android:title="@string/mock_gpx_file_title" />
+
 </PreferenceScreen>

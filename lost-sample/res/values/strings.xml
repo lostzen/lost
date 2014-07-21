@@ -20,4 +20,11 @@
     <string name="mock_accuracy_key">mock_accuracy_key</string>
     <string name="mock_accuracy_title">Mock Accuracy</string>
 
+    <string name="mock_mode_gpx_key">mock_gpx_key</string>
+    <string name="mock_mode_gpx_title">GPX Trace Mode</string>
+    <string name="mock_mode_gpx_summary">Replay mock GPX trace from file</string>
+
+    <string name="mock_gpx_file_key">mock_gpx_file_key</string>
+    <string name="mock_gpx_file_title">GPX Filename</string>
+
 </resources>

@@ -40,6 +40,7 @@ public class SettingsFragment extends PreferenceFragment {
         updateValue(getString(R.string.mock_lat_key));
         updateValue(getString(R.string.mock_lng_key));
         updateValue(getString(R.string.mock_accuracy_key));
+        updateValue(getString(R.string.mock_gpx_file_key));
     }
 
     @Override
@@ -53,6 +54,11 @@ public class SettingsFragment extends PreferenceFragment {
         super.onPause();
         prefs.unregisterOnSharedPreferenceChangeListener(listener);
         setMockLocation();
+
+        if (prefs.getBoolean(getString(R.string.mock_mode_gpx_key), false)) {
+            String filename = getValue(getString(R.string.mock_gpx_file_key));
+            LostActivity.getLocationClient().setMockTrace(filename);
+        }
     }
 
     private void updateValue(String key) {
@@ -60,15 +66,22 @@ public class SettingsFragment extends PreferenceFragment {
         final Preference pref = findPreference(key);
         pref.setSummary(value);
 
-        try {
-            Float.parseFloat(value);
-        } catch (NumberFormatException e) {
-            Toast.makeText(getActivity(), "Invalid value: " + pref.getTitle(), Toast.LENGTH_SHORT)
-                    .show();
+        if (!getString(R.string.mock_gpx_file_key).equals(key)) {
+            try {
+                Float.parseFloat(value);
+            } catch (NumberFormatException e) {
+                Toast.makeText(getActivity(), "Invalid value: " + pref.getTitle(),
+                        Toast.LENGTH_SHORT)
+                        .show();
+            }
         }
     }
 
     private String getValue(String key) {
+        if (getString(R.string.mock_gpx_file_key).equals(key)) {
+            return prefs.getString(key, "lost.gpx");
+        }
+
         return prefs.getString(key, "0.0");
     }
 
@@ -107,7 +120,8 @@ public class SettingsFragment extends PreferenceFragment {
     private class SettingsListener implements SharedPreferences.OnSharedPreferenceChangeListener {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-            if (!getString(R.string.mock_mode_key).equals(key)) {
+            if (!getString(R.string.mock_mode_key).equals(key) &&
+                    !getString(R.string.mock_mode_gpx_key).equals(key)) {
                 updateValue(key);
             }
         }

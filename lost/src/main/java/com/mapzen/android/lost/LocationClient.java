@@ -273,6 +273,7 @@ public class LocationClient {
                     }
                 }
 
+                location.setTime(System.currentTimeMillis());
                 locationListener.onLocationChanged(location);
             }
         }
