@@ -180,7 +180,7 @@ public class LostActivity extends Activity {
         final TextView time = (TextView) view.findViewById(R.id.time);
 
         provider.setText(location.getProvider() + " provider");
-        coordinates.setText(String.format("%.5f, %.5f", location.getLatitude(),
+        coordinates.setText(String.format("%.4f, %.4f", location.getLatitude(),
                 location.getLongitude()));
         accuracy.setText("within " + Math.round(location.getAccuracy()) + " meters");
         time.setText(new Date(location.getTime()).toString());

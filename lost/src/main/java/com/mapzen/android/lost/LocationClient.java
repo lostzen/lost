@@ -212,6 +212,10 @@ public class LocationClient {
 
     public void setMockLocation(Location mockLocation) {
         this.mockLocation = mockLocation;
+
+        if (locationListener != null) {
+            locationListener.onLocationChanged(mockLocation);
+        }
     }
 
     public static interface ConnectionCallbacks {

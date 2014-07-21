@@ -299,6 +299,17 @@ public class LocationClientTest {
         assertThat(locationClient.getLastLocation()).isEqualTo(mockLocation);
     }
 
+    @Test
+    public void setMockLocation_shouldInvokeListener() throws Exception {
+        Location mockLocation = new Location("mock");
+        locationClient.setMockMode(true);
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        locationClient.requestLocationUpdates(request, listener);
+        locationClient.setMockLocation(mockLocation);
+        assertThat(listener.location).isEqualTo(mockLocation);
+    }
+
     private static Location getTestLocation(String provider, float lat, float lng, long time) {
         Location location = new Location(provider);
         location.setLatitude(lat);
