@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -39,6 +40,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -88,6 +90,8 @@ public class LostActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        File file = Environment.getExternalStorageDirectory();
+        System.out.println("External storage directory: " + file.toString());
         final FragmentManager fragmentManager = getFragmentManager();
         fragment = (LostFragment) fragmentManager.findFragmentByTag(LostFragment.TAG);
         if (fragment == null) {

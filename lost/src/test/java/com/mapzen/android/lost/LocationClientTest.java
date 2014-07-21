@@ -5,12 +5,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowEnvironment;
 import org.robolectric.shadows.ShadowLocationManager;
 
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Environment;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
@@ -19,7 +28,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.robolectric.Robolectric.application;
 import static org.robolectric.Robolectric.shadowOf;
 
-@Config(manifest=Config.NONE)
+@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class LocationClientTest {
     private LocationClient locationClient;
@@ -120,7 +129,7 @@ public class LocationClientTest {
         locationClient.requestLocationUpdates(LocationRequest.create(), listener);
         Location location = new Location(GPS_PROVIDER);
         shadowLocationManager.simulateLocation(location);
-        assertThat(listener.location).isEqualTo(location);
+        assertThat(listener.getMostRecentLocation()).isEqualTo(location);
     }
 
     @Test
@@ -129,7 +138,7 @@ public class LocationClientTest {
         locationClient.requestLocationUpdates(LocationRequest.create(), listener);
         Location location = new Location(NETWORK_PROVIDER);
         shadowLocationManager.simulateLocation(location);
-        assertThat(listener.location).isEqualTo(location);
+        assertThat(listener.getMostRecentLocation()).isEqualTo(location);
     }
 
     @Test
@@ -147,7 +156,7 @@ public class LocationClientTest {
 
         shadowLocationManager.simulateLocation(location1);
         shadowLocationManager.simulateLocation(location2);
-        assertThat(listener.location).isEqualTo(location1);
+        assertThat(listener.getMostRecentLocation()).isEqualTo(location1);
     }
 
     @Test
@@ -165,7 +174,7 @@ public class LocationClientTest {
 
         shadowLocationManager.simulateLocation(location1);
         shadowLocationManager.simulateLocation(location2);
-        assertThat(listener.location).isEqualTo(location1);
+        assertThat(listener.getMostRecentLocation()).isEqualTo(location1);
     }
 
     @Test
@@ -186,7 +195,7 @@ public class LocationClientTest {
         shadowLocationManager.simulateLocation(gpsLocation);
         shadowLocationManager.simulateLocation(networkLocation);
 
-        assertThat(listener.location).isEqualTo(gpsLocation);
+        assertThat(listener.getMostRecentLocation()).isEqualTo(gpsLocation);
     }
 
     @Test
@@ -207,7 +216,7 @@ public class LocationClientTest {
         shadowLocationManager.simulateLocation(networkLocation);
         shadowLocationManager.simulateLocation(gpsLocation);
 
-        assertThat(listener.location).isEqualTo(networkLocation);
+        assertThat(listener.getMostRecentLocation()).isEqualTo(networkLocation);
     }
 
     @Test
@@ -300,14 +309,41 @@ public class LocationClientTest {
     }
 
     @Test
-    public void setMockLocation_shouldInvokeListener() throws Exception {
+    public void setMockLocation_shouldInvokeListenerOnce() throws Exception {
         Location mockLocation = new Location("mock");
         locationClient.setMockMode(true);
         TestLocationListener listener = new TestLocationListener();
         LocationRequest request = LocationRequest.create();
         locationClient.requestLocationUpdates(request, listener);
         locationClient.setMockLocation(mockLocation);
-        assertThat(listener.location).isEqualTo(mockLocation);
+        assertThat(listener.getAllLocations()).hasSize(1);
+        assertThat(listener.getMostRecentLocation()).isEqualTo(mockLocation);
+    }
+
+    @Test
+    public void setMockTrace_shouldInvokeListenerForEachLocation() throws Exception {
+        byte[] encoded = Files.readAllBytes(Paths.get("src/test/resources/test.gpx"));
+        String contents = new String(encoded, "UTF-8");
+
+        ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
+        File directory = Environment.getExternalStorageDirectory();
+        File file = new File(directory, "test.gpx");
+        FileWriter fileWriter = new FileWriter(file, false);
+        fileWriter.write(contents);
+        fileWriter.close();
+
+        locationClient.setMockMode(true);
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        locationClient.requestLocationUpdates(request, listener);
+        locationClient.setMockTrace("test.gpx");
+        assertThat(listener.getAllLocations()).hasSize(3);
+        assertThat(listener.getAllLocations().get(0).getLatitude()).isEqualTo(0.0);
+        assertThat(listener.getAllLocations().get(0).getLongitude()).isEqualTo(0.1);
+        assertThat(listener.getAllLocations().get(1).getLatitude()).isEqualTo(1.0);
+        assertThat(listener.getAllLocations().get(1).getLongitude()).isEqualTo(1.1);
+        assertThat(listener.getAllLocations().get(2).getLatitude()).isEqualTo(2.0);
+        assertThat(listener.getAllLocations().get(2).getLongitude()).isEqualTo(2.1);
     }
 
     private static Location getTestLocation(String provider, float lat, float lng, long time) {
@@ -333,11 +369,19 @@ public class LocationClientTest {
     }
 
     class TestLocationListener implements LocationListener {
-        private Location location;
+        private ArrayList<Location> locations = new ArrayList<Location>();
 
         @Override
         public void onLocationChanged(Location location) {
-            this.location = location;
+            locations.add(location);
+        }
+
+        public List<Location> getAllLocations() {
+            return locations;
+        }
+
+        public Location getMostRecentLocation() {
+            return locations.get(locations.size() - 1);
         }
     }
 }

@@ -1,11 +1,20 @@
 package com.mapzen.android.lost;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
+import android.util.Xml;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 import static android.location.LocationManager.GPS_PROVIDER;
@@ -215,6 +224,57 @@ public class LocationClient {
 
         if (locationListener != null) {
             locationListener.onLocationChanged(mockLocation);
+        }
+    }
+
+    public void setMockTrace(String filename) {
+        File file = new File(Environment.getExternalStorageDirectory(), filename);
+        FileInputStream in = null;
+        try {
+            in = new FileInputStream(file);
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+            parser.setInput(in, null);
+            parser.nextTag();
+            parse(parser);
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "Unable to find gpx trace file: " + filename, e);
+        } catch (XmlPullParserException e) {
+            Log.e(TAG, "Error parsing gpx trace file: " + filename, e);
+        } catch (IOException e) {
+            Log.e(TAG, "Error parsing gpx trace file: " + filename, e);
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    Log.e(TAG, "Error closing gpx trace file: " + filename, e);
+                }
+            }
+        }
+    }
+
+    private void parse(XmlPullParser parser) throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, null, "gpx");
+        while (parser.next() != XmlPullParser.END_DOCUMENT) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
+                continue;
+            }
+
+            if ("trkpt".equals(parser.getName())) {
+                final Location location = new Location("gpx");
+                for (int i = 0; i < parser.getAttributeCount(); i++) {
+                    final String name = parser.getAttributeName(i);
+                    final String value = parser.getAttributeValue(i);
+                    if ("lat".equals(name)) {
+                        location.setLatitude(Double.parseDouble(value));
+                    } else if ("lon".equals(name)) {
+                        location.setLongitude(Double.parseDouble(value));
+                    }
+                }
+
+                locationListener.onLocationChanged(location);
+            }
         }
     }
 
