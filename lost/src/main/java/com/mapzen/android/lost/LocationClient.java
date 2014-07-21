@@ -28,6 +28,7 @@ public class LocationClient {
     private long fastestInterval;
     private float smallestDisplacement;
     private boolean mockMode;
+    private Location mockLocation;
 
     public LocationClient(Context context, ConnectionCallbacks connectionCallbacks) {
         this.context = context;
@@ -47,6 +48,11 @@ public class LocationClient {
 
     public Location getLastLocation() {
         throwIfNotConnected();
+
+        if (mockMode) {
+            return mockLocation;
+        }
+
         final List<String> providers = locationManager.getAllProviders();
         Location bestLocation = null;
         for (String provider : providers) {
@@ -57,6 +63,7 @@ public class LocationClient {
                 }
             }
         }
+
         return bestLocation;
     }
 
@@ -201,6 +208,10 @@ public class LocationClient {
             connectGpsListener(fastestInterval, smallestDisplacement);
             connectNetworkListener(fastestInterval, smallestDisplacement);
         }
+    }
+
+    public void setMockLocation(Location mockLocation) {
+        this.mockLocation = mockLocation;
     }
 
     public static interface ConnectionCallbacks {

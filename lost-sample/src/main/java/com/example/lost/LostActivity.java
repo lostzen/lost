@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -45,14 +46,19 @@ import java.util.Date;
  * LOST Activity
  */
 public class LostActivity extends Activity {
-    LostFragment fragment;
-    LocationClient client;
-    SharedPreferences sharedPreferences;
+    private LostFragment fragment;
+    private SharedPreferences sharedPreferences;
+
+    private static LocationClient client;
+
+    public static LocationClient getLocationClient() {
+        return client;
+    }
 
     LocationClient.ConnectionCallbacks callbacks = new LocationClient.ConnectionCallbacks() {
         @Override
         public void onConnected(Bundle connectionHint) {
-            Toast.makeText(getApplication(), "Location client connected",
+            Toast.makeText(LostActivity.this, "Location client connected",
                     Toast.LENGTH_SHORT).show();
 
             if (fragment.lastKnownLocation == null) {
@@ -67,7 +73,7 @@ public class LostActivity extends Activity {
 
         @Override
         public void onDisconnected() {
-            Toast.makeText(getApplication(), "Location client disconnected",
+            Toast.makeText(LostActivity.this, "Location client disconnected",
                     Toast.LENGTH_SHORT).show();
         }
     };
@@ -102,13 +108,13 @@ public class LostActivity extends Activity {
     protected void onResume() {
         super.onResume();
         client.setMockMode(isMockModePrefEnabled());
-        client.connect();
+        connect();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        client.disconnect();
+        disconnect();
     }
 
     @Override
@@ -121,30 +127,61 @@ public class LostActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.reset:
-                client.disconnect();
-                fragment.reset();
-                client.connect();
+                onResetOptionSelected();
                 break;
             case R.id.settings:
-                startActivity(new Intent(this, SettingsActivity.class));
+                onSettingsOptionSelected();
                 break;
         }
 
         return true;
     }
 
+    private void onResetOptionSelected() {
+        disconnect();
+        reset();
+        connect();
+    }
+
+    private void onSettingsOptionSelected() {
+        startActivity(new Intent(this, SettingsActivity.class));
+    }
+
     private boolean isMockModePrefEnabled() {
         return sharedPreferences.getBoolean(getString(R.string.mock_mode_key), false);
     }
 
+    private void connect() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                client.connect();
+            }
+        }, 300);
+    }
+
+    private void disconnect() {
+        client.disconnect();
+    }
+
+    private void reset() {
+        fragment.reset();
+    }
+
     public static void populateLocationView(View view, Location location) {
+        if (location == null) {
+            clearLocationView(view);
+            return;
+        }
+
         final TextView provider = (TextView) view.findViewById(R.id.provider);
         final TextView coordinates = (TextView) view.findViewById(R.id.coordinates);
         final TextView accuracy = (TextView) view.findViewById(R.id.accuracy);
         final TextView time = (TextView) view.findViewById(R.id.time);
 
         provider.setText(location.getProvider() + " provider");
-        coordinates.setText(location.getLatitude() + ", " + location.getLongitude());
+        coordinates.setText(String.format("%.5f, %.5f", location.getLatitude(),
+                location.getLongitude()));
         accuracy.setText("within " + Math.round(location.getAccuracy()) + " meters");
         time.setText(new Date(location.getTime()).toString());
     }

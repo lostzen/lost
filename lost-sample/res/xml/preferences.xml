@@ -8,4 +8,19 @@
         android:summary="@string/mock_mode_summary"
         android:title="@string/mock_mode_title" />
 
+    <EditTextPreference
+        android:defaultValue="0.0"
+        android:key="@string/mock_lat_key"
+        android:title="@string/mock_lat_title" />
+
+    <EditTextPreference
+        android:defaultValue="0.0"
+        android:key="@string/mock_lng_key"
+        android:title="@string/mock_lng_title" />
+
+    <EditTextPreference
+        android:defaultValue="0.0"
+        android:key="@string/mock_accuracy_key"
+        android:title="@string/mock_accuracy_title" />
+
 </PreferenceScreen>
