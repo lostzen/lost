@@ -8,6 +8,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.util.Log;
 import android.util.Xml;
 
@@ -227,31 +228,36 @@ public class LocationClient {
         }
     }
 
-    public void setMockTrace(String filename) {
-        File file = new File(Environment.getExternalStorageDirectory(), filename);
-        FileInputStream in = null;
-        try {
-            in = new FileInputStream(file);
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-            parser.setInput(in, null);
-            parser.nextTag();
-            parse(parser);
-        } catch (FileNotFoundException e) {
-            Log.e(TAG, "Unable to find gpx trace file: " + filename, e);
-        } catch (XmlPullParserException e) {
-            Log.e(TAG, "Error parsing gpx trace file: " + filename, e);
-        } catch (IOException e) {
-            Log.e(TAG, "Error parsing gpx trace file: " + filename, e);
-        } finally {
-            if (in != null) {
+    public void setMockTrace(final String filename) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                File file = new File(Environment.getExternalStorageDirectory(), filename);
+                FileInputStream in = null;
                 try {
-                    in.close();
+                    in = new FileInputStream(file);
+                    XmlPullParser parser = Xml.newPullParser();
+                    parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+                    parser.setInput(in, null);
+                    parser.nextTag();
+                    parse(parser);
+                } catch (FileNotFoundException e) {
+                    Log.e(TAG, "Unable to find gpx trace file: " + filename, e);
+                } catch (XmlPullParserException e) {
+                    Log.e(TAG, "Error parsing gpx trace file: " + filename, e);
                 } catch (IOException e) {
-                    Log.e(TAG, "Error closing gpx trace file: " + filename, e);
+                    Log.e(TAG, "Error parsing gpx trace file: " + filename, e);
+                } finally {
+                    if (in != null) {
+                        try {
+                            in.close();
+                        } catch (IOException e) {
+                            Log.e(TAG, "Error closing gpx trace file: " + filename, e);
+                        }
+                    }
                 }
             }
-        }
+        }).start();
     }
 
     private void parse(XmlPullParser parser) throws IOException, XmlPullParserException {
@@ -274,7 +280,19 @@ public class LocationClient {
                 }
 
                 location.setTime(System.currentTimeMillis());
-                locationListener.onLocationChanged(location);
+
+                new Handler(context.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        locationListener.onLocationChanged(location);
+                    }
+                });
+
+                try {
+                    Thread.sleep(fastestInterval);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

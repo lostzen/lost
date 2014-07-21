@@ -3,6 +3,7 @@ package com.mapzen.android.lost;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowEnvironment;
@@ -16,6 +17,7 @@ import android.os.Environment;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -322,21 +324,15 @@ public class LocationClientTest {
 
     @Test
     public void setMockTrace_shouldInvokeListenerForEachLocation() throws Exception {
-        byte[] encoded = Files.readAllBytes(Paths.get("src/test/resources/test.gpx"));
-        String contents = new String(encoded, "UTF-8");
-
-        ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
-        File directory = Environment.getExternalStorageDirectory();
-        File file = new File(directory, "test.gpx");
-        FileWriter fileWriter = new FileWriter(file, false);
-        fileWriter.write(contents);
-        fileWriter.close();
-
+        loadTestGpxTrace();
         locationClient.setMockMode(true);
         TestLocationListener listener = new TestLocationListener();
         LocationRequest request = LocationRequest.create();
+        request.setFastestInterval(0);
         locationClient.requestLocationUpdates(request, listener);
         locationClient.setMockTrace("test.gpx");
+        Thread.sleep(1000);
+        Robolectric.runUiThreadTasks();
         assertThat(listener.getAllLocations()).hasSize(3);
         assertThat(listener.getAllLocations().get(0).getLatitude()).isEqualTo(0.0);
         assertThat(listener.getAllLocations().get(0).getLongitude()).isEqualTo(0.1);
@@ -346,12 +342,44 @@ public class LocationClientTest {
         assertThat(listener.getAllLocations().get(2).getLongitude()).isEqualTo(2.1);
     }
 
+    @Test
+    public void setMockTrace_shouldRespectFastestInterval() throws Exception {
+        loadTestGpxTrace();
+        locationClient.setMockMode(true);
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        request.setInterval(1000);
+        locationClient.requestLocationUpdates(request, listener);
+        locationClient.setMockTrace("test.gpx");
+        Thread.sleep(1000);
+        Robolectric.runUiThreadTasks();
+        assertThat(listener.getAllLocations()).hasSize(1);
+        Thread.sleep(1000);
+        Robolectric.runUiThreadTasks();
+        assertThat(listener.getAllLocations()).hasSize(2);
+        Thread.sleep(1000);
+        Robolectric.runUiThreadTasks();
+        assertThat(listener.getAllLocations()).hasSize(3);
+    }
+
     private static Location getTestLocation(String provider, float lat, float lng, long time) {
         Location location = new Location(provider);
         location.setLatitude(lat);
         location.setLongitude(lng);
         location.setTime(time);
         return location;
+    }
+
+    private void loadTestGpxTrace() throws IOException {
+        byte[] encoded = Files.readAllBytes(Paths.get("src/test/resources/test.gpx"));
+        String contents = new String(encoded, "UTF-8");
+
+        ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
+        File directory = Environment.getExternalStorageDirectory();
+        File file = new File(directory, "test.gpx");
+        FileWriter fileWriter = new FileWriter(file, false);
+        fileWriter.write(contents);
+        fileWriter.close();
     }
 
     class TestConnectionCallbacks implements LocationClient.ConnectionCallbacks {
