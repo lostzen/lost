@@ -24,6 +24,12 @@ import static android.location.LocationManager.NETWORK_PROVIDER;
 public class LocationClient {
     public static final String TAG = LocationClient.class.getSimpleName();
 
+    // GPX Tags
+    public static final String TAG_GPX = "gpx";
+    public static final String TAG_TRACK_POINT = "trkpt";
+    public static final String TAG_LATITUDE = "lat";
+    public static final String TAG_LONGITUDE = "lon";
+
     private final Context context;
     private final ConnectionCallbacks connectionCallbacks;
 
@@ -261,20 +267,20 @@ public class LocationClient {
     }
 
     private void parse(XmlPullParser parser) throws IOException, XmlPullParserException {
-        parser.require(XmlPullParser.START_TAG, null, "gpx");
+        parser.require(XmlPullParser.START_TAG, null, TAG_GPX);
         while (parser.next() != XmlPullParser.END_DOCUMENT) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
 
-            if ("trkpt".equals(parser.getName())) {
-                final Location location = new Location("gpx");
+            if (TAG_TRACK_POINT.equals(parser.getName())) {
+                final Location location = new Location(TAG_GPX);
                 for (int i = 0; i < parser.getAttributeCount(); i++) {
                     final String name = parser.getAttributeName(i);
                     final String value = parser.getAttributeValue(i);
-                    if ("lat".equals(name)) {
+                    if (TAG_LATITUDE.equals(name)) {
                         location.setLatitude(Double.parseDouble(value));
-                    } else if ("lon".equals(name)) {
+                    } else if (TAG_LONGITUDE.equals(name)) {
                         location.setLongitude(Double.parseDouble(value));
                     }
                 }
