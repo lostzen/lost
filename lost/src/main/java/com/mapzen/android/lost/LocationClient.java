@@ -1,7 +1,9 @@
 package com.mapzen.android.lost;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import android.content.Context;
 import android.location.Location;
@@ -10,13 +12,18 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
-import android.util.Xml;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
@@ -24,11 +31,13 @@ import static android.location.LocationManager.NETWORK_PROVIDER;
 public class LocationClient {
     public static final String TAG = LocationClient.class.getSimpleName();
 
-    // GPX Tags
-    public static final String TAG_GPX = "gpx";
+    // GPX tags
     public static final String TAG_TRACK_POINT = "trkpt";
-    public static final String TAG_LATITUDE = "lat";
-    public static final String TAG_LONGITUDE = "lon";
+    public static final String TAG_LAT = "lat";
+    public static final String TAG_LNG = "lon";
+
+    // Name of the mock location provider.
+    public static final String MOCK_PROVIDER = "mock";
 
     private final Context context;
     private final ConnectionCallbacks connectionCallbacks;
@@ -238,53 +247,42 @@ public class LocationClient {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                File file = new File(Environment.getExternalStorageDirectory(), filename);
-                FileInputStream in = null;
+                final File file = new File(Environment.getExternalStorageDirectory(), filename);
+                final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                final XPath xPath = XPathFactory.newInstance().newXPath();
+                final String expression = "//" + TAG_TRACK_POINT;
+
+                NodeList nodeList = null;
                 try {
-                    in = new FileInputStream(file);
-                    XmlPullParser parser = Xml.newPullParser();
-                    parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-                    parser.setInput(in, null);
-                    parser.nextTag();
-                    parse(parser);
-                } catch (FileNotFoundException e) {
-                    Log.e(TAG, "Unable to find gpx trace file: " + filename, e);
-                } catch (XmlPullParserException e) {
-                    Log.e(TAG, "Error parsing gpx trace file: " + filename, e);
+                    DocumentBuilder builder = factory.newDocumentBuilder();
+                    Document document = builder.parse(file);
+                    nodeList = (NodeList) xPath.compile(expression)
+                            .evaluate(document, XPathConstants.NODESET);
+                } catch (ParserConfigurationException e) {
+                    e.printStackTrace();
+                } catch (SAXException e) {
+                    e.printStackTrace();
                 } catch (IOException e) {
-                    Log.e(TAG, "Error parsing gpx trace file: " + filename, e);
-                } finally {
-                    if (in != null) {
-                        try {
-                            in.close();
-                        } catch (IOException e) {
-                            Log.e(TAG, "Error closing gpx trace file: " + filename, e);
-                        }
-                    }
+                    e.printStackTrace();
+                } catch (XPathExpressionException e) {
+                    e.printStackTrace();
                 }
+
+                parse(nodeList);
             }
         }).start();
     }
 
-    private void parse(XmlPullParser parser) throws IOException, XmlPullParserException {
-        parser.require(XmlPullParser.START_TAG, null, TAG_GPX);
-        while (parser.next() != XmlPullParser.END_DOCUMENT) {
-            if (parser.getEventType() != XmlPullParser.START_TAG) {
-                continue;
-            }
+    private void parse(NodeList nodeList) {
+        if (nodeList != null) {
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node node = nodeList.item(i);
+                String lat = node.getAttributes().getNamedItem(TAG_LAT).getNodeValue();
+                String lng = node.getAttributes().getNamedItem(TAG_LNG).getNodeValue();
 
-            if (TAG_TRACK_POINT.equals(parser.getName())) {
-                final Location location = new Location(TAG_GPX);
-                for (int i = 0; i < parser.getAttributeCount(); i++) {
-                    final String name = parser.getAttributeName(i);
-                    final String value = parser.getAttributeValue(i);
-                    if (TAG_LATITUDE.equals(name)) {
-                        location.setLatitude(Double.parseDouble(value));
-                    } else if (TAG_LONGITUDE.equals(name)) {
-                        location.setLongitude(Double.parseDouble(value));
-                    }
-                }
-
+                final Location location = new Location(MOCK_PROVIDER);
+                location.setLatitude(Double.parseDouble(lat));
+                location.setLongitude(Double.parseDouble(lng));
                 location.setTime(System.currentTimeMillis());
 
                 new Handler(context.getMainLooper()).post(new Runnable() {
