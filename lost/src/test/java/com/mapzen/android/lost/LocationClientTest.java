@@ -330,7 +330,7 @@ public class LocationClientTest {
         LocationRequest request = LocationRequest.create();
         request.setFastestInterval(0);
         locationClient.requestLocationUpdates(request, listener);
-        locationClient.setMockTrace("test.gpx");
+        locationClient.setMockTrace("lost.gpx");
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(listener.getAllLocations()).hasSize(3);
@@ -350,7 +350,7 @@ public class LocationClientTest {
         LocationRequest request = LocationRequest.create();
         request.setInterval(1000);
         locationClient.requestLocationUpdates(request, listener);
-        locationClient.setMockTrace("test.gpx");
+        locationClient.setMockTrace("lost.gpx");
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(listener.getAllLocations()).hasSize(1);
@@ -371,12 +371,12 @@ public class LocationClientTest {
     }
 
     private void loadTestGpxTrace() throws IOException {
-        byte[] encoded = Files.readAllBytes(Paths.get("src/test/resources/test.gpx"));
+        byte[] encoded = Files.readAllBytes(Paths.get("src/test/resources/lost.gpx"));
         String contents = new String(encoded, "UTF-8");
 
         ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
         File directory = Environment.getExternalStorageDirectory();
-        File file = new File(directory, "test.gpx");
+        File file = new File(directory, "lost.gpx");
         FileWriter fileWriter = new FileWriter(file, false);
         fileWriter.write(contents);
         fileWriter.close();
