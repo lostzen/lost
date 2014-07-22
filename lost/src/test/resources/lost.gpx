@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx xmlns="http://www.topografix.com/GPX/1/0" version="1.0"
+    creator="mapzen - start where you are http://mapzen.com">
+    <trk>
+        <name>Mapzen Route</name>
+        <trkseg>
+            <trkpt lat="0.0" lon="0.1">
+                <ele>-0.0</ele>
+                <time>2014-06-10T00:00:00-04:00</time>
+            </trkpt>
+            <trkpt lat="1.0" lon="1.1">
+                <ele>1.0</ele>
+                <time>2014-06-10T00:00:01-04:00</time>
+            </trkpt>
+            <trkpt lat="2.0" lon="2.1">
+                <ele>2.0</ele>
+                <time>2014-06-10T00:00:02-04:00</time>
+            </trkpt>
+        </trkseg>
+    </trk>
+</gpx>
