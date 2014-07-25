@@ -230,8 +230,8 @@ public class LocationClient {
         if (mockMode) {
             removeLocationUpdates(locationListener);
         } else {
-            connectGpsListener(fastestInterval, smallestDisplacement);
-            connectNetworkListener(fastestInterval, smallestDisplacement);
+            initGpsListener(fastestInterval, smallestDisplacement);
+            initNetworkListener(fastestInterval, smallestDisplacement);
         }
     }
 

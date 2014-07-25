@@ -362,6 +362,24 @@ public class LocationClientTest {
         assertThat(listener.getAllLocations()).hasSize(3);
     }
 
+    @Test
+    public void setMockMode_shouldGenerateNewListeners() throws Exception {
+        locationClient.requestLocationUpdates(LocationRequest.create(), new TestLocationListener());
+
+        android.location.LocationListener gpsListener =
+                shadowLocationManager.getRequestLocationUpdateListeners().get(0);
+        android.location.LocationListener networkListener =
+                shadowLocationManager.getRequestLocationUpdateListeners().get(1);
+
+        locationClient.setMockMode(true);
+        locationClient.setMockMode(false);
+
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners().get(0))
+                .isNotSameAs(gpsListener);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners().get(1))
+                .isNotSameAs(networkListener);
+    }
+
     private static Location getTestLocation(String provider, float lat, float lng, long time) {
         Location location = new Location(provider);
         location.setLatitude(lat);
