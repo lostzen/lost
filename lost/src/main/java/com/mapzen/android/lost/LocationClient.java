@@ -221,6 +221,9 @@ public class LocationClient {
     }
 
     public void setMockMode(boolean isMockMode) {
+        if (mockMode == isMockMode) {
+            return;
+        }
         mockMode = isMockMode;
 
         if (locationManager == null) {

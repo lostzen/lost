@@ -294,6 +294,17 @@ public class LocationClientTest {
     }
 
     @Test
+    public void setMockMode_shouldNotDoubleListeners() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        locationClient.requestLocationUpdates(request, listener);
+        locationClient.connect();
+        int expectedSize = shadowLocationManager.getRequestLocationUpdateListeners().size();
+        locationClient.setMockMode(false);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(expectedSize);
+    }
+
+    @Test
     public void requestLocationUpdates_shouldNotRegisterListenersWithMockModeOn() throws Exception {
         locationClient.setMockMode(true);
         TestLocationListener listener = new TestLocationListener();
