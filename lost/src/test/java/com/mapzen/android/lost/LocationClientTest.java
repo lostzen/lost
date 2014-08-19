@@ -26,6 +26,7 @@ import java.util.List;
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 import static android.location.LocationManager.PASSIVE_PROVIDER;
+import static com.mapzen.android.lost.LocationClient.RECENT_UPDATE_THRESHOLD_IN_MILLIS;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.robolectric.Robolectric.application;
 import static org.robolectric.Robolectric.shadowOf;
@@ -110,6 +111,46 @@ public class LocationClientTest {
         shadowLocationManager.setLastKnownLocation(PASSIVE_PROVIDER, passiveLocation);
 
         assertThat(locationClient.getLastLocation()).isEqualTo(passiveLocation);
+    }
+
+    @Test
+    public void getLastLocation_shouldIgnoreStaleLocations() throws Exception {
+        long time = System.currentTimeMillis();
+        TestClock testClock = new TestClock();
+        testClock.setCurrentTimeInMillis(time);
+        locationClient.clock = testClock;
+
+        Location gpsLocation = new Location(GPS_PROVIDER);
+        gpsLocation.setAccuracy(100);
+        gpsLocation.setTime(time);
+        shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, gpsLocation);
+
+        Location networkLocation = new Location(NETWORK_PROVIDER);
+        networkLocation.setAccuracy(100);
+        networkLocation.setTime(time - (2 * RECENT_UPDATE_THRESHOLD_IN_MILLIS));
+        shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, networkLocation);
+
+        assertThat(locationClient.getLastLocation()).isEqualTo(gpsLocation);
+    }
+
+    @Test
+    public void getLastLocation_ifNoFreshLocationsShouldReturnMostRecent() throws Exception {
+        long time = System.currentTimeMillis();
+        TestClock testClock = new TestClock();
+        testClock.setCurrentTimeInMillis(time);
+        locationClient.clock = testClock;
+
+        Location gpsLocation = new Location(GPS_PROVIDER);
+        gpsLocation.setAccuracy(100);
+        gpsLocation.setTime(time - (2 * RECENT_UPDATE_THRESHOLD_IN_MILLIS));
+        shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, gpsLocation);
+
+        Location networkLocation = new Location(NETWORK_PROVIDER);
+        networkLocation.setAccuracy(100);
+        networkLocation.setTime(time - (3 * RECENT_UPDATE_THRESHOLD_IN_MILLIS));
+        shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, networkLocation);
+
+        assertThat(locationClient.getLastLocation()).isEqualTo(gpsLocation);
     }
 
     @Test(expected = IllegalStateException.class)
