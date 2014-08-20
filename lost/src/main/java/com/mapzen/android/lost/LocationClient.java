@@ -39,6 +39,9 @@ public class LocationClient {
     // Name of the mock location provider.
     public static final String MOCK_PROVIDER = "mock";
 
+    // Location updates more than 60 seconds old are considered stale.
+    public static final int RECENT_UPDATE_THRESHOLD_IN_MILLIS = 60 * 1000;
+
     private final Context context;
     private final ConnectionCallbacks connectionCallbacks;
 
@@ -54,6 +57,8 @@ public class LocationClient {
     private float smallestDisplacement;
     private boolean mockMode;
     private Location mockLocation;
+
+    Clock clock = new SystemClock();
 
     public LocationClient(Context context, ConnectionCallbacks connectionCallbacks) {
         this.context = context;
@@ -79,12 +84,22 @@ public class LocationClient {
         }
 
         final List<String> providers = locationManager.getAllProviders();
+        final long minTime = clock.getCurrentTimeInMillis() - RECENT_UPDATE_THRESHOLD_IN_MILLIS;
         Location bestLocation = null;
+        float bestAccuracy = Float.MAX_VALUE;
+        long bestTime = Long.MIN_VALUE;
         for (String provider : providers) {
             final Location location = locationManager.getLastKnownLocation(provider);
             if (location != null) {
-                if (bestLocation == null || location.getAccuracy() < bestLocation.getAccuracy()) {
+                final float accuracy = location.getAccuracy();
+                final long time = location.getTime();
+                if (time > minTime && accuracy < bestAccuracy) {
                     bestLocation = location;
+                    bestAccuracy = accuracy;
+                    bestTime = time;
+                } else if (time < minTime && bestAccuracy == Float.MAX_VALUE && time > bestTime) {
+                    bestLocation = location;
+                    bestTime = time;
                 }
             }
         }
