@@ -181,12 +181,14 @@ public class LostActivity extends Activity {
         final TextView provider = (TextView) view.findViewById(R.id.provider);
         final TextView coordinates = (TextView) view.findViewById(R.id.coordinates);
         final TextView accuracy = (TextView) view.findViewById(R.id.accuracy);
+        final TextView speed = (TextView) view.findViewById(R.id.speed);
         final TextView time = (TextView) view.findViewById(R.id.time);
 
         provider.setText(location.getProvider() + " provider");
         coordinates.setText(String.format("%.4f, %.4f", location.getLatitude(),
                 location.getLongitude()));
         accuracy.setText("within " + Math.round(location.getAccuracy()) + " meters");
+        speed.setText(location.getSpeed() + " m/s");
         time.setText(new Date(location.getTime()).toString());
     }
 
@@ -194,11 +196,13 @@ public class LostActivity extends Activity {
         final TextView provider = (TextView) view.findViewById(R.id.provider);
         final TextView coordinates = (TextView) view.findViewById(R.id.coordinates);
         final TextView accuracy = (TextView) view.findViewById(R.id.accuracy);
+        final TextView speed = (TextView) view.findViewById(R.id.speed);
         final TextView time = (TextView) view.findViewById(R.id.time);
 
         provider.setText("");
         coordinates.setText("");
         accuracy.setText("");
+        speed.setText("");
         time.setText("");
     }
 
