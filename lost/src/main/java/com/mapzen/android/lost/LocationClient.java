@@ -33,6 +33,7 @@ public class LocationClient {
 
     // GPX tags
     public static final String TAG_TRACK_POINT = "trkpt";
+    public static final String TAG_SPEED = "speed";
     public static final String TAG_LAT = "lat";
     public static final String TAG_LNG = "lon";
 
@@ -269,12 +270,16 @@ public class LocationClient {
                 final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 final XPath xPath = XPathFactory.newInstance().newXPath();
                 final String expression = "//" + TAG_TRACK_POINT;
+                final String speedExpression = "//" + TAG_SPEED;
 
                 NodeList nodeList = null;
+                NodeList speedList = null;
                 try {
                     DocumentBuilder builder = factory.newDocumentBuilder();
                     Document document = builder.parse(file);
                     nodeList = (NodeList) xPath.compile(expression)
+                            .evaluate(document, XPathConstants.NODESET);
+                    speedList = (NodeList) xPath.compile(speedExpression)
                             .evaluate(document, XPathConstants.NODESET);
                 } catch (ParserConfigurationException e) {
                     e.printStackTrace();
@@ -286,12 +291,12 @@ public class LocationClient {
                     e.printStackTrace();
                 }
 
-                parse(nodeList);
+                parse(nodeList, speedList);
             }
         }).start();
     }
 
-    private void parse(NodeList nodeList) {
+    private void parse(NodeList nodeList, NodeList speedList) {
         if (nodeList != null) {
             for (int i = 0; i < nodeList.getLength(); i++) {
                 Node node = nodeList.item(i);
@@ -302,6 +307,8 @@ public class LocationClient {
                 location.setLatitude(Double.parseDouble(lat));
                 location.setLongitude(Double.parseDouble(lng));
                 location.setTime(System.currentTimeMillis());
+                location.setSpeed(Float.parseFloat(speedList.item(i).getFirstChild()
+                        .getNodeValue()));
 
                 new Handler(context.getMainLooper()).post(new Runnable() {
                     @Override

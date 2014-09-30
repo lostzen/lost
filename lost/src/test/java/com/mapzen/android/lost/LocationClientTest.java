@@ -395,6 +395,22 @@ public class LocationClientTest {
     }
 
     @Test
+    public void setMockTrace_shouldBroadcastSpeedWithLocation() throws Exception {
+        loadTestGpxTrace();
+        locationClient.setMockMode(true);
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        request.setFastestInterval(0);
+        locationClient.requestLocationUpdates(request, listener);
+        locationClient.setMockTrace("lost.gpx");
+        Thread.sleep(1000);
+        Robolectric.runUiThreadTasks();
+        assertThat(listener.getAllLocations().get(0).getSpeed()).isEqualTo(10f);
+        assertThat(listener.getAllLocations().get(1).getSpeed()).isEqualTo(20f);
+        assertThat(listener.getAllLocations().get(2).getSpeed()).isEqualTo(30f);
+    }
+
+    @Test
     public void setMockTrace_shouldRespectFastestInterval() throws Exception {
         loadTestGpxTrace();
         locationClient.setMockMode(true);
