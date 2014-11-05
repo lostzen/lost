@@ -24,7 +24,7 @@ Include dependency using Maven.
 <dependency>
   <groupId>com.mapzen.android</groupId>
   <artifactId>lost</artifactId>
-  <version>0.1</version>
+  <version>0.2</version>
 </dependency>
 ```
 
@@ -33,10 +33,10 @@ Include dependency using Maven.
 Include dependency using Gradle.
 
 ```groovy
-compile 'com.mapzen.android:lost:0.1'
+compile 'com.mapzen.android:lost:0.2'
 ```
 
 [1]: https://developer.android.com/reference/com/google/android/gms/location/LocationClient.html
 [2]: https://developer.android.com/reference/android/location/LocationManager.html
 [3]: http://developer.android.com/google/play-services/location.html
-[4]: http://search.maven.org/remotecontent?filepath=com/mapzen/android/lost/0.1/lost-0.1.jar
+[4]: http://search.maven.org/remotecontent?filepath=com/mapzen/android/lost/0.2/lost-0.2.jar
