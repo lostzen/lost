@@ -31,6 +31,10 @@ import javax.xml.xpath.XPathFactory;
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 
+/**
+ * This class is deprecated. Use {@link com.mapzen.android.lost.api.LocationServices}.
+ */
+@Deprecated
 public class LocationClient {
     public static final String TAG = LocationClient.class.getSimpleName();
 
