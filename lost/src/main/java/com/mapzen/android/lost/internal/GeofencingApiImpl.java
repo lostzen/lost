@@ -1,4 +1,7 @@
-package com.mapzen.android.lost;
+package com.mapzen.android.lost.internal;
+
+import com.mapzen.android.lost.api.Geofence;
+import com.mapzen.android.lost.api.GeofencingApi;
 
 import android.app.PendingIntent;
 

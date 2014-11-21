@@ -1,4 +1,7 @@
-package com.mapzen.android.lost;
+package com.mapzen.android.lost.api;
+
+import com.mapzen.android.lost.internal.Clock;
+import com.mapzen.android.lost.internal.SystemClock;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;

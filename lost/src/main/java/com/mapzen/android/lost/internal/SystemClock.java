@@ -1,4 +1,4 @@
-package com.mapzen.android.lost;
+package com.mapzen.android.lost.internal;
 
 public class SystemClock implements Clock {
     @Override

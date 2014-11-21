@@ -1,4 +1,4 @@
-package com.mapzen.android.lost;
+package com.mapzen.android.lost.internal;
 
 public class TestClock implements Clock {
     private long currentTimeInMillis;

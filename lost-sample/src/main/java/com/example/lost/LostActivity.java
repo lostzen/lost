@@ -15,9 +15,9 @@
  */
 package com.example.lost;
 
-import com.mapzen.android.lost.LocationClient;
-import com.mapzen.android.lost.LocationListener;
-import com.mapzen.android.lost.LocationRequest;
+import com.mapzen.android.lost.api.LocationClient;
+import com.mapzen.android.lost.api.LocationListener;
+import com.mapzen.android.lost.api.LocationRequest;
 
 import android.app.Activity;
 import android.app.FragmentManager;

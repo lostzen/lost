@@ -1,4 +1,7 @@
-package com.mapzen.android.lost;
+package com.mapzen.android.lost.api;
+
+import com.mapzen.android.lost.internal.FusedLocationProviderApiImpl;
+import com.mapzen.android.lost.internal.GeofencingApiImpl;
 
 import org.junit.Test;
 

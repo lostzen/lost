@@ -1,4 +1,4 @@
-package com.mapzen.android.lost;
+package com.mapzen.android.lost.api;
 
 import android.app.PendingIntent;
 

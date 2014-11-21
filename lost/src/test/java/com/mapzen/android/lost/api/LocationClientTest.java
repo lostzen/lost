@@ -1,4 +1,6 @@
-package com.mapzen.android.lost;
+package com.mapzen.android.lost.api;
+
+import com.mapzen.android.lost.internal.TestClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +28,7 @@ import java.util.List;
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 import static android.location.LocationManager.PASSIVE_PROVIDER;
-import static com.mapzen.android.lost.LocationClient.RECENT_UPDATE_THRESHOLD_IN_MILLIS;
+import static com.mapzen.android.lost.api.LocationClient.RECENT_UPDATE_THRESHOLD_IN_MILLIS;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.robolectric.Robolectric.application;
 import static org.robolectric.Robolectric.shadowOf;
