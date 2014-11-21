@@ -7,6 +7,9 @@ import android.app.PendingIntent;
 
 import java.util.List;
 
+/**
+ * Implementation of the {@link GeofencingApi}.
+ */
 public class GeofencingApiImpl implements GeofencingApi {
     @Override
     public void addGeofences(List<Geofence> geofences, PendingIntent pendingIntent) {
