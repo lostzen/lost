@@ -8,18 +8,33 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Bundle;
 import android.os.Looper;
+import android.util.Log;
 
 import java.util.List;
+
+import static android.location.LocationManager.GPS_PROVIDER;
+import static android.location.LocationManager.NETWORK_PROVIDER;
 
 /**
  * Implementation of the {@link FusedLocationProviderApi}.
  */
 public class FusedLocationProviderApiImpl implements FusedLocationProviderApi {
+    public static final String TAG = FusedLocationProviderApiImpl.class.getSimpleName();
+
     /** Location updates more than 60 seconds old are considered stale. */
     public static final int RECENT_UPDATE_THRESHOLD_IN_MILLIS = 60 * 1000;
 
     private final LocationManager locationManager;
+    private LocationListener locationListener;
+    private float gpsAccuracy = Float.MAX_VALUE;
+    private float networkAccuracy = Float.MAX_VALUE;
+    private long fastestInterval;
+    private float smallestDisplacement;
+
+    private final GpsListener gpsListener = new GpsListener();
+    private final NetworkListener networkListener = new NetworkListener();
 
     Clock clock = new SystemClock();
 
@@ -57,7 +72,8 @@ public class FusedLocationProviderApiImpl implements FusedLocationProviderApi {
 
     @Override
     public void removeLocationUpdates(LocationListener listener) {
-        throw new RuntimeException("Sorry, not yet implemented");
+        locationManager.removeUpdates(gpsListener);
+        locationManager.removeUpdates(networkListener);
     }
 
     @Override
@@ -73,7 +89,11 @@ public class FusedLocationProviderApiImpl implements FusedLocationProviderApi {
 
     @Override
     public void requestLocationUpdates(LocationRequest request, LocationListener listener) {
-        throw new RuntimeException("Sorry, not yet implemented");
+        this.locationListener = listener;
+        this.fastestInterval = request.getFastestInterval();
+        this.smallestDisplacement = request.getSmallestDisplacement();
+        connectGpsListener();
+        connectNetworkListener();
     }
 
     @Override
@@ -89,5 +109,67 @@ public class FusedLocationProviderApiImpl implements FusedLocationProviderApi {
     @Override
     public void setMockMode(boolean isMockMode) {
         throw new RuntimeException("Sorry, not yet implemented");
+    }
+
+    private void connectGpsListener() {
+        try {
+            locationManager.requestLocationUpdates(GPS_PROVIDER, fastestInterval,
+                    smallestDisplacement, gpsListener);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Unable to register for GPS updates.", e);
+        }
+    }
+
+    private void connectNetworkListener() {
+        try {
+            locationManager.requestLocationUpdates(NETWORK_PROVIDER, fastestInterval,
+                    smallestDisplacement, networkListener);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Unable to register for network updates.", e);
+        }
+    }
+
+    private class GpsListener implements android.location.LocationListener {
+        @Override
+        public void onLocationChanged(Location location) {
+            gpsAccuracy = location.getAccuracy();
+            if (locationListener != null && gpsAccuracy <= networkAccuracy) {
+                locationListener.onLocationChanged(location);
+            }
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+        }
+    }
+
+    private class NetworkListener implements android.location.LocationListener {
+        @Override
+        public void onLocationChanged(Location location) {
+            networkAccuracy = location.getAccuracy();
+            if (locationListener != null && networkAccuracy <= gpsAccuracy) {
+                locationListener.onLocationChanged(location);
+            }
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+        }
     }
 }

@@ -1,5 +1,8 @@
 package com.mapzen.android.lost.internal;
 
+import com.mapzen.android.lost.api.LocationListener;
+import com.mapzen.android.lost.api.LocationRequest;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +13,9 @@ import org.robolectric.shadows.ShadowLocationManager;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
@@ -116,9 +122,174 @@ public class FusedLocationProviderApiImplTest {
         assertThat(api.getLastLocation()).isEqualTo(gpsLocation);
     }
 
+    @Test
+    public void requestLocationUpdates_shouldRegisterGpsAndNetworkListener() throws Exception {
+        LocationListener listener = new TestLocationListener();
+        api.requestLocationUpdates(LocationRequest.create(), listener);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(2);
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldNotifyOnLocationChangedGps() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        api.requestLocationUpdates(LocationRequest.create(), listener);
+        Location location = new Location(GPS_PROVIDER);
+        shadowLocationManager.simulateLocation(location);
+        assertThat(listener.getMostRecentLocation()).isEqualTo(location);
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldNotifyOnLocationChangedNetwork() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        api.requestLocationUpdates(LocationRequest.create(), listener);
+        Location location = new Location(NETWORK_PROVIDER);
+        shadowLocationManager.simulateLocation(location);
+        assertThat(listener.getMostRecentLocation()).isEqualTo(location);
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldNotNotifyIfLessThanFastestIntervalGps()
+            throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        request.setFastestInterval(5000);
+        api.requestLocationUpdates(request, listener);
+
+        final long time = System.currentTimeMillis();
+        Location location1 = getTestLocation(GPS_PROVIDER, 0, 0, time);
+        Location location2 = getTestLocation(GPS_PROVIDER, 1, 1, time + 1000);
+
+        shadowLocationManager.simulateLocation(location1);
+        shadowLocationManager.simulateLocation(location2);
+        assertThat(listener.getMostRecentLocation()).isEqualTo(location1);
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldNotNotifyIfLessThanFastestIntervalNetwork()
+            throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        request.setFastestInterval(5000);
+        api.requestLocationUpdates(request, listener);
+
+        final long time = System.currentTimeMillis();
+        Location location1 = getTestLocation(NETWORK_PROVIDER, 0, 0, time);
+        Location location2 = getTestLocation(NETWORK_PROVIDER, 1, 1, time + 1000);
+
+        shadowLocationManager.simulateLocation(location1);
+        shadowLocationManager.simulateLocation(location2);
+        assertThat(listener.getMostRecentLocation()).isEqualTo(location1);
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldNotNotifyIfLessThanSmallestDisplacementGps()
+            throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        request.setSmallestDisplacement(200000);
+        api.requestLocationUpdates(request, listener);
+
+        final long time = System.currentTimeMillis();
+        Location location1 = getTestLocation(GPS_PROVIDER, 0, 0, time);
+        Location location2 = getTestLocation(GPS_PROVIDER, 1, 1, time + 1000);
+
+        shadowLocationManager.simulateLocation(location1);
+        shadowLocationManager.simulateLocation(location2);
+        assertThat(listener.getMostRecentLocation()).isEqualTo(location1);
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldNotNotifyIfLessThanSmallestDisplacementNetwork()
+            throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        request.setSmallestDisplacement(200000);
+        api.requestLocationUpdates(request, listener);
+
+        final long time = System.currentTimeMillis();
+        Location location1 = getTestLocation(NETWORK_PROVIDER, 0, 0, time);
+        Location location2 = getTestLocation(NETWORK_PROVIDER, 1, 1, time + 1000);
+
+        shadowLocationManager.simulateLocation(location1);
+        shadowLocationManager.simulateLocation(location2);
+        assertThat(listener.getMostRecentLocation()).isEqualTo(location1);
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldIgnoreNetworkWhenGpsIsMoreAccurate() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        request.setFastestInterval(0);
+        request.setSmallestDisplacement(0);
+        api.requestLocationUpdates(request, listener);
+
+        final long time = System.currentTimeMillis();
+        Location gpsLocation = getTestLocation(GPS_PROVIDER, 0, 0, time);
+        Location networkLocation = getTestLocation(NETWORK_PROVIDER, 0, 0, time + 1);
+
+        gpsLocation.setAccuracy(10);
+        networkLocation.setAccuracy(20);
+        shadowLocationManager.simulateLocation(gpsLocation);
+        shadowLocationManager.simulateLocation(networkLocation);
+        assertThat(listener.getMostRecentLocation()).isEqualTo(gpsLocation);
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldIgnoreGpsWhenNetworkIsMoreAccurate() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        request.setFastestInterval(0);
+        request.setSmallestDisplacement(0);
+        api.requestLocationUpdates(request, listener);
+
+        final long time = System.currentTimeMillis();
+        Location networkLocation = getTestLocation(NETWORK_PROVIDER, 0, 0, time);
+        Location gpsLocation = getTestLocation(GPS_PROVIDER, 0, 0, time + 1);
+
+        networkLocation.setAccuracy(10);
+        gpsLocation.setAccuracy(20);
+        shadowLocationManager.simulateLocation(networkLocation);
+        shadowLocationManager.simulateLocation(gpsLocation);
+        assertThat(listener.getMostRecentLocation()).isEqualTo(networkLocation);
+    }
+
+    @Test
+    public void removeLocationUpdates_shouldUnregisterAllListeners() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        api.requestLocationUpdates(request, listener);
+        api.removeLocationUpdates(listener);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
+    }
+
     private void initTestClock(long time) {
         TestClock testClock = new TestClock();
         testClock.setCurrentTimeInMillis(time);
         api.clock = testClock;
+    }
+
+    private static Location getTestLocation(String provider, float lat, float lng, long time) {
+        Location location = new Location(provider);
+        location.setLatitude(lat);
+        location.setLongitude(lng);
+        location.setTime(time);
+        return location;
+    }
+
+    class TestLocationListener implements LocationListener {
+        private ArrayList<Location> locations = new ArrayList<Location>();
+
+        @Override
+        public void onLocationChanged(Location location) {
+            locations.add(location);
+        }
+
+        public List<Location> getAllLocations() {
+            return locations;
+        }
+
+        public Location getMostRecentLocation() {
+            return locations.get(locations.size() - 1);
+        }
     }
 }
