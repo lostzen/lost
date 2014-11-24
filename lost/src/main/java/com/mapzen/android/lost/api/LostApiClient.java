@@ -8,6 +8,10 @@ public interface LostApiClient {
 
     public void connect();
 
+    public void disconnect();
+
+    public boolean isConnected();
+
     public static final class Builder {
         private final Context context;
 
