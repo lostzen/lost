@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowEnvironment;
 import org.robolectric.shadows.ShadowLocationManager;
 
@@ -32,6 +33,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.robolectric.Robolectric.application;
 import static org.robolectric.Robolectric.shadowOf;
 
+@Config(manifest=Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class FusedLocationProviderApiImplTest {
     private FusedLocationProviderApiImpl api;

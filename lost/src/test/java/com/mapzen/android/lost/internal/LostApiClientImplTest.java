@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import android.location.Location;
 import android.location.LocationManager;
@@ -19,6 +20,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.robolectric.Robolectric.application;
 import static org.robolectric.Robolectric.shadowOf;
 
+@Config(manifest=Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class LostApiClientImplTest {
     private LostApiClient client;
