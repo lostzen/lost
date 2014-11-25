@@ -4,6 +4,8 @@ import android.app.PendingIntent;
 import android.location.Location;
 import android.os.Looper;
 
+import java.io.File;
+
 public interface FusedLocationProviderApi {
 
     Location getLastLocation();
@@ -21,4 +23,6 @@ public interface FusedLocationProviderApi {
     void setMockLocation(Location mockLocation);
 
     void setMockMode(boolean isMockMode);
+
+    void setMockTracefile(final File file);
 }

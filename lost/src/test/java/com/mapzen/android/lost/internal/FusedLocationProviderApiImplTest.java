@@ -8,12 +8,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.shadows.ShadowEnvironment;
 import org.robolectric.shadows.ShadowLocationManager;
 
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Environment;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -262,6 +269,137 @@ public class FusedLocationProviderApiImplTest {
         assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
     }
 
+    @Test
+    public void setMockMode_shouldUnregisterAllListenersWhenTrue() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        api.requestLocationUpdates(request, listener);
+        api.setMockMode(true);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
+    }
+
+    @Test
+    public void setMockMode_shouldRegisterListenersWhenFalse() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        api.requestLocationUpdates(request, listener);
+        api.setMockMode(true);
+        api.setMockMode(false);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isNotEmpty();
+    }
+
+    @Test
+    public void setMockMode_shouldNotRegisterDuplicateListeners() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        api.requestLocationUpdates(request, listener);
+        api.setMockMode(false);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(2);
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldNotRegisterListenersWithMockModeOn() throws Exception {
+        api.setMockMode(true);
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        api.requestLocationUpdates(request, listener);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
+    }
+
+    @Test
+    public void setMockLocation_shouldReturnMockLastLocation() throws Exception {
+        Location mockLocation = new Location("mock");
+        api.setMockMode(true);
+        api.setMockLocation(mockLocation);
+        assertThat(api.getLastLocation()).isEqualTo(mockLocation);
+    }
+
+    @Test
+    public void setMockLocation_shouldInvokeListenerOnce() throws Exception {
+        Location mockLocation = new Location("mock");
+        api.setMockMode(true);
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        api.requestLocationUpdates(request, listener);
+        api.setMockLocation(mockLocation);
+        assertThat(listener.getAllLocations()).hasSize(1);
+        assertThat(listener.getMostRecentLocation()).isEqualTo(mockLocation);
+    }
+
+    @Test
+    public void setMockTrace_shouldInvokeListenerForEachLocation() throws Exception {
+        File file = getTestGpxTrace();
+        api.setMockMode(true);
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        request.setFastestInterval(0);
+        api.requestLocationUpdates(request, listener);
+        api.setMockTracefile(file);
+        Thread.sleep(1000);
+        Robolectric.runUiThreadTasks();
+        assertThat(listener.getAllLocations()).hasSize(3);
+        assertThat(listener.getAllLocations().get(0).getLatitude()).isEqualTo(0.0);
+        assertThat(listener.getAllLocations().get(0).getLongitude()).isEqualTo(0.1);
+        assertThat(listener.getAllLocations().get(1).getLatitude()).isEqualTo(1.0);
+        assertThat(listener.getAllLocations().get(1).getLongitude()).isEqualTo(1.1);
+        assertThat(listener.getAllLocations().get(2).getLatitude()).isEqualTo(2.0);
+        assertThat(listener.getAllLocations().get(2).getLongitude()).isEqualTo(2.1);
+    }
+
+    @Test
+    public void setMockTrace_shouldBroadcastSpeedWithLocation() throws Exception {
+        File file = getTestGpxTrace();
+        api.setMockMode(true);
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        request.setFastestInterval(0);
+        api.requestLocationUpdates(request, listener);
+        api.setMockTracefile(file);
+        Thread.sleep(1000);
+        Robolectric.runUiThreadTasks();
+        assertThat(listener.getAllLocations().get(0).getSpeed()).isEqualTo(10f);
+        assertThat(listener.getAllLocations().get(1).getSpeed()).isEqualTo(20f);
+        assertThat(listener.getAllLocations().get(2).getSpeed()).isEqualTo(30f);
+    }
+
+    @Test
+    public void setMockTrace_shouldRespectFastestInterval() throws Exception {
+        File file = getTestGpxTrace();
+        api.setMockMode(true);
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        request.setInterval(1000);
+        api.requestLocationUpdates(request, listener);
+        api.setMockTracefile(file);
+        Thread.sleep(1000);
+        Robolectric.runUiThreadTasks();
+        assertThat(listener.getAllLocations()).hasSize(1);
+        Thread.sleep(1000);
+        Robolectric.runUiThreadTasks();
+        assertThat(listener.getAllLocations()).hasSize(2);
+        Thread.sleep(1000);
+        Robolectric.runUiThreadTasks();
+        assertThat(listener.getAllLocations()).hasSize(3);
+    }
+
+    @Test
+    public void setMockMode_shouldGenerateNewListeners() throws Exception {
+        api.requestLocationUpdates(LocationRequest.create(), new TestLocationListener());
+
+        android.location.LocationListener gpsListener =
+                shadowLocationManager.getRequestLocationUpdateListeners().get(0);
+        android.location.LocationListener networkListener =
+                shadowLocationManager.getRequestLocationUpdateListeners().get(1);
+
+        api.setMockMode(true);
+        api.setMockMode(false);
+
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners().get(0))
+                .isNotSameAs(gpsListener);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners().get(1))
+                .isNotSameAs(networkListener);
+    }
+
     private void initTestClock(long time) {
         TestClock testClock = new TestClock();
         testClock.setCurrentTimeInMillis(time);
@@ -274,6 +412,19 @@ public class FusedLocationProviderApiImplTest {
         location.setLongitude(lng);
         location.setTime(time);
         return location;
+    }
+
+    private File getTestGpxTrace() throws IOException {
+        byte[] encoded = Files.readAllBytes(Paths.get("src/test/resources/lost.gpx"));
+        String contents = new String(encoded, "UTF-8");
+
+        ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
+        File directory = Environment.getExternalStorageDirectory();
+        File file = new File(directory, "lost.gpx");
+        FileWriter fileWriter = new FileWriter(file, false);
+        fileWriter.write(contents);
+        fileWriter.close();
+        return file;
     }
 
     class TestLocationListener implements LocationListener {
