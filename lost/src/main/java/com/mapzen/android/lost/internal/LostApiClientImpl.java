@@ -24,7 +24,10 @@ public class LostApiClientImpl implements LostApiClient {
 
     @Override
     public void disconnect() {
-        LocationServices.FusedLocationApi.removeLocationUpdates((LocationListener) null);
+        if (LocationServices.FusedLocationApi != null) {
+            LocationServices.FusedLocationApi.removeLocationUpdates((LocationListener) null);
+        }
+
         LocationServices.FusedLocationApi = null;
         LocationServices.GeofencingApi = null;
     }

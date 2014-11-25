@@ -5,6 +5,7 @@ import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationServices;
 import com.mapzen.android.lost.api.LostApiClient;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +26,11 @@ public class LostApiClientImplTest {
     @Before
     public void setUp() throws Exception {
         client = new LostApiClient.Builder(application).build();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        client.disconnect();
     }
 
     @Test

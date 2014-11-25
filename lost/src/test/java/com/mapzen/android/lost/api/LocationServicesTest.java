@@ -3,6 +3,7 @@ package com.mapzen.android.lost.api;
 import com.mapzen.android.lost.internal.FusedLocationProviderApiImpl;
 import com.mapzen.android.lost.internal.GeofencingApiImpl;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,9 +14,17 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 public class LocationServicesTest {
+    private LostApiClient client;
+
     @Before
     public void setUp() throws Exception {
-        new LostApiClient.Builder(Robolectric.application).build().connect();
+        client = new LostApiClient.Builder(Robolectric.application).build();
+        client.connect();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        client.disconnect();
     }
 
     @Test
