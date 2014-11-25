@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.lost;
+package com.example.lost.locationservices;
 
 import com.mapzen.android.lost.api.LocationClient;
 import com.mapzen.android.lost.api.LocationListener;

@@ -32,7 +32,7 @@
 
     <modules>
         <module>lost</module>
-        <module>lost-sample</module>
+        <module>lost-demos</module>
     </modules>
 
     <properties>

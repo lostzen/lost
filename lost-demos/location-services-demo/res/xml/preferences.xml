@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="@string/mock_mode_key"
+        android:summary="@string/mock_mode_summary"
+        android:title="@string/mock_mode_title" />
+
+    <EditTextPreference
+        android:defaultValue="0.0"
+        android:key="@string/mock_lat_key"
+        android:title="@string/mock_lat_title" />
+
+    <EditTextPreference
+        android:defaultValue="0.0"
+        android:key="@string/mock_lng_key"
+        android:title="@string/mock_lng_title" />
+
+    <EditTextPreference
+        android:defaultValue="0.0"
+        android:key="@string/mock_accuracy_key"
+        android:title="@string/mock_accuracy_title" />
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="@string/mock_mode_gpx_key"
+        android:summary="@string/mock_mode_gpx_summary"
+        android:title="@string/mock_mode_gpx_title" />
+
+    <EditTextPreference
+        android:defaultValue="lost.gpx"
+        android:key="@string/mock_gpx_file_key"
+        android:title="@string/mock_gpx_file_title" />
+
+</PreferenceScreen>
