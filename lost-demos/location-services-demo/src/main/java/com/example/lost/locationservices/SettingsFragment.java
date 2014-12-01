@@ -16,7 +16,6 @@
 package com.example.lost.locationservices;
 
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -53,12 +52,6 @@ public class SettingsFragment extends PreferenceFragment {
     public void onPause() {
         super.onPause();
         prefs.unregisterOnSharedPreferenceChangeListener(listener);
-        setMockLocation();
-
-        if (prefs.getBoolean(getString(R.string.mock_mode_gpx_key), false)) {
-            String filename = getValue(getString(R.string.mock_gpx_file_key));
-            LostActivity.getLocationClient().setMockTrace(filename);
-        }
     }
 
     private void updateValue(String key) {
@@ -83,35 +76,6 @@ public class SettingsFragment extends PreferenceFragment {
         }
 
         return prefs.getString(key, "0.0");
-    }
-
-    public void setMockLocation() {
-        float lat = 0f;
-        float lng = 0f;
-        float accuracy = 0f;
-
-        try {
-            lat = Float.parseFloat(getValue(getString(R.string.mock_lat_key)));
-        } catch (NumberFormatException e) {
-        }
-
-        try {
-            lng = Float.parseFloat(getValue(getString(R.string.mock_lng_key)));
-        } catch (NumberFormatException e) {
-        }
-
-        try {
-            accuracy = Float.parseFloat(getValue(getString(R.string.mock_accuracy_key)));
-        } catch (NumberFormatException e) {
-        }
-
-        final Location location = new Location("mock");
-        location.setLatitude(lat);
-        location.setLongitude(lng);
-        location.setAccuracy(accuracy);
-        location.setTime(System.currentTimeMillis());
-
-        LostActivity.getLocationClient().setMockLocation(location);
     }
 
     /**
