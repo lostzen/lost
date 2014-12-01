@@ -20,7 +20,6 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -36,11 +35,9 @@ import static android.location.LocationManager.NETWORK_PROVIDER;
 /**
  * Implementation of the {@link FusedLocationProviderApi}.
  */
-public class FusedLocationProviderApiImpl implements FusedLocationProviderApi {
+public class FusedLocationProviderApiImpl implements FusedLocationProviderApi,
+        FusionEngine.Callback {
     public static final String TAG = FusedLocationProviderApiImpl.class.getSimpleName();
-
-    /** Location updates more than 60 seconds old are considered stale. */
-    public static final int RECENT_UPDATE_THRESHOLD_IN_MILLIS = 60 * 1000;
 
     // Name of the mock location provider.
     public static final String MOCK_PROVIDER = "mock";
@@ -64,11 +61,12 @@ public class FusedLocationProviderApiImpl implements FusedLocationProviderApi {
     private GpsListener gpsListener;
     private NetworkListener networkListener;
 
-    Clock clock = new SystemClock();
+    private FusionEngine fusionEngine;
 
     public FusedLocationProviderApiImpl(Context context) {
         this.context = context;
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        fusionEngine = new FusionEngine(context, this);
         createGpsAndNetworkListeners();
     }
 
@@ -78,30 +76,7 @@ public class FusedLocationProviderApiImpl implements FusedLocationProviderApi {
             return mockLocation;
         }
 
-        final List<String> providers = locationManager.getAllProviders();
-        final long minTime = clock.getCurrentTimeInMillis() - RECENT_UPDATE_THRESHOLD_IN_MILLIS;
-
-        Location bestLocation = null;
-        float bestAccuracy = Float.MAX_VALUE;
-        long bestTime = Long.MIN_VALUE;
-
-        for (String provider : providers) {
-            final Location location = locationManager.getLastKnownLocation(provider);
-            if (location != null) {
-                final float accuracy = location.getAccuracy();
-                final long time = location.getTime();
-                if (time > minTime && accuracy < bestAccuracy) {
-                    bestLocation = location;
-                    bestAccuracy = accuracy;
-                    bestTime = time;
-                } else if (time < minTime && bestAccuracy == Float.MAX_VALUE && time > bestTime) {
-                    bestLocation = location;
-                    bestTime = time;
-                }
-            }
-        }
-
-        return bestLocation;
+        return fusionEngine.getLastLocation();
     }
 
     @Override
@@ -248,6 +223,10 @@ public class FusedLocationProviderApiImpl implements FusedLocationProviderApi {
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Unable to register for network updates.", e);
         }
+    }
+
+    @Override
+    public void reportLocation(Location location) {
     }
 
     private class GpsListener implements android.location.LocationListener {
