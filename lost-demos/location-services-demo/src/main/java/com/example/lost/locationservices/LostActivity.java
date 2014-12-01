@@ -130,11 +130,12 @@ public class LostActivity extends Activity {
                 if (prefs.getBoolean(getString(R.string.mock_mode_gpx_key), false)) {
                     String filename = prefs.getString(getString(R.string.mock_gpx_file_key), null);
                     File file = new File(Environment.getExternalStorageDirectory(), filename);
-                    LocationServices.FusedLocationApi.setMockTracefile(file);
+                    LocationServices.FusedLocationApi.setMockTrace(file);
                 }
 
                 if (fragment.lastKnownLocation == null) {
-                    fragment.setLastKnownLocation(LocationServices.FusedLocationApi.getLastLocation());
+                    fragment.setLastKnownLocation(
+                            LocationServices.FusedLocationApi.getLastLocation());
                 }
 
                 LocationRequest locationRequest = LocationRequest.create();
@@ -163,7 +164,8 @@ public class LostActivity extends Activity {
         }
 
         try {
-            accuracy = Float.parseFloat(prefs.getString(getString(R.string.mock_accuracy_key), "0.0"));
+            accuracy = Float.parseFloat(prefs.getString(getString(R.string.mock_accuracy_key),
+                    "0.0"));
         } catch (NumberFormatException e) {
         }
 

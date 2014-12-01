@@ -164,7 +164,7 @@ public class FusedLocationProviderApiImpl implements FusedLocationProviderApi {
     }
 
     @Override
-    public void setMockTracefile(final File file) {
+    public void setMockTrace(final File file) {
         new Thread(new Runnable() {
             @Override
             public void run() {

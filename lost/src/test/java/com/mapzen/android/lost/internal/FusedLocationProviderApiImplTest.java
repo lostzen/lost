@@ -336,7 +336,7 @@ public class FusedLocationProviderApiImplTest {
         LocationRequest request = LocationRequest.create();
         request.setFastestInterval(0);
         api.requestLocationUpdates(request, listener);
-        api.setMockTracefile(file);
+        api.setMockTrace(file);
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(listener.getAllLocations()).hasSize(3);
@@ -356,7 +356,7 @@ public class FusedLocationProviderApiImplTest {
         LocationRequest request = LocationRequest.create();
         request.setFastestInterval(0);
         api.requestLocationUpdates(request, listener);
-        api.setMockTracefile(file);
+        api.setMockTrace(file);
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(listener.getAllLocations().get(0).getSpeed()).isEqualTo(10f);
@@ -372,7 +372,7 @@ public class FusedLocationProviderApiImplTest {
         LocationRequest request = LocationRequest.create();
         request.setInterval(1000);
         api.requestLocationUpdates(request, listener);
-        api.setMockTracefile(file);
+        api.setMockTrace(file);
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(listener.getAllLocations()).hasSize(1);

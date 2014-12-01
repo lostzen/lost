@@ -24,5 +24,5 @@ public interface FusedLocationProviderApi {
 
     void setMockMode(boolean isMockMode);
 
-    void setMockTracefile(final File file);
+    void setMockTrace(final File file);
 }
