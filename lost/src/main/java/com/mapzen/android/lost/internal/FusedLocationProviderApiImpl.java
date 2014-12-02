@@ -17,34 +17,25 @@ import java.io.File;
 public class FusedLocationProviderApiImpl implements
         FusedLocationProviderApi, LocationEngine.Callback {
 
+    private final Context context;
+    private LocationEngine locationEngine;
     private LocationListener locationListener;
     private boolean mockMode;
 
-    private final FusionEngine fusionEngine;
-    private final MockEngine mockEngine;
-
     public FusedLocationProviderApiImpl(Context context) {
-        fusionEngine = new FusionEngine(context, this);
-        mockEngine = new MockEngine(context, this);
+        this.context = context;
+        locationEngine = new FusionEngine(context, this);
     }
 
     @Override
     public Location getLastLocation() {
-        if (mockMode) {
-            return mockEngine.getLastLocation();
-        } else {
-            return fusionEngine.getLastLocation();
-        }
+        return locationEngine.getLastLocation();
     }
 
     @Override
-    public void removeLocationUpdates(LocationListener listener) {
-        fusionEngine.setRequest(null);
-    }
-
-    @Override
-    public void removeLocationUpdates(PendingIntent callbackIntent) {
-        throw new RuntimeException("Sorry, not yet implemented");
+    public void requestLocationUpdates(LocationRequest request, LocationListener listener) {
+        this.locationListener = listener;
+        locationEngine.setRequest(request);
     }
 
     @Override
@@ -54,37 +45,49 @@ public class FusedLocationProviderApiImpl implements
     }
 
     @Override
-    public void requestLocationUpdates(LocationRequest request, LocationListener listener) {
-        this.locationListener = listener;
-
-        if (mockMode) {
-            mockEngine.setRequest(request);
-        } else {
-            fusionEngine.setRequest(request);
-        }
-    }
-
-    @Override
     public void requestLocationUpdates(LocationRequest request, PendingIntent callbackIntent) {
         throw new RuntimeException("Sorry, not yet implemented");
     }
 
     @Override
-    public void setMockLocation(Location mockLocation) {
-        mockEngine.setLocation(mockLocation);
+    public void removeLocationUpdates(LocationListener listener) {
+        locationEngine.setRequest(null);
+    }
+
+    @Override
+    public void removeLocationUpdates(PendingIntent callbackIntent) {
+        throw new RuntimeException("Sorry, not yet implemented");
     }
 
     @Override
     public void setMockMode(boolean isMockMode) {
-        this.mockMode = isMockMode;
-        if (isMockMode) {
-            fusionEngine.setRequest(null);
+        if (mockMode != isMockMode) {
+            toggleMockMode();
+        }
+    }
+
+    private void toggleMockMode() {
+        mockMode = !mockMode;
+        locationEngine.setRequest(null);
+        if (mockMode) {
+            locationEngine = new MockEngine(context, this);
+        } else {
+            locationEngine = new FusionEngine(context, this);
+        }
+    }
+
+    @Override
+    public void setMockLocation(Location mockLocation) {
+        if (locationEngine instanceof MockEngine) {
+            ((MockEngine) locationEngine).setLocation(mockLocation);
         }
     }
 
     @Override
     public void setMockTrace(final File file) {
-        mockEngine.setTrace(file);
+        if (locationEngine instanceof MockEngine) {
+            ((MockEngine) locationEngine).setTrace(file);
+        }
     }
 
     @Override

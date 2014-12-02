@@ -210,8 +210,10 @@ public class FusedLocationProviderApiImplTest {
     public void setMockMode_shouldNotRegisterDuplicateListeners() throws Exception {
         TestLocationListener listener = new TestLocationListener();
         LocationRequest request = LocationRequest.create();
+        api.setMockMode(true);
         api.requestLocationUpdates(request, listener);
         api.setMockMode(false);
+        api.requestLocationUpdates(request, listener);
         assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(2);
     }
 
