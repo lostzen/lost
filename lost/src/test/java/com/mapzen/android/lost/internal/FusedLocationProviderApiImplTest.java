@@ -206,16 +206,6 @@ public class FusedLocationProviderApiImplTest {
     }
 
     @Test
-    public void setMockMode_shouldRegisterListenersWhenFalse() throws Exception {
-        TestLocationListener listener = new TestLocationListener();
-        LocationRequest request = LocationRequest.create();
-        api.requestLocationUpdates(request, listener);
-        api.setMockMode(true);
-        api.setMockMode(false);
-        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isNotEmpty();
-    }
-
-    @Test
     public void setMockMode_shouldNotRegisterDuplicateListeners() throws Exception {
         TestLocationListener listener = new TestLocationListener();
         LocationRequest request = LocationRequest.create();
@@ -307,24 +297,6 @@ public class FusedLocationProviderApiImplTest {
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(listener.getAllLocations()).hasSize(3);
-    }
-
-    @Test
-    public void setMockMode_shouldGenerateNewListeners() throws Exception {
-        api.requestLocationUpdates(LocationRequest.create(), new TestLocationListener());
-
-        android.location.LocationListener gpsListener =
-                shadowLocationManager.getRequestLocationUpdateListeners().get(0);
-        android.location.LocationListener networkListener =
-                shadowLocationManager.getRequestLocationUpdateListeners().get(1);
-
-        api.setMockMode(true);
-        api.setMockMode(false);
-
-        assertThat(shadowLocationManager.getRequestLocationUpdateListeners().get(0))
-                .isNotSameAs(gpsListener);
-        assertThat(shadowLocationManager.getRequestLocationUpdateListeners().get(1))
-                .isNotSameAs(networkListener);
     }
 
     private static Location getTestLocation(String provider, float lat, float lng, long time) {

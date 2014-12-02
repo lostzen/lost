@@ -12,11 +12,8 @@ import org.xml.sax.SAXException;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.location.Location;
-import android.location.LocationManager;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,9 +26,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import static android.location.LocationManager.GPS_PROVIDER;
-import static android.location.LocationManager.NETWORK_PROVIDER;
-
 /**
  * Implementation of the {@link FusedLocationProviderApi}.
  */
@@ -42,13 +36,11 @@ public class FusedLocationProviderApiImpl implements FusedLocationProviderApi,
     // Name of the mock location provider.
     public static final String MOCK_PROVIDER = "mock";
 
-    private final LocationManager locationManager;
     private final Context context;
     private LocationListener locationListener;
-    private float gpsAccuracy = Float.MAX_VALUE;
-    private float networkAccuracy = Float.MAX_VALUE;
+
     private long fastestInterval;
-    private float smallestDisplacement;
+
     private boolean mockMode;
     private Location mockLocation;
 
@@ -58,16 +50,11 @@ public class FusedLocationProviderApiImpl implements FusedLocationProviderApi,
     public static final String TAG_LAT = "lat";
     public static final String TAG_LNG = "lon";
 
-    private GpsListener gpsListener;
-    private NetworkListener networkListener;
-
     private FusionEngine fusionEngine;
 
     public FusedLocationProviderApiImpl(Context context) {
         this.context = context;
-        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         fusionEngine = new FusionEngine(context, this);
-        createGpsAndNetworkListeners();
     }
 
     @Override
@@ -81,8 +68,7 @@ public class FusedLocationProviderApiImpl implements FusedLocationProviderApi,
 
     @Override
     public void removeLocationUpdates(LocationListener listener) {
-        locationManager.removeUpdates(gpsListener);
-        locationManager.removeUpdates(networkListener);
+        fusionEngine.setRequest(null);
     }
 
     @Override
@@ -100,11 +86,8 @@ public class FusedLocationProviderApiImpl implements FusedLocationProviderApi,
     public void requestLocationUpdates(LocationRequest request, LocationListener listener) {
         this.locationListener = listener;
         this.fastestInterval = request.getFastestInterval();
-        this.smallestDisplacement = request.getSmallestDisplacement();
-
         if (!mockMode) {
-            connectGpsListener();
-            connectNetworkListener();
+            fusionEngine.setRequest(request);
         }
     }
 
@@ -123,18 +106,9 @@ public class FusedLocationProviderApiImpl implements FusedLocationProviderApi,
 
     @Override
     public void setMockMode(boolean isMockMode) {
-        if (mockMode == isMockMode) {
-            return;
-        }
-
-        mockMode = isMockMode;
-
+        this.mockMode = isMockMode;
         if (isMockMode) {
-            removeLocationUpdates(locationListener);
-        } else {
-            createGpsAndNetworkListeners();
-            connectGpsListener();
-            connectNetworkListener();
+            fusionEngine.setRequest(null);
         }
     }
 
@@ -202,74 +176,10 @@ public class FusedLocationProviderApiImpl implements FusedLocationProviderApi,
         }
     }
 
-    private void createGpsAndNetworkListeners() {
-        gpsListener = new GpsListener();
-        networkListener = new NetworkListener();
-    }
-
-    private void connectGpsListener() {
-        try {
-            locationManager.requestLocationUpdates(GPS_PROVIDER, fastestInterval,
-                    smallestDisplacement, gpsListener);
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, "Unable to register for GPS updates.", e);
-        }
-    }
-
-    private void connectNetworkListener() {
-        try {
-            locationManager.requestLocationUpdates(NETWORK_PROVIDER, fastestInterval,
-                    smallestDisplacement, networkListener);
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, "Unable to register for network updates.", e);
-        }
-    }
-
     @Override
     public void reportLocation(Location location) {
-    }
-
-    private class GpsListener implements android.location.LocationListener {
-        @Override
-        public void onLocationChanged(Location location) {
-            gpsAccuracy = location.getAccuracy();
-            if (locationListener != null && gpsAccuracy <= networkAccuracy) {
-                locationListener.onLocationChanged(location);
-            }
-        }
-
-        @Override
-        public void onStatusChanged(String s, int i, Bundle bundle) {
-        }
-
-        @Override
-        public void onProviderEnabled(String s) {
-        }
-
-        @Override
-        public void onProviderDisabled(String s) {
-        }
-    }
-
-    private class NetworkListener implements android.location.LocationListener {
-        @Override
-        public void onLocationChanged(Location location) {
-            networkAccuracy = location.getAccuracy();
-            if (locationListener != null && networkAccuracy <= gpsAccuracy) {
-                locationListener.onLocationChanged(location);
-            }
-        }
-
-        @Override
-        public void onStatusChanged(String s, int i, Bundle bundle) {
-        }
-
-        @Override
-        public void onProviderEnabled(String s) {
-        }
-
-        @Override
-        public void onProviderDisabled(String s) {
+        if (locationListener != null) {
+            locationListener.onLocationChanged(location);
         }
     }
 }

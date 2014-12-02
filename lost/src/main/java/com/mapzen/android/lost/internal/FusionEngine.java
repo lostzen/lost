@@ -23,6 +23,11 @@ public class FusionEngine implements LocationListener {
     private final Callback callback;
     private final LocationManager locationManager;
 
+    private LocationRequest locationRequest;
+
+    private float gpsAccuracy = Float.MAX_VALUE;
+    private float networkAccuracy = Float.MAX_VALUE;
+
     static Clock clock = new SystemClock();
 
     public FusionEngine(Context context, Callback callback) {
@@ -57,17 +62,46 @@ public class FusionEngine implements LocationListener {
         return bestLocation;
     }
 
-    public void setRequest(LocationRequest request) {
+    public void setRequest(LocationRequest locationRequest) {
+        this.locationRequest = locationRequest;
+
+        if (locationRequest != null) {
+            enable();
+        } else {
+            disable();
+        }
+    }
+
+    private void enable() {
+        if (locationRequest == null) {
+            return;
+        }
+
+        enableGps();
+        enableNetwork();
+    }
+
+    private void disable() {
+        locationManager.removeUpdates(this);
+    }
+
+    private void enableGps() {
         try {
-            locationManager.requestLocationUpdates(GPS_PROVIDER, request.getFastestInterval(),
-                    request.getSmallestDisplacement(), this);
+            locationManager.requestLocationUpdates(GPS_PROVIDER,
+                    locationRequest.getFastestInterval(),
+                    locationRequest.getSmallestDisplacement(),
+                    this);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Unable to register for GPS updates.", e);
         }
+    }
 
+    private void enableNetwork() {
         try {
-            locationManager.requestLocationUpdates(NETWORK_PROVIDER, request.getFastestInterval(),
-                    request.getSmallestDisplacement(), this);
+            locationManager.requestLocationUpdates(NETWORK_PROVIDER,
+                    locationRequest.getFastestInterval(),
+                    locationRequest.getSmallestDisplacement(),
+                    this);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Unable to register for network updates.", e);
         }
@@ -75,8 +109,16 @@ public class FusionEngine implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        if (callback != null) {
-            callback.reportLocation(location);
+        if (GPS_PROVIDER.equals(location.getProvider())) {
+            gpsAccuracy = location.getAccuracy();
+            if (callback != null && gpsAccuracy <= networkAccuracy) {
+                callback.reportLocation(location);
+            }
+        } else if (NETWORK_PROVIDER.equals(location.getProvider())) {
+            networkAccuracy = location.getAccuracy();
+            if (callback != null && networkAccuracy <= gpsAccuracy) {
+                callback.reportLocation(location);
+            }
         }
     }
 

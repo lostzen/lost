@@ -122,21 +122,134 @@ public class FusionEngineTest {
     }
 
     @Test
-    public void setRequest_shouldRegisterForLocationManagerUpdates() throws Exception {
+    public void setRequest_shouldEnableLocationUpdatesForValidRequest() throws Exception {
         fusionEngine.setRequest(LocationRequest.create());
         assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(2);
     }
 
     @Test
-    public void onLocationChanged_shouldInvokeCallback() throws Exception {
-        fusionEngine.onLocationChanged(new Location("test"));
-        assertThat(callback.location).isNotNull();
+    public void setRequest_shouldDisableLocationUpdatesForNullRequest() throws Exception {
+        fusionEngine.setRequest(LocationRequest.create());
+        fusionEngine.setRequest(null);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
     }
 
-    private void initTestClock(long time) {
+    @Test
+    public void onLocationChanged_shouldReportGps() throws Exception {
+        fusionEngine.setRequest(LocationRequest.create());
+        Location location = new Location(GPS_PROVIDER);
+        shadowLocationManager.simulateLocation(location);
+        assertThat(callback.location).isEqualTo(location);
+    }
+
+    @Test
+    public void onLocationChanged_shouldReportNetwork() throws Exception {
+        fusionEngine.setRequest(LocationRequest.create());
+        Location location = new Location(NETWORK_PROVIDER);
+        shadowLocationManager.simulateLocation(location);
+        assertThat(callback.location).isEqualTo(location);
+    }
+
+    @Test
+    public void onLocationChanged_shouldNotReportLessThanFastestIntervalGps() throws Exception {
+        LocationRequest request = LocationRequest.create().setFastestInterval(5000);
+        fusionEngine.setRequest(request);
+
+        final long time = System.currentTimeMillis();
+        Location location1 = getTestLocation(GPS_PROVIDER, 0, 0, time);
+        Location location2 = getTestLocation(GPS_PROVIDER, 1, 1, time + 1000);
+
+        shadowLocationManager.simulateLocation(location1);
+        shadowLocationManager.simulateLocation(location2);
+        assertThat(callback.location).isEqualTo(location1);
+    }
+
+    @Test
+    public void onLocationChanged_shouldNotReportLessThanFastestIntervalNetwork() throws Exception {
+        LocationRequest request = LocationRequest.create().setFastestInterval(5000);
+        fusionEngine.setRequest(request);
+
+        final long time = System.currentTimeMillis();
+        Location location1 = getTestLocation(NETWORK_PROVIDER, 0, 0, time);
+        Location location2 = getTestLocation(NETWORK_PROVIDER, 1, 1, time + 1000);
+
+        shadowLocationManager.simulateLocation(location1);
+        shadowLocationManager.simulateLocation(location2);
+        assertThat(callback.location).isEqualTo(location1);
+    }
+
+    @Test
+    public void onLocationChanged_shouldNotReportLessThanMinDisplacementGps() throws Exception {
+        LocationRequest request = LocationRequest.create().setSmallestDisplacement(200000);
+        fusionEngine.setRequest(request);
+
+        final long time = System.currentTimeMillis();
+        Location location1 = getTestLocation(GPS_PROVIDER, 0, 0, time);
+        Location location2 = getTestLocation(GPS_PROVIDER, 1, 1, time + 1000);
+
+        shadowLocationManager.simulateLocation(location1);
+        shadowLocationManager.simulateLocation(location2);
+        assertThat(callback.location).isEqualTo(location1);
+    }
+
+    @Test
+    public void onLocationChanged_shouldNotReportLessThanMinDisplacementNetwork() throws Exception {
+        LocationRequest request = LocationRequest.create().setSmallestDisplacement(200000);
+        fusionEngine.setRequest(request);
+
+        final long time = System.currentTimeMillis();
+        Location location1 = getTestLocation(NETWORK_PROVIDER, 0, 0, time);
+        Location location2 = getTestLocation(NETWORK_PROVIDER, 1, 1, time + 1000);
+
+        shadowLocationManager.simulateLocation(location1);
+        shadowLocationManager.simulateLocation(location2);
+        assertThat(callback.location).isEqualTo(location1);
+    }
+
+    @Test
+    public void onLocationChanged_shouldIgnoreNetworkWhenGpsIsMoreAccurate() throws Exception {
+        LocationRequest request = LocationRequest.create().setFastestInterval(0);
+        fusionEngine.setRequest(request);
+
+        final long time = System.currentTimeMillis();
+        Location gpsLocation = getTestLocation(GPS_PROVIDER, 0, 0, time);
+        Location networkLocation = getTestLocation(NETWORK_PROVIDER, 0, 0, time + 1);
+
+        gpsLocation.setAccuracy(10);
+        networkLocation.setAccuracy(20);
+        shadowLocationManager.simulateLocation(gpsLocation);
+        shadowLocationManager.simulateLocation(networkLocation);
+        assertThat(callback.location).isEqualTo(gpsLocation);
+    }
+
+    @Test
+    public void onLocationChanged_shouldIgnoreGpsWhenNetworkIsMoreAccurate() throws Exception {
+        LocationRequest request = LocationRequest.create().setFastestInterval(0);
+        fusionEngine.setRequest(request);
+
+        final long time = System.currentTimeMillis();
+        Location networkLocation = getTestLocation(NETWORK_PROVIDER, 0, 0, time + 1);
+        Location gpsLocation = getTestLocation(GPS_PROVIDER, 0, 0, time);
+
+        networkLocation.setAccuracy(10);
+        gpsLocation.setAccuracy(20);
+        shadowLocationManager.simulateLocation(networkLocation);
+        shadowLocationManager.simulateLocation(gpsLocation);
+        assertThat(callback.location).isEqualTo(networkLocation);
+    }
+
+    private static void initTestClock(long time) {
         TestClock testClock = new TestClock();
         testClock.setCurrentTimeInMillis(time);
         FusionEngine.clock = testClock;
+    }
+
+    private static Location getTestLocation(String provider, float lat, float lng, long time) {
+        Location location = new Location(provider);
+        location.setLatitude(lat);
+        location.setLongitude(lng);
+        location.setTime(time);
+        return location;
     }
 
     class TestCallback implements FusionEngine.Callback {
