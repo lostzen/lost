@@ -252,7 +252,7 @@ public class FusionEngineTest {
         return location;
     }
 
-    class TestCallback implements FusionEngine.Callback {
+    class TestCallback implements LocationEngine.Callback {
         private Location location;
 
         @Override

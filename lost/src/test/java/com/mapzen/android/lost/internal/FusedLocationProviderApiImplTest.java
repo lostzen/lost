@@ -52,7 +52,8 @@ public class FusedLocationProviderApiImplTest {
 
     @Test
     public void getLastLocation_shouldReturnMostRecentLocation() throws Exception {
-        shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, new Location(GPS_PROVIDER));
+        Location location = new Location(GPS_PROVIDER);
+        shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, location);
         assertThat(api.getLastLocation()).isNotNull();
     }
 

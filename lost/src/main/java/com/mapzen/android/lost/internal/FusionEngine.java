@@ -1,7 +1,5 @@
 package com.mapzen.android.lost.internal;
 
-import com.mapzen.android.lost.api.LocationRequest;
-
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -14,16 +12,16 @@ import java.util.List;
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 
-public class FusionEngine implements LocationListener {
+/**
+ * Location engine that fuses GPS and network locations.
+ */
+public class FusionEngine extends LocationEngine implements LocationListener {
     private static final String TAG = FusionEngine.class.getSimpleName();
 
     /** Location updates more than 60 seconds old are considered stale. */
     public static final int RECENT_UPDATE_THRESHOLD_IN_MILLIS = 60 * 1000;
 
-    private final Callback callback;
     private final LocationManager locationManager;
-
-    private LocationRequest locationRequest;
 
     private float gpsAccuracy = Float.MAX_VALUE;
     private float networkAccuracy = Float.MAX_VALUE;
@@ -31,8 +29,8 @@ public class FusionEngine implements LocationListener {
     static Clock clock = new SystemClock();
 
     public FusionEngine(Context context, Callback callback) {
-        this.locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        this.callback = callback;
+        super(context, callback);
+        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     }
 
     public Location getLastLocation() {
@@ -62,34 +60,22 @@ public class FusionEngine implements LocationListener {
         return bestLocation;
     }
 
-    public void setRequest(LocationRequest locationRequest) {
-        this.locationRequest = locationRequest;
-
-        if (locationRequest != null) {
-            enable();
-        } else {
-            disable();
-        }
-    }
-
-    private void enable() {
-        if (locationRequest == null) {
-            return;
-        }
-
+    @Override
+    protected void enable() {
         enableGps();
         enableNetwork();
     }
 
-    private void disable() {
+    @Override
+    protected void disable() {
         locationManager.removeUpdates(this);
     }
 
     private void enableGps() {
         try {
             locationManager.requestLocationUpdates(GPS_PROVIDER,
-                    locationRequest.getFastestInterval(),
-                    locationRequest.getSmallestDisplacement(),
+                    getRequest().getFastestInterval(),
+                    getRequest().getSmallestDisplacement(),
                     this);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Unable to register for GPS updates.", e);
@@ -99,8 +85,8 @@ public class FusionEngine implements LocationListener {
     private void enableNetwork() {
         try {
             locationManager.requestLocationUpdates(NETWORK_PROVIDER,
-                    locationRequest.getFastestInterval(),
-                    locationRequest.getSmallestDisplacement(),
+                    getRequest().getFastestInterval(),
+                    getRequest().getSmallestDisplacement(),
                     this);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Unable to register for network updates.", e);
@@ -111,13 +97,13 @@ public class FusionEngine implements LocationListener {
     public void onLocationChanged(Location location) {
         if (GPS_PROVIDER.equals(location.getProvider())) {
             gpsAccuracy = location.getAccuracy();
-            if (callback != null && gpsAccuracy <= networkAccuracy) {
-                callback.reportLocation(location);
+            if (getCallback() != null && gpsAccuracy <= networkAccuracy) {
+                getCallback().reportLocation(location);
             }
         } else if (NETWORK_PROVIDER.equals(location.getProvider())) {
             networkAccuracy = location.getAccuracy();
-            if (callback != null && networkAccuracy <= gpsAccuracy) {
-                callback.reportLocation(location);
+            if (getCallback() != null && networkAccuracy <= gpsAccuracy) {
+                getCallback().reportLocation(location);
             }
         }
     }
@@ -132,9 +118,5 @@ public class FusionEngine implements LocationListener {
 
     @Override
     public void onProviderDisabled(String provider) {
-    }
-
-    public interface Callback {
-        public void reportLocation(Location location);
     }
 }

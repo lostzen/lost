@@ -122,6 +122,12 @@ public class LostActivity extends Activity {
             public void run() {
                 client.connect();
                 LocationServices.FusedLocationApi.setMockMode(isMockModePrefEnabled());
+
+                LocationRequest locationRequest = LocationRequest.create();
+                locationRequest.setInterval(1000);
+                locationRequest.setSmallestDisplacement(0);
+                LocationServices.FusedLocationApi.requestLocationUpdates(locationRequest, listener);
+
                 if (isMockModePrefEnabled()) {
                     setMockLocation();
                 }
@@ -137,11 +143,6 @@ public class LostActivity extends Activity {
                     fragment.setLastKnownLocation(
                             LocationServices.FusedLocationApi.getLastLocation());
                 }
-
-                LocationRequest locationRequest = LocationRequest.create();
-                locationRequest.setInterval(1000);
-                locationRequest.setSmallestDisplacement(0);
-                LocationServices.FusedLocationApi.requestLocationUpdates(locationRequest, listener);
             }
         }, 300);
     }
