@@ -139,7 +139,7 @@ public class LostActivity extends Activity {
                 }
 
                 LocationRequest locationRequest = LocationRequest.create();
-                locationRequest.setInterval(5000);
+                locationRequest.setInterval(1000);
                 locationRequest.setSmallestDisplacement(0);
                 LocationServices.FusedLocationApi.requestLocationUpdates(locationRequest, listener);
             }
