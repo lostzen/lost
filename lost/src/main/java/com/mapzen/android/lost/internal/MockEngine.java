@@ -33,16 +33,11 @@ public class MockEngine extends LocationEngine {
     public static final String TAG_LNG = "lon";
 
     private Location location;
+    private File traceFile;
+    private TraceThread traceThread;
 
     public MockEngine(Context context, FusionEngine.Callback callback) {
         super(context, callback);
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
-        if (getCallback() != null) {
-            getCallback().reportLocation(location);
-        }
     }
 
     @Override
@@ -52,79 +47,113 @@ public class MockEngine extends LocationEngine {
 
     @Override
     protected void enable() {
+        traceThread = new TraceThread(traceFile);
+        traceThread.start();
     }
 
     @Override
     protected void disable() {
+        if (traceThread != null) {
+            traceThread.cancel();
+        }
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+        if (getCallback() != null) {
+            getCallback().reportLocation(location);
+        }
     }
 
     /**
      * Set a GPX trace file to be replayed as mock locations.
      */
-    public void setTrace(final File file) {
-        if (getRequest() == null) {
-            return;
-        }
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                final XPath xPath = XPathFactory.newInstance().newXPath();
-                final String expression = "//" + TAG_TRACK_POINT;
-                final String speedExpression = "//" + TAG_SPEED;
-
-                NodeList nodeList = null;
-                NodeList speedList = null;
-                try {
-                    DocumentBuilder builder = factory.newDocumentBuilder();
-                    Document document = builder.parse(file);
-                    nodeList = (NodeList) xPath.compile(expression)
-                            .evaluate(document, XPathConstants.NODESET);
-                    speedList = (NodeList) xPath.compile(speedExpression)
-                            .evaluate(document, XPathConstants.NODESET);
-                } catch (ParserConfigurationException e) {
-                    e.printStackTrace();
-                } catch (SAXException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (XPathExpressionException e) {
-                    e.printStackTrace();
-                }
-
-                parse(nodeList, speedList);
-            }
-        }).start();
+    public void setTrace(File file) {
+        traceFile = file;
     }
 
-    private void parse(NodeList nodeList, NodeList speedList) {
-        if (nodeList != null) {
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                Node node = nodeList.item(i);
-                String lat = node.getAttributes().getNamedItem(TAG_LAT).getNodeValue();
-                String lng = node.getAttributes().getNamedItem(TAG_LNG).getNodeValue();
+    private class TraceThread extends Thread {
+        private File gpxFile;
+        private boolean canceled;
 
-                final Location location = new Location(MOCK_PROVIDER);
-                location.setLatitude(Double.parseDouble(lat));
-                location.setLongitude(Double.parseDouble(lng));
-                location.setTime(System.currentTimeMillis());
-                location.setSpeed(Float.parseFloat(speedList.item(i).getFirstChild()
-                        .getNodeValue()));
+        public TraceThread(File file) {
+            gpxFile = file;
+        }
 
-                new Handler(getContext().getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        setLocation(location);
-                    }
-                });
+        public void cancel() {
+            canceled = true;
+            interrupt();
+        }
 
-                try {
-                    Thread.sleep(getRequest().getFastestInterval());
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+        @Override
+        public void run() {
+            final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            final XPath xPath = XPathFactory.newInstance().newXPath();
+            final String expression = "//" + TAG_TRACK_POINT;
+            final String speedExpression = "//" + TAG_SPEED;
+
+            NodeList nodeList = null;
+            NodeList speedList = null;
+            try {
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                Document document = builder.parse(gpxFile);
+                nodeList = (NodeList) xPath.compile(expression)
+                        .evaluate(document, XPathConstants.NODESET);
+                speedList = (NodeList) xPath.compile(speedExpression)
+                        .evaluate(document, XPathConstants.NODESET);
+            } catch (ParserConfigurationException e) {
+                e.printStackTrace();
+            } catch (SAXException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (XPathExpressionException e) {
+                e.printStackTrace();
+            }
+
+            parse(nodeList, speedList);
+        }
+
+        private void parse(NodeList nodeList, NodeList speedList) {
+            if (nodeList != null) {
+                for (int i = 0; i < nodeList.getLength(); i++) {
+                    postMockLocation(nodeToLocation(nodeList, speedList, i));
+                    sleepFastestInterval();
                 }
             }
+        }
+
+        private Location nodeToLocation(NodeList nodeList, NodeList speedList, int i) {
+            final Node node = nodeList.item(i);
+            String lat = node.getAttributes().getNamedItem(TAG_LAT).getNodeValue();
+            String lng = node.getAttributes().getNamedItem(TAG_LNG).getNodeValue();
+
+            final Location location = new Location(MOCK_PROVIDER);
+            location.setLatitude(Double.parseDouble(lat));
+            location.setLongitude(Double.parseDouble(lng));
+            location.setTime(System.currentTimeMillis());
+            location.setSpeed(Float.parseFloat(speedList.item(i).getFirstChild().getNodeValue()));
+
+            return location;
+        }
+
+        private void sleepFastestInterval() {
+            try {
+                Thread.sleep(getRequest().getFastestInterval());
+            } catch (InterruptedException e) {
+                canceled = true;
+            }
+        }
+
+        private void postMockLocation(final Location mockLocation) {
+            new Handler(getContext().getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    if (!canceled) {
+                        setLocation(mockLocation);
+                    }
+                }
+            });
         }
     }
 }

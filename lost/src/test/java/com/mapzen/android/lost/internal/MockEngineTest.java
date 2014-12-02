@@ -48,15 +48,9 @@ public class MockEngineTest {
     }
 
     @Test
-    public void setTrace_shouldDoNothingIfNoRequestIsSet() throws Exception {
-        mockEngine.setTrace(getTestGpxTrace());
-        assertThat(callback.lastLocation).isNull();
-    }
-
-    @Test
     public void setTrace_shouldReportEachLocation() throws Exception {
-        mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
         mockEngine.setTrace(getTestGpxTrace());
+        mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(callback.locations).hasSize(3);
@@ -70,8 +64,8 @@ public class MockEngineTest {
 
     @Test
     public void setTrace_shouldReportSpeed() throws Exception {
-        mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
         mockEngine.setTrace(getTestGpxTrace());
+        mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(callback.locations.get(0).getSpeed()).isEqualTo(10f);
@@ -81,8 +75,8 @@ public class MockEngineTest {
 
     @Test
     public void setTrace_shouldRespectFastestInterval() throws Exception {
-        mockEngine.setRequest(LocationRequest.create().setFastestInterval(1000));
         mockEngine.setTrace(getTestGpxTrace());
+        mockEngine.setRequest(LocationRequest.create().setFastestInterval(1000));
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(callback.locations).hasSize(1);
@@ -92,6 +86,19 @@ public class MockEngineTest {
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(callback.locations).hasSize(3);
+    }
+
+    @Test
+    public void disable_shouldCancelTraceReplay() throws Exception {
+        mockEngine.setTrace(getTestGpxTrace());
+        mockEngine.setRequest(LocationRequest.create().setFastestInterval(1000));
+        Thread.sleep(1000);
+        Robolectric.runUiThreadTasks();
+        assertThat(callback.locations).hasSize(1);
+        mockEngine.disable();
+        Thread.sleep(1000);
+        Robolectric.runUiThreadTasks();
+        assertThat(callback.locations).hasSize(1);
     }
 
     public static File getTestGpxTrace() throws IOException {

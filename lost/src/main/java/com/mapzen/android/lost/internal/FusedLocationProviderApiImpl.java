@@ -84,7 +84,7 @@ public class FusedLocationProviderApiImpl implements
     }
 
     @Override
-    public void setMockTrace(final File file) {
+    public void setMockTrace(File file) {
         if (locationEngine instanceof MockEngine) {
             ((MockEngine) locationEngine).setTrace(file);
         }

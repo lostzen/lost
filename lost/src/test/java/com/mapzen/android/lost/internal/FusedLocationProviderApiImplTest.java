@@ -248,13 +248,12 @@ public class FusedLocationProviderApiImplTest {
 
     @Test
     public void setMockTrace_shouldInvokeListenerForEachLocation() throws Exception {
-        File file = getTestGpxTrace();
         api.setMockMode(true);
+        api.setMockTrace(getTestGpxTrace());
         TestLocationListener listener = new TestLocationListener();
         LocationRequest request = LocationRequest.create();
         request.setFastestInterval(0);
         api.requestLocationUpdates(request, listener);
-        api.setMockTrace(file);
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(listener.getAllLocations()).hasSize(3);
@@ -268,13 +267,12 @@ public class FusedLocationProviderApiImplTest {
 
     @Test
     public void setMockTrace_shouldBroadcastSpeedWithLocation() throws Exception {
-        File file = getTestGpxTrace();
         api.setMockMode(true);
+        api.setMockTrace(getTestGpxTrace());
         TestLocationListener listener = new TestLocationListener();
         LocationRequest request = LocationRequest.create();
         request.setFastestInterval(0);
         api.requestLocationUpdates(request, listener);
-        api.setMockTrace(file);
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(listener.getAllLocations().get(0).getSpeed()).isEqualTo(10f);
@@ -284,13 +282,12 @@ public class FusedLocationProviderApiImplTest {
 
     @Test
     public void setMockTrace_shouldRespectFastestInterval() throws Exception {
-        File file = getTestGpxTrace();
         api.setMockMode(true);
+        api.setMockTrace(getTestGpxTrace());
         TestLocationListener listener = new TestLocationListener();
         LocationRequest request = LocationRequest.create();
         request.setInterval(1000);
         api.requestLocationUpdates(request, listener);
-        api.setMockTrace(file);
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(listener.getAllLocations()).hasSize(1);
