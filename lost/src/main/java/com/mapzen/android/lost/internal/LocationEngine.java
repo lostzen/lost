@@ -46,7 +46,7 @@ public abstract class LocationEngine {
     protected abstract void enable();
 
     /**
-     * Subclass should perform all operations required to enable the engine. (ex. Remove location
+     * Subclass should perform all operations required to disable the engine. (ex. Remove location
      * updates.)
      */
     protected abstract void disable();
