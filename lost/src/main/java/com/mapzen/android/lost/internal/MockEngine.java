@@ -47,8 +47,10 @@ public class MockEngine extends LocationEngine {
 
     @Override
     protected void enable() {
-        traceThread = new TraceThread(traceFile);
-        traceThread.start();
+        if (traceFile != null) {
+            traceThread = new TraceThread();
+            traceThread.start();
+        }
     }
 
     @Override
@@ -73,12 +75,7 @@ public class MockEngine extends LocationEngine {
     }
 
     private class TraceThread extends Thread {
-        private File gpxFile;
         private boolean canceled;
-
-        public TraceThread(File file) {
-            gpxFile = file;
-        }
 
         public void cancel() {
             canceled = true;
@@ -96,7 +93,7 @@ public class MockEngine extends LocationEngine {
             NodeList speedList = null;
             try {
                 DocumentBuilder builder = factory.newDocumentBuilder();
-                Document document = builder.parse(gpxFile);
+                Document document = builder.parse(traceFile);
                 nodeList = (NodeList) xPath.compile(expression)
                         .evaluate(document, XPathConstants.NODESET);
                 speedList = (NodeList) xPath.compile(speedExpression)
@@ -138,10 +135,12 @@ public class MockEngine extends LocationEngine {
         }
 
         private void sleepFastestInterval() {
-            try {
-                Thread.sleep(getRequest().getFastestInterval());
-            } catch (InterruptedException e) {
-                canceled = true;
+            if (getRequest() != null) {
+                try {
+                    Thread.sleep(getRequest().getFastestInterval());
+                } catch (InterruptedException e) {
+                    canceled = true;
+                }
             }
         }
 
