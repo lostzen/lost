@@ -6,6 +6,8 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
+import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_HIGH_ACCURACY;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 @Config(manifest=Config.NONE)
@@ -62,5 +64,21 @@ public class LocationRequestTest {
     public void setSmallestDisplacement_shouldOverrideDefaultValue() throws Exception {
         locationRequest.setSmallestDisplacement(10.0f);
         assertThat(locationRequest.getSmallestDisplacement()).isEqualTo(10.0f);
+    }
+
+    @Test
+    public void getPriority_shouldReturnDefaultValue() throws Exception {
+        assertThat(locationRequest.getPriority()).isEqualTo(PRIORITY_BALANCED_POWER_ACCURACY);
+    }
+
+    @Test
+    public void setPriority_shouldOverrideDefaultValue() throws Exception {
+        locationRequest.setPriority(PRIORITY_HIGH_ACCURACY);
+        assertThat(locationRequest.getPriority()).isEqualTo(PRIORITY_HIGH_ACCURACY);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setPriority_shouldRejectInvalidValues() throws Exception {
+        locationRequest.setPriority(-1);
     }
 }
