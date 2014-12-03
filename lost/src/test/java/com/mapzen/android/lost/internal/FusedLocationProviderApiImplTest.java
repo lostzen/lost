@@ -27,8 +27,6 @@ import java.util.List;
 
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
-import static android.location.LocationManager.PASSIVE_PROVIDER;
-import static com.mapzen.android.lost.api.LocationClient.RECENT_UPDATE_THRESHOLD_IN_MILLIS;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.robolectric.Robolectric.application;
 import static org.robolectric.Robolectric.shadowOf;
@@ -53,82 +51,10 @@ public class FusedLocationProviderApiImplTest {
     }
 
     @Test
-    public void getLastLocation_shouldReturnNullIfNoLocationAvailable() throws Exception {
-        assertThat(api.getLastLocation()).isNull();
-    }
-
-    @Test
-    public void getLastLocation_shouldReturnGpsLocationIfOnlyProvider() throws Exception {
+    public void getLastLocation_shouldReturnMostRecentLocation() throws Exception {
         Location location = new Location(GPS_PROVIDER);
         shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, location);
-        assertThat(api.getLastLocation()).isEqualTo(location);
-    }
-
-    @Test
-    public void getLastLocation_shouldReturnNetworkLocationIfOnlyProvider() throws Exception {
-        Location location = new Location(NETWORK_PROVIDER);
-        shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, location);
-        assertThat(api.getLastLocation()).isEqualTo(location);
-    }
-
-    @Test
-    public void getLastLocation_shouldReturnPassiveLocationIfOnlyProvider() throws Exception {
-        Location location = new Location(PASSIVE_PROVIDER);
-        shadowLocationManager.setLastKnownLocation(PASSIVE_PROVIDER, location);
-        assertThat(api.getLastLocation()).isEqualTo(location);
-    }
-
-    @Test
-    public void getLastLocation_shouldReturnMostAccurateResult() throws Exception {
-        Location gpsLocation = new Location(GPS_PROVIDER);
-        gpsLocation.setAccuracy(1000);
-        shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, gpsLocation);
-
-        Location networkLocation = new Location(NETWORK_PROVIDER);
-        networkLocation.setAccuracy(100);
-        shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, networkLocation);
-
-        Location passiveLocation = new Location(PASSIVE_PROVIDER);
-        passiveLocation.setAccuracy(10);
-        shadowLocationManager.setLastKnownLocation(PASSIVE_PROVIDER, passiveLocation);
-
-        assertThat(api.getLastLocation()).isEqualTo(passiveLocation);
-    }
-
-    @Test
-    public void getLastLocation_shouldIgnoreStaleLocations() throws Exception {
-        long time = System.currentTimeMillis();
-        initTestClock(time);
-
-        Location gpsLocation = new Location(GPS_PROVIDER);
-        gpsLocation.setAccuracy(100);
-        gpsLocation.setTime(time);
-        shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, gpsLocation);
-
-        Location networkLocation = new Location(NETWORK_PROVIDER);
-        networkLocation.setAccuracy(100);
-        networkLocation.setTime(time - (2 * RECENT_UPDATE_THRESHOLD_IN_MILLIS));
-        shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, networkLocation);
-
-        assertThat(api.getLastLocation()).isEqualTo(gpsLocation);
-    }
-
-    @Test
-    public void getLastLocation_ifNoFreshLocationsShouldReturnMostRecent() throws Exception {
-        long time = System.currentTimeMillis();
-        initTestClock(time);
-
-        Location gpsLocation = new Location(GPS_PROVIDER);
-        gpsLocation.setAccuracy(100);
-        gpsLocation.setTime(time - (2 * RECENT_UPDATE_THRESHOLD_IN_MILLIS));
-        shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, gpsLocation);
-
-        Location networkLocation = new Location(NETWORK_PROVIDER);
-        networkLocation.setAccuracy(100);
-        networkLocation.setTime(time - (3 * RECENT_UPDATE_THRESHOLD_IN_MILLIS));
-        shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, networkLocation);
-
-        assertThat(api.getLastLocation()).isEqualTo(gpsLocation);
+        assertThat(api.getLastLocation()).isNotNull();
     }
 
     @Test
@@ -281,21 +207,13 @@ public class FusedLocationProviderApiImplTest {
     }
 
     @Test
-    public void setMockMode_shouldRegisterListenersWhenFalse() throws Exception {
-        TestLocationListener listener = new TestLocationListener();
-        LocationRequest request = LocationRequest.create();
-        api.requestLocationUpdates(request, listener);
-        api.setMockMode(true);
-        api.setMockMode(false);
-        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isNotEmpty();
-    }
-
-    @Test
     public void setMockMode_shouldNotRegisterDuplicateListeners() throws Exception {
         TestLocationListener listener = new TestLocationListener();
         LocationRequest request = LocationRequest.create();
+        api.setMockMode(true);
         api.requestLocationUpdates(request, listener);
         api.setMockMode(false);
+        api.requestLocationUpdates(request, listener);
         assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(2);
     }
 
@@ -330,13 +248,12 @@ public class FusedLocationProviderApiImplTest {
 
     @Test
     public void setMockTrace_shouldInvokeListenerForEachLocation() throws Exception {
-        File file = getTestGpxTrace();
         api.setMockMode(true);
+        api.setMockTrace(getTestGpxTrace());
         TestLocationListener listener = new TestLocationListener();
         LocationRequest request = LocationRequest.create();
         request.setFastestInterval(0);
         api.requestLocationUpdates(request, listener);
-        api.setMockTrace(file);
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(listener.getAllLocations()).hasSize(3);
@@ -350,13 +267,12 @@ public class FusedLocationProviderApiImplTest {
 
     @Test
     public void setMockTrace_shouldBroadcastSpeedWithLocation() throws Exception {
-        File file = getTestGpxTrace();
         api.setMockMode(true);
+        api.setMockTrace(getTestGpxTrace());
         TestLocationListener listener = new TestLocationListener();
         LocationRequest request = LocationRequest.create();
         request.setFastestInterval(0);
         api.requestLocationUpdates(request, listener);
-        api.setMockTrace(file);
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(listener.getAllLocations().get(0).getSpeed()).isEqualTo(10f);
@@ -366,13 +282,12 @@ public class FusedLocationProviderApiImplTest {
 
     @Test
     public void setMockTrace_shouldRespectFastestInterval() throws Exception {
-        File file = getTestGpxTrace();
         api.setMockMode(true);
+        api.setMockTrace(getTestGpxTrace());
         TestLocationListener listener = new TestLocationListener();
         LocationRequest request = LocationRequest.create();
         request.setInterval(1000);
         api.requestLocationUpdates(request, listener);
-        api.setMockTrace(file);
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(listener.getAllLocations()).hasSize(1);
@@ -382,30 +297,6 @@ public class FusedLocationProviderApiImplTest {
         Thread.sleep(1000);
         Robolectric.runUiThreadTasks();
         assertThat(listener.getAllLocations()).hasSize(3);
-    }
-
-    @Test
-    public void setMockMode_shouldGenerateNewListeners() throws Exception {
-        api.requestLocationUpdates(LocationRequest.create(), new TestLocationListener());
-
-        android.location.LocationListener gpsListener =
-                shadowLocationManager.getRequestLocationUpdateListeners().get(0);
-        android.location.LocationListener networkListener =
-                shadowLocationManager.getRequestLocationUpdateListeners().get(1);
-
-        api.setMockMode(true);
-        api.setMockMode(false);
-
-        assertThat(shadowLocationManager.getRequestLocationUpdateListeners().get(0))
-                .isNotSameAs(gpsListener);
-        assertThat(shadowLocationManager.getRequestLocationUpdateListeners().get(1))
-                .isNotSameAs(networkListener);
-    }
-
-    private void initTestClock(long time) {
-        TestClock testClock = new TestClock();
-        testClock.setCurrentTimeInMillis(time);
-        api.clock = testClock;
     }
 
     private static Location getTestLocation(String provider, float lat, float lng, long time) {
