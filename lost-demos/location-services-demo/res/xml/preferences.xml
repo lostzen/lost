@@ -2,6 +2,23 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <EditTextPreference
+        android:defaultValue="1000"
+        android:key="@string/interval_key"
+        android:title="@string/interval_title" />
+
+    <EditTextPreference
+        android:defaultValue="0"
+        android:key="@string/displacement_key"
+        android:title="@string/displacement_title" />
+
+    <ListPreference
+        android:defaultValue="102"
+        android:entries="@array/priority_entries"
+        android:key="@string/priority_key"
+        android:title="@string/priority_title"
+        android:entryValues="@array/priority_values" />
+
     <CheckBoxPreference
         android:defaultValue="false"
         android:key="@string/mock_mode_key"
