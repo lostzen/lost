@@ -1,5 +1,7 @@
 package com.mapzen.android.lost.internal;
 
+import com.mapzen.android.lost.api.LocationRequest;
+
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -11,6 +13,7 @@ import java.util.List;
 
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
+import static android.location.LocationManager.PASSIVE_PROVIDER;
 
 /**
  * Location engine that fuses GPS and network locations.
@@ -62,8 +65,21 @@ public class FusionEngine extends LocationEngine implements LocationListener {
 
     @Override
     protected void enable() {
-        enableGps();
-        enableNetwork();
+        switch (getRequest().getPriority()) {
+            case LocationRequest.PRIORITY_HIGH_ACCURACY:
+                enableGps();
+                enableNetwork();
+                break;
+            case LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY:
+                enableNetwork();
+                break;
+            case LocationRequest.PRIORITY_LOW_POWER:
+                enableNetwork();
+                break;
+            case LocationRequest.PRIORITY_NO_POWER:
+                enablePassive();
+                break;
+        }
     }
 
     @Override
@@ -90,6 +106,17 @@ public class FusionEngine extends LocationEngine implements LocationListener {
                     this);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Unable to register for network updates.", e);
+        }
+    }
+
+    private void enablePassive() {
+        try {
+            locationManager.requestLocationUpdates(PASSIVE_PROVIDER,
+                    getRequest().getFastestInterval(),
+                    getRequest().getSmallestDisplacement(),
+                    this);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Unable to register for passive updates.", e);
         }
     }
 

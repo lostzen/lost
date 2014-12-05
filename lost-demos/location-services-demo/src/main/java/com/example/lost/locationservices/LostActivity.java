@@ -29,19 +29,17 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import static com.mapzen.android.lost.api.LocationServices.FusedLocationApi;
+import static java.lang.Float.parseFloat;
+import static java.lang.Integer.parseInt;
 
 /**
  * LOST Activity
  */
 public class LostActivity extends Activity {
     private LostFragment fragment;
-    private SharedPreferences sharedPreferences;
+    private SharedPreferences prefs;
 
     private static LostApiClient client;
-
-    public static LostApiClient getLocationClient() {
-        return client;
-    }
 
     LocationListener listener = new LocationListener() {
         @Override
@@ -68,7 +66,7 @@ public class LostActivity extends Activity {
             client = fragment.client;
         }
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+        prefs = PreferenceManager.getDefaultSharedPreferences(getApplication());
     }
 
     @Override
@@ -114,7 +112,7 @@ public class LostActivity extends Activity {
     }
 
     private boolean isMockModePrefEnabled() {
-        return sharedPreferences.getBoolean(getString(R.string.mock_mode_key), false);
+        return prefs.getBoolean(getString(R.string.mock_mode_key), false);
     }
 
     private void connect() {
@@ -124,16 +122,21 @@ public class LostActivity extends Activity {
                 client.connect();
                 FusedLocationApi.setMockMode(isMockModePrefEnabled());
 
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(LostActivity.this);
                 if (prefs.getBoolean(getString(R.string.mock_mode_gpx_key), false)) {
                     String filename = prefs.getString(getString(R.string.mock_gpx_file_key), null);
                     File file = new File(Environment.getExternalStorageDirectory(), filename);
                     FusedLocationApi.setMockTrace(file);
                 }
 
-                LocationRequest locationRequest = LocationRequest.create();
-                locationRequest.setInterval(1000);
-                locationRequest.setSmallestDisplacement(0);
+                final String intervalKey = getString(R.string.interval_key);
+                final String displacementKey = getString(R.string.displacement_key);
+                final String priorityKey = getString(R.string.priority_key);
+
+                final LocationRequest locationRequest = LocationRequest.create()
+                        .setInterval(parseInt(prefs.getString(intervalKey, "1000")))
+                        .setSmallestDisplacement(parseInt(prefs.getString(displacementKey, "0")))
+                        .setPriority(parseInt(prefs.getString(priorityKey, "102")));
+
                 FusedLocationApi.requestLocationUpdates(locationRequest, listener);
 
                 if (isMockModePrefEnabled()) {
@@ -152,21 +155,18 @@ public class LostActivity extends Activity {
         float lng = 0f;
         float accuracy = 0f;
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(LostActivity.this);
-
         try {
-            lat = Float.parseFloat(prefs.getString(getString(R.string.mock_lat_key), "0.0"));
+            lat = parseFloat(prefs.getString(getString(R.string.mock_lat_key), "0.0"));
         } catch (NumberFormatException e) {
         }
 
         try {
-            lng = Float.parseFloat(prefs.getString(getString(R.string.mock_lng_key), "0.0"));
+            lng = parseFloat(prefs.getString(getString(R.string.mock_lng_key), "0.0"));
         } catch (NumberFormatException e) {
         }
 
         try {
-            accuracy = Float.parseFloat(prefs.getString(getString(R.string.mock_accuracy_key),
-                    "0.0"));
+            accuracy = parseFloat(prefs.getString(getString(R.string.mock_accuracy_key), "0.0"));
         } catch (NumberFormatException e) {
         }
 

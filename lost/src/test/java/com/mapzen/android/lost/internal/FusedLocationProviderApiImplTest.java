@@ -27,6 +27,7 @@ import java.util.List;
 
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
+import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_HIGH_ACCURACY;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.robolectric.Robolectric.application;
 import static org.robolectric.Robolectric.shadowOf;
@@ -60,14 +61,16 @@ public class FusedLocationProviderApiImplTest {
     @Test
     public void requestLocationUpdates_shouldRegisterGpsAndNetworkListener() throws Exception {
         LocationListener listener = new TestLocationListener();
-        api.requestLocationUpdates(LocationRequest.create(), listener);
+        api.requestLocationUpdates(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY),
+                listener);
         assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(2);
     }
 
     @Test
     public void requestLocationUpdates_shouldNotifyOnLocationChangedGps() throws Exception {
         TestLocationListener listener = new TestLocationListener();
-        api.requestLocationUpdates(LocationRequest.create(), listener);
+        api.requestLocationUpdates(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY),
+                listener);
         Location location = new Location(GPS_PROVIDER);
         shadowLocationManager.simulateLocation(location);
         assertThat(listener.getMostRecentLocation()).isEqualTo(location);
@@ -86,7 +89,7 @@ public class FusedLocationProviderApiImplTest {
     public void requestLocationUpdates_shouldNotNotifyIfLessThanFastestIntervalGps()
             throws Exception {
         TestLocationListener listener = new TestLocationListener();
-        LocationRequest request = LocationRequest.create();
+        LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
         request.setFastestInterval(5000);
         api.requestLocationUpdates(request, listener);
 
@@ -120,7 +123,7 @@ public class FusedLocationProviderApiImplTest {
     public void requestLocationUpdates_shouldNotNotifyIfLessThanSmallestDisplacementGps()
             throws Exception {
         TestLocationListener listener = new TestLocationListener();
-        LocationRequest request = LocationRequest.create();
+        LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
         request.setSmallestDisplacement(200000);
         api.requestLocationUpdates(request, listener);
 
@@ -153,7 +156,7 @@ public class FusedLocationProviderApiImplTest {
     @Test
     public void requestLocationUpdates_shouldIgnoreNetworkWhenGpsIsMoreAccurate() throws Exception {
         TestLocationListener listener = new TestLocationListener();
-        LocationRequest request = LocationRequest.create();
+        LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
         request.setFastestInterval(0);
         request.setSmallestDisplacement(0);
         api.requestLocationUpdates(request, listener);
@@ -209,7 +212,7 @@ public class FusedLocationProviderApiImplTest {
     @Test
     public void setMockMode_shouldNotRegisterDuplicateListeners() throws Exception {
         TestLocationListener listener = new TestLocationListener();
-        LocationRequest request = LocationRequest.create();
+        LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
         api.setMockMode(true);
         api.requestLocationUpdates(request, listener);
         api.setMockMode(false);

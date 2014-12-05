@@ -1,5 +1,7 @@
 package com.example.lost.locationservices;
 
+import com.mapzen.android.lost.api.LocationRequest;
+
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -21,6 +23,9 @@ public class SettingsFragment extends PreferenceFragment {
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         listener = new SettingsListener();
 
+        updateValue(getString(R.string.interval_key));
+        updateValue(getString(R.string.displacement_key));
+        updateValue(getString(R.string.priority_key));
         updateValue(getString(R.string.mock_lat_key));
         updateValue(getString(R.string.mock_lng_key));
         updateValue(getString(R.string.mock_accuracy_key));
@@ -51,6 +56,23 @@ public class SettingsFragment extends PreferenceFragment {
                 Toast.makeText(getActivity(), "Invalid value: " + pref.getTitle(),
                         Toast.LENGTH_SHORT)
                         .show();
+            }
+        }
+
+        if (getString(R.string.priority_key).equals(key)) {
+            switch (Integer.parseInt(value)) {
+                case LocationRequest.PRIORITY_HIGH_ACCURACY:
+                    pref.setSummary("High Accuracy");
+                    break;
+                case LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY:
+                    pref.setSummary("Balanced Power Accuracy");
+                    break;
+                case LocationRequest.PRIORITY_LOW_POWER:
+                    pref.setSummary("Low Power");
+                    break;
+                case LocationRequest.PRIORITY_NO_POWER:
+                    pref.setSummary("No Power");
+                    break;
             }
         }
     }

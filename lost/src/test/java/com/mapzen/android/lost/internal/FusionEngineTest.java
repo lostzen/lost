@@ -13,10 +13,16 @@ import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
 
+import java.util.Collection;
+
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 import static android.location.LocationManager.PASSIVE_PROVIDER;
 import static com.mapzen.android.lost.api.LocationClient.RECENT_UPDATE_THRESHOLD_IN_MILLIS;
+import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
+import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_HIGH_ACCURACY;
+import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_LOW_POWER;
+import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_NO_POWER;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.robolectric.Robolectric.application;
 import static org.robolectric.Robolectric.shadowOf;
@@ -122,9 +128,37 @@ public class FusionEngineTest {
     }
 
     @Test
-    public void setRequest_shouldEnableLocationUpdatesForValidRequest() throws Exception {
-        fusionEngine.setRequest(LocationRequest.create());
-        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(2);
+    public void setRequest_shouldRegisterGpsAndNetworkIfPriorityHighAccuracy() throws Exception {
+        fusionEngine.setRequest(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY));
+        Collection<String> providers = shadowLocationManager.getProvidersForListener(fusionEngine);
+        assertThat(providers).hasSize(2);
+        assertThat(providers).contains(GPS_PROVIDER);
+        assertThat(providers).contains(NETWORK_PROVIDER);
+    }
+
+    @Test
+    public void setRequest_shouldRegisterNetworkOnlyIfPriorityBalanced() throws Exception {
+        fusionEngine.setRequest(LocationRequest.create()
+                .setPriority(PRIORITY_BALANCED_POWER_ACCURACY));
+        Collection<String> providers = shadowLocationManager.getProvidersForListener(fusionEngine);
+        assertThat(providers).hasSize(1);
+        assertThat(providers).contains(NETWORK_PROVIDER);
+    }
+
+    @Test
+    public void setRequest_shouldRegisterNetworkOnlyIfPriorityLowPower() throws Exception {
+        fusionEngine.setRequest(LocationRequest.create().setPriority(PRIORITY_LOW_POWER));
+        Collection<String> providers = shadowLocationManager.getProvidersForListener(fusionEngine);
+        assertThat(providers).hasSize(1);
+        assertThat(providers).contains(NETWORK_PROVIDER);
+    }
+
+    @Test
+    public void setRequest_shouldRegisterPassiveProviderOnlyNoPower() throws Exception {
+        fusionEngine.setRequest(LocationRequest.create().setPriority(PRIORITY_NO_POWER));
+        Collection<String> providers = shadowLocationManager.getProvidersForListener(fusionEngine);
+        assertThat(providers).hasSize(1);
+        assertThat(providers).contains(PASSIVE_PROVIDER);
     }
 
     @Test
@@ -136,7 +170,7 @@ public class FusionEngineTest {
 
     @Test
     public void onLocationChanged_shouldReportGps() throws Exception {
-        fusionEngine.setRequest(LocationRequest.create());
+        fusionEngine.setRequest(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY));
         Location location = new Location(GPS_PROVIDER);
         shadowLocationManager.simulateLocation(location);
         assertThat(callback.location).isEqualTo(location);
@@ -144,7 +178,7 @@ public class FusionEngineTest {
 
     @Test
     public void onLocationChanged_shouldReportNetwork() throws Exception {
-        fusionEngine.setRequest(LocationRequest.create());
+        fusionEngine.setRequest(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY));
         Location location = new Location(NETWORK_PROVIDER);
         shadowLocationManager.simulateLocation(location);
         assertThat(callback.location).isEqualTo(location);
@@ -152,7 +186,8 @@ public class FusionEngineTest {
 
     @Test
     public void onLocationChanged_shouldNotReportLessThanFastestIntervalGps() throws Exception {
-        LocationRequest request = LocationRequest.create().setFastestInterval(5000);
+        LocationRequest request = LocationRequest.create().setFastestInterval(5000)
+                .setPriority(PRIORITY_HIGH_ACCURACY);
         fusionEngine.setRequest(request);
 
         final long time = System.currentTimeMillis();
@@ -166,7 +201,8 @@ public class FusionEngineTest {
 
     @Test
     public void onLocationChanged_shouldNotReportLessThanFastestIntervalNetwork() throws Exception {
-        LocationRequest request = LocationRequest.create().setFastestInterval(5000);
+        LocationRequest request = LocationRequest.create().setFastestInterval(5000)
+                .setPriority(PRIORITY_HIGH_ACCURACY);
         fusionEngine.setRequest(request);
 
         final long time = System.currentTimeMillis();
@@ -180,7 +216,8 @@ public class FusionEngineTest {
 
     @Test
     public void onLocationChanged_shouldNotReportLessThanMinDisplacementGps() throws Exception {
-        LocationRequest request = LocationRequest.create().setSmallestDisplacement(200000);
+        LocationRequest request = LocationRequest.create().setSmallestDisplacement(200000)
+                .setPriority(PRIORITY_HIGH_ACCURACY);
         fusionEngine.setRequest(request);
 
         final long time = System.currentTimeMillis();
@@ -208,7 +245,8 @@ public class FusionEngineTest {
 
     @Test
     public void onLocationChanged_shouldIgnoreNetworkWhenGpsIsMoreAccurate() throws Exception {
-        LocationRequest request = LocationRequest.create().setFastestInterval(0);
+        LocationRequest request = LocationRequest.create().setFastestInterval(0)
+                .setPriority(PRIORITY_HIGH_ACCURACY);
         fusionEngine.setRequest(request);
 
         final long time = System.currentTimeMillis();
