@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.android.support</groupId>
             <artifactId>support-v4</artifactId>
-            <version>19.1.0</version>
+            <version>19.0.1</version>
             <scope>test</scope>
         </dependency>
 
