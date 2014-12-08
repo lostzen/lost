@@ -32,7 +32,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.robolectric.Robolectric.application;
 import static org.robolectric.Robolectric.shadowOf;
 
-@Config(manifest=Config.NONE)
+@Config(manifest=Config.NONE, emulateSdk = 18)
 @RunWith(RobolectricTestRunner.class)
 public class FusedLocationProviderApiImplTest {
     private FusedLocationProviderApiImpl api;

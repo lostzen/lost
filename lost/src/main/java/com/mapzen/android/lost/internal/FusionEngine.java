@@ -28,8 +28,8 @@ public class FusionEngine extends LocationEngine implements LocationListener {
 
     private final LocationManager locationManager;
 
-    private float gpsAccuracy = Float.MAX_VALUE;
-    private float networkAccuracy = Float.MAX_VALUE;
+    private Location gpsLocation;
+    private Location networkLocation;
 
     static Clock clock = new SystemClock();
 
@@ -125,13 +125,13 @@ public class FusionEngine extends LocationEngine implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         if (GPS_PROVIDER.equals(location.getProvider())) {
-            gpsAccuracy = location.getAccuracy();
-            if (getCallback() != null && gpsAccuracy <= networkAccuracy) {
+            gpsLocation = location;
+            if (getCallback() != null && isBetterThan(gpsLocation, networkLocation)) {
                 getCallback().reportLocation(location);
             }
         } else if (NETWORK_PROVIDER.equals(location.getProvider())) {
-            networkAccuracy = location.getAccuracy();
-            if (getCallback() != null && networkAccuracy <= gpsAccuracy) {
+            networkLocation = location;
+            if (getCallback() != null && isBetterThan(networkLocation, gpsLocation)) {
                 getCallback().reportLocation(location);
             }
         }
