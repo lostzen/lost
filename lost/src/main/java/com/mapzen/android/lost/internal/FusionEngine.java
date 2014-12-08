@@ -22,7 +22,9 @@ public class FusionEngine extends LocationEngine implements LocationListener {
     private static final String TAG = FusionEngine.class.getSimpleName();
 
     /** Location updates more than 60 seconds old are considered stale. */
-    public static final int RECENT_UPDATE_THRESHOLD_IN_MILLIS = 60 * 1000;
+    public static final long RECENT_UPDATE_THRESHOLD_IN_MILLIS = 60 * 1000;
+    public static final long RECENT_UPDATE_THRESHOLD_IN_NANOS =
+            RECENT_UPDATE_THRESHOLD_IN_MILLIS * 1000000;
 
     private final LocationManager locationManager;
 
@@ -145,5 +147,30 @@ public class FusionEngine extends LocationEngine implements LocationListener {
 
     @Override
     public void onProviderDisabled(String provider) {
+    }
+
+    public static boolean isBetterThan(Location locationA, Location locationB) {
+        if (locationA == null) {
+            return false;
+        }
+
+        if (locationB == null) {
+            return true;
+        }
+
+        if (locationA.getElapsedRealtimeNanos() > locationB.getElapsedRealtimeNanos() +
+                RECENT_UPDATE_THRESHOLD_IN_NANOS) {
+            return true;
+        }
+
+        if (!locationA.hasAccuracy()) {
+            return false;
+        }
+
+        if (!locationB.hasAccuracy()) {
+            return true;
+        }
+
+        return locationA.getAccuracy() < locationB.getAccuracy();
     }
 }
