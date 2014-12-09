@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import static com.mapzen.android.lost.api.LocationServices.FusedLocationApi;
-import static java.lang.Float.parseFloat;
 
 /**
  * LOST Activity
@@ -155,17 +154,17 @@ public class LostActivity extends Activity {
         float accuracy = 0f;
 
         try {
-            lat = parseFloat(prefs.getString(getString(R.string.mock_lat_key), "0.0"));
+            lat = prefs.getFloat(getString(R.string.mock_lat_key), 0f);
         } catch (NumberFormatException e) {
         }
 
         try {
-            lng = parseFloat(prefs.getString(getString(R.string.mock_lng_key), "0.0"));
+            lng = prefs.getFloat(getString(R.string.mock_lng_key), 0f);
         } catch (NumberFormatException e) {
         }
 
         try {
-            accuracy = parseFloat(prefs.getString(getString(R.string.mock_accuracy_key), "0.0"));
+            accuracy = prefs.getFloat(getString(R.string.mock_accuracy_key), 0f);
         } catch (NumberFormatException e) {
         }
 

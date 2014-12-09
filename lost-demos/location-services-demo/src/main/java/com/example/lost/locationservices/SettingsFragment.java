@@ -94,7 +94,7 @@ public class SettingsFragment extends PreferenceFragment {
             return String.valueOf(prefs.getInt(key, 102));
         }
 
-        return prefs.getString(key, "0.0");
+        return String.valueOf(prefs.getFloat(key, 0f));
     }
 
     /**
