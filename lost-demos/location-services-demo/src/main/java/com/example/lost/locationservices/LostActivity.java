@@ -10,6 +10,7 @@ import android.app.ListFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Environment;
@@ -130,10 +131,14 @@ public class LostActivity extends Activity {
                 final String displacementKey = getString(R.string.displacement_key);
                 final String priorityKey = getString(R.string.priority_key);
 
+                final Resources res = getResources();
                 final LocationRequest locationRequest = LocationRequest.create()
-                        .setInterval(prefs.getInt(intervalKey, 1000))
-                        .setSmallestDisplacement(prefs.getInt(displacementKey, 0))
-                        .setPriority(prefs.getInt(priorityKey, 102));
+                        .setInterval(prefs.getInt(intervalKey,
+                                res.getInteger(R.integer.interval_default_value)))
+                        .setSmallestDisplacement(prefs.getInt(displacementKey,
+                                res.getInteger(R.integer.displacement_default_value)))
+                        .setPriority(prefs.getInt(priorityKey,
+                                res.getInteger(R.integer.priority_default_value)));
 
                 FusedLocationApi.requestLocationUpdates(locationRequest, listener);
 
@@ -154,17 +159,20 @@ public class LostActivity extends Activity {
         float accuracy = 0f;
 
         try {
-            lat = prefs.getFloat(getString(R.string.mock_lat_key), 0f);
+            lat = prefs.getFloat(getString(R.string.mock_lat_key),
+                    getResources().getInteger(R.integer.mock_lat_default_value));
         } catch (NumberFormatException e) {
         }
 
         try {
-            lng = prefs.getFloat(getString(R.string.mock_lng_key), 0f);
+            lng = prefs.getFloat(getString(R.string.mock_lng_key),
+                    getResources().getInteger(R.integer.mock_lng_default_value));
         } catch (NumberFormatException e) {
         }
 
         try {
-            accuracy = prefs.getFloat(getString(R.string.mock_accuracy_key), 0f);
+            accuracy = prefs.getFloat(getString(R.string.mock_accuracy_key),
+                    getResources().getInteger(R.integer.mock_accuracy_default_value));
         } catch (NumberFormatException e) {
         }
 

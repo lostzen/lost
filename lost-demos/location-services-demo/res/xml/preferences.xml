@@ -3,51 +3,51 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <com.example.lost.locationservices.util.EditIntPreference
-        android:defaultValue="1000"
+        android:defaultValue="@integer/interval_default_value"
         android:key="@string/interval_key"
         android:title="@string/interval_title" />
 
     <com.example.lost.locationservices.util.EditIntPreference
-        android:defaultValue="0"
+        android:defaultValue="@integer/displacement_default_value"
         android:key="@string/displacement_key"
         android:title="@string/displacement_title" />
 
     <com.example.lost.locationservices.util.IntListPreference
-        android:defaultValue="102"
+        android:defaultValue="@integer/priority_default_value"
         android:entries="@array/priority_entries"
         android:key="@string/priority_key"
         android:title="@string/priority_title"
         android:entryValues="@array/priority_values" />
 
     <CheckBoxPreference
-        android:defaultValue="false"
+        android:defaultValue="@bool/mock_mode_default_value"
         android:key="@string/mock_mode_key"
         android:summary="@string/mock_mode_summary"
         android:title="@string/mock_mode_title" />
 
     <com.example.lost.locationservices.util.EditFloatPreference
-        android:defaultValue="0.0"
+        android:defaultValue="@integer/mock_lat_default_value"
         android:key="@string/mock_lat_key"
         android:title="@string/mock_lat_title" />
 
     <com.example.lost.locationservices.util.EditFloatPreference
-        android:defaultValue="0.0"
+        android:defaultValue="@integer/mock_lng_default_value"
         android:key="@string/mock_lng_key"
         android:title="@string/mock_lng_title" />
 
     <com.example.lost.locationservices.util.EditFloatPreference
-        android:defaultValue="0.0"
+        android:defaultValue="@integer/mock_accuracy_default_value"
         android:key="@string/mock_accuracy_key"
         android:title="@string/mock_accuracy_title" />
 
     <CheckBoxPreference
-        android:defaultValue="false"
+        android:defaultValue="@bool/mock_trace_default_value"
         android:key="@string/mock_mode_gpx_key"
         android:summary="@string/mock_mode_gpx_summary"
         android:title="@string/mock_mode_gpx_title" />
 
     <EditTextPreference
-        android:defaultValue="lost.gpx"
+        android:defaultValue="@string/mock_gpx_file_default_value"
         android:key="@string/mock_gpx_file_key"
         android:title="@string/mock_gpx_file_title" />
 
