@@ -10,6 +10,7 @@ import android.app.ListFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Environment;
@@ -29,8 +30,6 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import static com.mapzen.android.lost.api.LocationServices.FusedLocationApi;
-import static java.lang.Float.parseFloat;
-import static java.lang.Integer.parseInt;
 
 /**
  * LOST Activity
@@ -132,10 +131,14 @@ public class LostActivity extends Activity {
                 final String displacementKey = getString(R.string.displacement_key);
                 final String priorityKey = getString(R.string.priority_key);
 
+                final Resources res = getResources();
                 final LocationRequest locationRequest = LocationRequest.create()
-                        .setInterval(parseInt(prefs.getString(intervalKey, "1000")))
-                        .setSmallestDisplacement(parseInt(prefs.getString(displacementKey, "0")))
-                        .setPriority(parseInt(prefs.getString(priorityKey, "102")));
+                        .setInterval(prefs.getInt(intervalKey,
+                                res.getInteger(R.integer.interval_default_value)))
+                        .setSmallestDisplacement(prefs.getInt(displacementKey,
+                                res.getInteger(R.integer.displacement_default_value)))
+                        .setPriority(prefs.getInt(priorityKey,
+                                res.getInteger(R.integer.priority_default_value)));
 
                 FusedLocationApi.requestLocationUpdates(locationRequest, listener);
 
@@ -156,17 +159,20 @@ public class LostActivity extends Activity {
         float accuracy = 0f;
 
         try {
-            lat = parseFloat(prefs.getString(getString(R.string.mock_lat_key), "0.0"));
+            lat = prefs.getFloat(getString(R.string.mock_lat_key),
+                    getResources().getInteger(R.integer.mock_lat_default_value));
         } catch (NumberFormatException e) {
         }
 
         try {
-            lng = parseFloat(prefs.getString(getString(R.string.mock_lng_key), "0.0"));
+            lng = prefs.getFloat(getString(R.string.mock_lng_key),
+                    getResources().getInteger(R.integer.mock_lng_default_value));
         } catch (NumberFormatException e) {
         }
 
         try {
-            accuracy = parseFloat(prefs.getString(getString(R.string.mock_accuracy_key), "0.0"));
+            accuracy = prefs.getFloat(getString(R.string.mock_accuracy_key),
+                    getResources().getInteger(R.integer.mock_accuracy_default_value));
         } catch (NumberFormatException e) {
         }
 

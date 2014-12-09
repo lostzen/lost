@@ -82,7 +82,19 @@ public class SettingsFragment extends PreferenceFragment {
             return prefs.getString(key, "lost.gpx");
         }
 
-        return prefs.getString(key, "0.0");
+        if (getString(R.string.interval_key).equals(key)) {
+            return String.valueOf(prefs.getInt(key, 1000));
+        }
+
+        if (getString(R.string.displacement_key).equals(key)) {
+            return String.valueOf(prefs.getInt(key, 0));
+        }
+
+        if (getString(R.string.priority_key).equals(key)) {
+            return String.valueOf(prefs.getInt(key, 102));
+        }
+
+        return String.valueOf(prefs.getFloat(key, 0f));
     }
 
     /**
