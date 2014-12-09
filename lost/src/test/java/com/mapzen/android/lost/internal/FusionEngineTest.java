@@ -23,11 +23,12 @@ import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_BALANCED_POWE
 import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_HIGH_ACCURACY;
 import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_LOW_POWER;
 import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_NO_POWER;
+import static com.mapzen.android.lost.internal.FusionEngine.RECENT_UPDATE_THRESHOLD_IN_NANOS;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.robolectric.Robolectric.application;
 import static org.robolectric.Robolectric.shadowOf;
 
-@Config(manifest=Config.NONE)
+@Config(manifest=Config.NONE, emulateSdk = 18)
 @RunWith(RobolectricTestRunner.class)
 public class FusionEngineTest {
     private FusionEngine fusionEngine;
@@ -274,6 +275,66 @@ public class FusionEngineTest {
         shadowLocationManager.simulateLocation(networkLocation);
         shadowLocationManager.simulateLocation(gpsLocation);
         assertThat(callback.location).isEqualTo(networkLocation);
+    }
+
+    @Test
+    public void isBetterThan_shouldReturnFalseIfLocationAIsNull() throws Exception {
+        Location locationA = null;
+        Location locationB = new Location("test");
+        assertThat(FusionEngine.isBetterThan(locationA, locationB)).isFalse();
+    }
+
+    @Test
+    public void isBetterThan_shouldReturnTrueIfLocationBIsNull() throws Exception {
+        Location locationA = new Location("test");
+        Location locationB = null;
+        assertThat(FusionEngine.isBetterThan(locationA, locationB)).isTrue();
+    }
+
+    @Test
+    public void isBetterThan_shouldReturnTrueIfLocationBIsStale() throws Exception {
+        final long timeInNanos = System.currentTimeMillis() * 1000000;
+        Location locationA = new Location("test");
+        Location locationB = new Location("test");
+        locationA.setElapsedRealtimeNanos(timeInNanos);
+        locationB.setElapsedRealtimeNanos(timeInNanos - RECENT_UPDATE_THRESHOLD_IN_NANOS - 1);
+        assertThat(FusionEngine.isBetterThan(locationA, locationB)).isTrue();
+    }
+
+    @Test
+    public void isBetterThan_shouldReturnFalseIfLocationAHasNoAccuracy() throws Exception {
+        Location locationA = new Location("test");
+        Location locationB = new Location("test");
+        locationA.removeAccuracy();
+        locationB.setAccuracy(30.0f);
+        assertThat(FusionEngine.isBetterThan(locationA, locationB)).isFalse();
+    }
+
+    @Test
+    public void isBetterThan_shouldReturnTrueIfLocationBHasNoAccuracy() throws Exception {
+        Location locationA = new Location("test");
+        Location locationB = new Location("test");
+        locationA.setAccuracy(30.0f);
+        locationB.removeAccuracy();
+        assertThat(FusionEngine.isBetterThan(locationA, locationB)).isTrue();
+    }
+
+    @Test
+    public void isBetterThan_shouldReturnTrueIfLocationAIsMoreAccurate() throws Exception {
+        Location locationA = new Location("test");
+        Location locationB = new Location("test");
+        locationA.setAccuracy(30.0f);
+        locationB.setAccuracy(40.0f);
+        assertThat(FusionEngine.isBetterThan(locationA, locationB)).isTrue();
+    }
+
+    @Test
+    public void isBetterThan_shouldReturnFalseIfLocationBIsMoreAccurate() throws Exception {
+        Location locationA = new Location("test");
+        Location locationB = new Location("test");
+        locationA.setAccuracy(40.0f);
+        locationB.setAccuracy(30.0f);
+        assertThat(FusionEngine.isBetterThan(locationA, locationB)).isFalse();
     }
 
     private static void initTestClock(long time) {
