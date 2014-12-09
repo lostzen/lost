@@ -6,19 +6,25 @@ import android.preference.EditTextPreference;
 import android.util.AttributeSet;
 import android.util.Log;
 
+import static android.text.InputType.TYPE_CLASS_NUMBER;
+import static android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL;
+
 public class EditFloatPreference extends EditTextPreference {
     public static final String TAG = EditFloatPreference.class.getSimpleName();
 
     public EditFloatPreference(Context context) {
         super(context);
+        getEditText().setRawInputType(TYPE_CLASS_NUMBER | TYPE_NUMBER_FLAG_DECIMAL);
     }
 
     public EditFloatPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
+        getEditText().setRawInputType(TYPE_CLASS_NUMBER | TYPE_NUMBER_FLAG_DECIMAL);
     }
 
     public EditFloatPreference(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        getEditText().setRawInputType(TYPE_CLASS_NUMBER | TYPE_NUMBER_FLAG_DECIMAL);
     }
 
     @Override
