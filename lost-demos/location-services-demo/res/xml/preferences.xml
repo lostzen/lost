@@ -2,17 +2,17 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <EditTextPreference
+    <com.example.lost.locationservices.util.EditIntPreference
         android:defaultValue="1000"
         android:key="@string/interval_key"
         android:title="@string/interval_title" />
 
-    <EditTextPreference
+    <com.example.lost.locationservices.util.EditIntPreference
         android:defaultValue="0"
         android:key="@string/displacement_key"
         android:title="@string/displacement_title" />
 
-    <ListPreference
+    <com.example.lost.locationservices.util.IntListPreference
         android:defaultValue="102"
         android:entries="@array/priority_entries"
         android:key="@string/priority_key"

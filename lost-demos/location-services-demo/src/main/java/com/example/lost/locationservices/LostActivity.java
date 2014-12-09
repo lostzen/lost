@@ -30,7 +30,6 @@ import java.util.Date;
 
 import static com.mapzen.android.lost.api.LocationServices.FusedLocationApi;
 import static java.lang.Float.parseFloat;
-import static java.lang.Integer.parseInt;
 
 /**
  * LOST Activity
@@ -133,9 +132,9 @@ public class LostActivity extends Activity {
                 final String priorityKey = getString(R.string.priority_key);
 
                 final LocationRequest locationRequest = LocationRequest.create()
-                        .setInterval(parseInt(prefs.getString(intervalKey, "1000")))
-                        .setSmallestDisplacement(parseInt(prefs.getString(displacementKey, "0")))
-                        .setPriority(parseInt(prefs.getString(priorityKey, "102")));
+                        .setInterval(prefs.getInt(intervalKey, 1000))
+                        .setSmallestDisplacement(prefs.getInt(displacementKey, 0))
+                        .setPriority(prefs.getInt(priorityKey, 102));
 
                 FusedLocationApi.requestLocationUpdates(locationRequest, listener);
 

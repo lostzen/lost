@@ -9,9 +9,11 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLocationManager;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 
 import java.util.Collection;
 
@@ -291,6 +293,7 @@ public class FusionEngineTest {
         assertThat(FusionEngine.isBetterThan(locationA, locationB)).isTrue();
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Test
     public void isBetterThan_shouldReturnTrueIfLocationBIsStale() throws Exception {
         final long timeInNanos = System.currentTimeMillis() * 1000000;
