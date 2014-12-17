@@ -34,7 +34,7 @@ import java.util.Date;
  */
 public class LostActivity extends Activity {
     private LostFragment fragment;
-    private SharedPreferences sharedPreferences;
+    private SharedPreferences prefs;
 
     private static LocationClient client;
 
@@ -56,6 +56,16 @@ public class LostActivity extends Activity {
             locationRequest.setInterval(1000);
             locationRequest.setSmallestDisplacement(0);
             client.requestLocationUpdates(locationRequest, listener);
+
+            client.setMockMode(isMockModePrefEnabled());
+            if (isMockModePrefEnabled()) {
+                setMockLocation();
+            }
+
+            if (prefs.getBoolean(getString(R.string.mock_mode_gpx_key), false)) {
+                String filename = prefs.getString(getString(R.string.mock_gpx_file_key), null);
+                client.setMockTrace(filename);
+            }
         }
 
         @Override
@@ -90,13 +100,12 @@ public class LostActivity extends Activity {
             client = fragment.client;
         }
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplication());
+        prefs = PreferenceManager.getDefaultSharedPreferences(getApplication());
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        client.setMockMode(isMockModePrefEnabled());
         connect();
     }
 
@@ -137,7 +146,7 @@ public class LostActivity extends Activity {
     }
 
     private boolean isMockModePrefEnabled() {
-        return sharedPreferences.getBoolean(getString(R.string.mock_mode_key), false);
+        return prefs.getBoolean(getString(R.string.mock_mode_key), false);
     }
 
     private void connect() {
@@ -155,6 +164,35 @@ public class LostActivity extends Activity {
 
     private void reset() {
         fragment.reset();
+    }
+
+    private void setMockLocation() {
+        float lat = 0f;
+        float lng = 0f;
+        float accuracy = 0f;
+
+        try {
+            lat = prefs.getFloat(getString(R.string.mock_lat_key), 0.0f);
+        } catch (NumberFormatException e) {
+        }
+
+        try {
+            lng = prefs.getFloat(getString(R.string.mock_lng_key), 0.0f);
+        } catch (NumberFormatException e) {
+        }
+
+        try {
+            accuracy = prefs.getFloat(getString(R.string.mock_accuracy_key), 0.0f);
+        } catch (NumberFormatException e) {
+        }
+
+        final Location location = new Location("mock");
+        location.setLatitude(lat);
+        location.setLongitude(lng);
+        location.setAccuracy(accuracy);
+        location.setTime(System.currentTimeMillis());
+
+        client.setMockLocation(location);
     }
 
     public static void populateLocationView(View view, Location location) {
@@ -194,7 +232,7 @@ public class LostActivity extends Activity {
     /**
      * LOST Fragment
      */
-    private static class LostFragment extends ListFragment {
+    public static class LostFragment extends ListFragment {
         public static final String TAG = LostFragment.class.getSimpleName();
 
         private LocationClient client;

@@ -222,11 +222,11 @@ public class LocationClient {
     }
 
     public void removeLocationUpdates(LocationListener locationListener) {
-        if (gpsListener != null) {
+        if (locationManager != null && gpsListener != null) {
             locationManager.removeUpdates(gpsListener);
         }
 
-        if (networkListener != null) {
+        if (locationManager != null && networkListener != null) {
             locationManager.removeUpdates(networkListener);
         }
     }
