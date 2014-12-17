@@ -46,7 +46,7 @@
         android:summary="@string/mock_mode_gpx_summary"
         android:title="@string/mock_mode_gpx_title" />
 
-    <EditTextPreference
+    <com.mapzen.prefsplus.EditTextPlusPreference
         android:defaultValue="@string/mock_gpx_file_default_value"
         android:key="@string/mock_gpx_file_key"
         android:title="@string/mock_gpx_file_title" />
