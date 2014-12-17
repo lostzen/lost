@@ -86,7 +86,9 @@ public class FusionEngine extends LocationEngine implements LocationListener {
 
     @Override
     protected void disable() {
-        locationManager.removeUpdates(this);
+        if (locationManager != null) {
+            locationManager.removeUpdates(this);
+        }
     }
 
     private void enableGps() {
