@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>lost-demos</artifactId>
+        <artifactId>lost-parent</artifactId>
         <groupId>com.mapzen.android</groupId>
         <version>0.3-SNAPSHOT</version>
     </parent>
 
-    <artifactId>lost-demo-location-client</artifactId>
-    <name>LOST Location Client Demo</name>
+    <artifactId>lost-sample</artifactId>
+    <name>LOST Sample</name>
     <packaging>apk</packaging>
 
     <dependencies>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">LOST LocationServices Demo</string>
+    <string name="app_name">LOST Sample</string>
     <string name="settings">Settings</string>
     <string name="reset">Reset</string>
     <string name="last_known_location">Last Known Location</string>

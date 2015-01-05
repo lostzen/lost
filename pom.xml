@@ -18,7 +18,7 @@
 
     <modules>
         <module>lost</module>
-        <module>lost-demos</module>
+        <module>lost-sample</module>
     </modules>
 
     <properties>

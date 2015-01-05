@@ -20,7 +20,7 @@ import java.util.Collection;
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 import static android.location.LocationManager.PASSIVE_PROVIDER;
-import static com.mapzen.android.lost.api.LocationClient.RECENT_UPDATE_THRESHOLD_IN_MILLIS;
+import static com.mapzen.android.lost.internal.FusionEngine.RECENT_UPDATE_THRESHOLD_IN_MILLIS;
 import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
 import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_HIGH_ACCURACY;
 import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_LOW_POWER;

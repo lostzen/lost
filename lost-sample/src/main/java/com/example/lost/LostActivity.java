@@ -1,8 +1,8 @@
-package com.example.lost.locationclient;
+package com.example.lost;
 
-import com.mapzen.android.lost.api.LocationClient;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
+import com.mapzen.android.lost.api.LostApiClient;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -10,6 +10,7 @@ import android.app.ListFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Environment;
@@ -23,11 +24,12 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+
+import static com.mapzen.android.lost.api.LocationServices.FusedLocationApi;
 
 /**
  * LOST Activity
@@ -36,44 +38,7 @@ public class LostActivity extends Activity {
     private LostFragment fragment;
     private SharedPreferences prefs;
 
-    private static LocationClient client;
-
-    public static LocationClient getLocationClient() {
-        return client;
-    }
-
-    LocationClient.ConnectionCallbacks callbacks = new LocationClient.ConnectionCallbacks() {
-        @Override
-        public void onConnected(Bundle connectionHint) {
-            Toast.makeText(LostActivity.this, "Location client connected",
-                    Toast.LENGTH_SHORT).show();
-
-            if (fragment.lastKnownLocation == null) {
-                fragment.setLastKnownLocation(client.getLastLocation());
-            }
-
-            LocationRequest locationRequest = LocationRequest.create();
-            locationRequest.setInterval(1000);
-            locationRequest.setSmallestDisplacement(0);
-            client.requestLocationUpdates(locationRequest, listener);
-
-            client.setMockMode(isMockModePrefEnabled());
-            if (isMockModePrefEnabled()) {
-                setMockLocation();
-            }
-
-            if (prefs.getBoolean(getString(R.string.mock_mode_gpx_key), false)) {
-                String filename = prefs.getString(getString(R.string.mock_gpx_file_key), null);
-                client.setMockTrace(filename);
-            }
-        }
-
-        @Override
-        public void onDisconnected() {
-            Toast.makeText(LostActivity.this, "Location client disconnected",
-                    Toast.LENGTH_SHORT).show();
-        }
-    };
+    private static LostApiClient client;
 
     LocationListener listener = new LocationListener() {
         @Override
@@ -94,7 +59,7 @@ public class LostActivity extends Activity {
             fragmentManager.beginTransaction().add(android.R.id.content, fragment,
                     LostFragment.TAG).commit();
             fragment.setListAdapter(new LostAdapter(this));
-            client = new LocationClient(this, callbacks);
+            client = new LostApiClient.Builder(this).build();
             fragment.client = client;
         } else {
             client = fragment.client;
@@ -154,16 +119,38 @@ public class LostActivity extends Activity {
             @Override
             public void run() {
                 client.connect();
+                FusedLocationApi.setMockMode(isMockModePrefEnabled());
+
+                if (prefs.getBoolean(getString(R.string.mock_mode_gpx_key), false)) {
+                    String filename = prefs.getString(getString(R.string.mock_gpx_file_key), null);
+                    File file = new File(Environment.getExternalStorageDirectory(), filename);
+                    FusedLocationApi.setMockTrace(file);
+                }
+
+                final String intervalKey = getString(R.string.interval_key);
+                final String displacementKey = getString(R.string.displacement_key);
+                final String priorityKey = getString(R.string.priority_key);
+
+                final Resources res = getResources();
+                final LocationRequest locationRequest = LocationRequest.create()
+                        .setInterval(prefs.getInt(intervalKey,
+                                res.getInteger(R.integer.interval_default_value)))
+                        .setSmallestDisplacement(prefs.getInt(displacementKey,
+                                res.getInteger(R.integer.displacement_default_value)))
+                        .setPriority(prefs.getInt(priorityKey,
+                                res.getInteger(R.integer.priority_default_value)));
+
+                FusedLocationApi.requestLocationUpdates(locationRequest, listener);
+
+                if (isMockModePrefEnabled()) {
+                    setMockLocation();
+                }
+
+                if (fragment.lastKnownLocation == null) {
+                    fragment.setLastKnownLocation(FusedLocationApi.getLastLocation());
+                }
             }
         }, 300);
-    }
-
-    private void disconnect() {
-        client.disconnect();
-    }
-
-    private void reset() {
-        fragment.reset();
     }
 
     private void setMockLocation() {
@@ -172,17 +159,20 @@ public class LostActivity extends Activity {
         float accuracy = 0f;
 
         try {
-            lat = prefs.getFloat(getString(R.string.mock_lat_key), 0.0f);
+            lat = prefs.getFloat(getString(R.string.mock_lat_key),
+                    getResources().getInteger(R.integer.mock_lat_default_value));
         } catch (NumberFormatException e) {
         }
 
         try {
-            lng = prefs.getFloat(getString(R.string.mock_lng_key), 0.0f);
+            lng = prefs.getFloat(getString(R.string.mock_lng_key),
+                    getResources().getInteger(R.integer.mock_lng_default_value));
         } catch (NumberFormatException e) {
         }
 
         try {
-            accuracy = prefs.getFloat(getString(R.string.mock_accuracy_key), 0.0f);
+            accuracy = prefs.getFloat(getString(R.string.mock_accuracy_key),
+                    getResources().getInteger(R.integer.mock_accuracy_default_value));
         } catch (NumberFormatException e) {
         }
 
@@ -192,7 +182,15 @@ public class LostActivity extends Activity {
         location.setAccuracy(accuracy);
         location.setTime(System.currentTimeMillis());
 
-        client.setMockLocation(location);
+        FusedLocationApi.setMockLocation(location);
+    }
+
+    private void disconnect() {
+        client.disconnect();
+    }
+
+    private void reset() {
+        fragment.reset();
     }
 
     public static void populateLocationView(View view, Location location) {
@@ -235,7 +233,7 @@ public class LostActivity extends Activity {
     public static class LostFragment extends ListFragment {
         public static final String TAG = LostFragment.class.getSimpleName();
 
-        private LocationClient client;
+        private LostApiClient client;
         private Location lastKnownLocation;
         private View headerView;
 
