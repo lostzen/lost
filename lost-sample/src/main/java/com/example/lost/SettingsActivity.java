@@ -1,4 +1,4 @@
-package com.example.lost.locationclient;
+package com.example.lost;
 
 import android.app.Activity;
 import android.os.Bundle;
