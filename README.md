@@ -6,7 +6,7 @@ Location Open Source Tracker for Android
 
 ## Usage
 
-LOST is a drop-in replacement for Google Play Services [LocationClient][1] that makes calls directly to the [LocationManger][2].
+LOST is a drop-in replacement for Google Play Services [FusedLocationProviderApi][1] that makes calls directly to the [LocationManger][2].
 
 This project seeks to provide an open source alternative to the [Fused Location Provider][3] that depends only on the Android SDK. Operations supported at this time include getting the last known location and registering for location updates.
 
@@ -24,7 +24,7 @@ Include dependency using Maven.
 <dependency>
   <groupId>com.mapzen.android</groupId>
   <artifactId>lost</artifactId>
-  <version>0.2</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 
@@ -33,10 +33,10 @@ Include dependency using Maven.
 Include dependency using Gradle.
 
 ```groovy
-compile 'com.mapzen.android:lost:0.2'
+compile 'com.mapzen.android:lost:1.0.0'
 ```
 
-[1]: https://developer.android.com/reference/com/google/android/gms/location/LocationClient.html
+[1]: https://developer.android.com/reference/com/google/android/gms/location/FusedLocationProviderApi.html
 [2]: https://developer.android.com/reference/android/location/LocationManager.html
 [3]: http://developer.android.com/google/play-services/location.html
-[4]: http://search.maven.org/remotecontent?filepath=com/mapzen/android/lost/0.2/lost-0.2.jar
+[4]: http://search.maven.org/remotecontent?filepath=com/mapzen/android/lost/1.0.0/lost-1.0.0.jar
