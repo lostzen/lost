@@ -9,23 +9,22 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLocationManager;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Build;
 
 import java.util.Collection;
 
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 import static android.location.LocationManager.PASSIVE_PROVIDER;
-import static com.mapzen.android.lost.internal.FusionEngine.RECENT_UPDATE_THRESHOLD_IN_MILLIS;
 import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
 import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_HIGH_ACCURACY;
 import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_LOW_POWER;
 import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_NO_POWER;
+import static com.mapzen.android.lost.internal.FusionEngine.RECENT_UPDATE_THRESHOLD_IN_MILLIS;
 import static com.mapzen.android.lost.internal.FusionEngine.RECENT_UPDATE_THRESHOLD_IN_NANOS;
+import static com.mapzen.android.lost.internal.SystemClock.MS_TO_NS;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.robolectric.Robolectric.application;
 import static org.robolectric.Robolectric.shadowOf;
@@ -293,14 +292,23 @@ public class FusionEngineTest {
         assertThat(FusionEngine.isBetterThan(locationA, locationB)).isTrue();
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    @Test
-    public void isBetterThan_shouldReturnTrueIfLocationBIsStale() throws Exception {
-        final long timeInNanos = System.currentTimeMillis() * 1000000;
+    @Test @Config(emulateSdk = 17, reportSdk = 17)
+    public void isBetterThan_shouldReturnTrueIfLocationBIsStale_Api17() throws Exception {
+        final long timeInNanos = System.currentTimeMillis() * MS_TO_NS;
         Location locationA = new Location("test");
         Location locationB = new Location("test");
         locationA.setElapsedRealtimeNanos(timeInNanos);
         locationB.setElapsedRealtimeNanos(timeInNanos - RECENT_UPDATE_THRESHOLD_IN_NANOS - 1);
+        assertThat(FusionEngine.isBetterThan(locationA, locationB)).isTrue();
+    }
+
+    @Test @Config(emulateSdk = 16, reportSdk = 16)
+    public void isBetterThan_shouldReturnTrueIfLocationBIsStale_Api16() throws Exception {
+        final long timeInMillis = System.currentTimeMillis();
+        Location locationA = new Location("test");
+        Location locationB = new Location("test");
+        locationA.setTime(timeInMillis);
+        locationB.setTime(timeInMillis - RECENT_UPDATE_THRESHOLD_IN_MILLIS - 1);
         assertThat(FusionEngine.isBetterThan(locationA, locationB)).isTrue();
     }
 
