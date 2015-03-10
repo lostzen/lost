@@ -160,7 +160,7 @@ public class FusionEngine extends LocationEngine implements LocationListener {
             return true;
         }
 
-        if (locationA.getElapsedRealtimeNanos() > locationB.getElapsedRealtimeNanos() +
+        if (SystemClock.getTimeInNanos(locationA) > SystemClock.getTimeInNanos(locationB) +
                 RECENT_UPDATE_THRESHOLD_IN_NANOS) {
             return true;
         }
