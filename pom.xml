@@ -12,7 +12,7 @@
     <groupId>com.mapzen.android</groupId>
     <artifactId>lost-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
 
     <name>LOST Parent</name>
 
@@ -30,7 +30,7 @@
         <url>http://github.com/mapzen/LOST</url>
         <connection>scm:git:git://github.com/mapzen/LOST.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/mapzen/LOST.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>lost-parent-1.0.1</tag>
     </scm>
 
     <issueManagement>

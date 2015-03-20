@@ -5,7 +5,7 @@
     <parent>
         <artifactId>lost-parent</artifactId>
         <groupId>com.mapzen.android</groupId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.1</version>
     </parent>
 
     <artifactId>lost-sample</artifactId>
