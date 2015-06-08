@@ -1,0 +1,52 @@
+buildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:1.2.3'
+    classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.+'
+    classpath 'com.github.dcendents:android-maven-plugin:1.2'
+  }
+}
+
+apply plugin: 'android-sdk-manager'
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = GROUP
+version = VERSION_NAME
+
+allprojects {
+    repositories {
+        mavenLocal()
+        jcenter()
+    }
+}
+
+android {
+  compileSdkVersion 21
+  buildToolsVersion "21.0.2"
+
+  defaultConfig {
+    minSdkVersion 21
+    targetSdkVersion 21
+  }
+
+  packagingOptions {
+    exclude 'META-INF/LICENSE.txt'
+  }
+}
+
+repositories {
+  jcenter()
+}
+
+dependencies {
+  compile 'com.android.support:appcompat-v7:22.2.0'
+  compile 'com.android.support:support-v4:22.2.0'
+  compile 'com.squareup:fest-android:1.0.7'
+
+  testCompile 'junit:junit:4.12'
+  testCompile 'org.robolectric:robolectric:2.4'
+}
+

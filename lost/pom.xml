@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.android.support</groupId>
             <artifactId>support-v4</artifactId>
-            <version>19.0.1</version>
+            <version>21.0.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -46,6 +46,24 @@
             <version>1.0.7</version>
             <scope>test</scope>
         </dependency>
+
+        <!--
+        <dependency>
+            <groupId>org.mozilla.mozstumbler</groupId>
+            <artifactId>stumbler</artifactId>
+            <version>1.7.10</version>
+            <type>aar</type>
+        #Dependency to appcompat-v7 19.1.0 breaks everything
+        </dependency>
+
+        <dependency>
+            <groupId>com.android.support</groupId>
+            <artifactId>appcompat-v7</artifactId>
+            <version>19.1.0</version>
+            <type>aar</type>
+        </dependency>
+        -->
+
     </dependencies>
 
 </project>

@@ -4,6 +4,9 @@ pom.xml.*
 release.properties
 gen-external-apklibs/
 
+# gradle artifacts
+.gradle/2.3/taskArtifacts
+
 # IntelliJ
 out/
 .idea/
@@ -18,3 +21,7 @@ tmp/
 *.*~
 *.apk
 com_crashlytics_export_strings.xml
+build
+
+# android sdk deployer
+local.properties
