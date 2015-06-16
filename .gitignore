@@ -5,7 +5,7 @@ release.properties
 gen-external-apklibs/
 
 # gradle artifacts
-.gradle/2.3/taskArtifacts
+.gradle/
 
 # IntelliJ
 out/
