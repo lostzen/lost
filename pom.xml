@@ -16,6 +16,17 @@
 
     <name>LOST Parent</name>
 
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-crankycoder-libMozStumbler</id>
+            <name>bintray</name>
+            <url>http://dl.bintray.com/crankycoder/libMozStumbler</url>
+        </repository>
+    </repositories>
+
     <modules>
         <module>lost</module>
         <module>lost-sample</module>
