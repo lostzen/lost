@@ -32,6 +32,11 @@ android {
     targetSdkVersion 21
   }
 
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_7
+    targetCompatibility JavaVersion.VERSION_1_7
+  }
+
   packagingOptions {
     exclude 'META-INF/LICENSE.txt'
   }
@@ -41,12 +46,20 @@ repositories {
   jcenter()
 }
 
+tasks.withType(Test) {
+  testLogging {
+    exceptionFormat "full"
+    events "started", "skipped", "passed", "failed"
+    showStandardStreams true
+  }
+}
+
 dependencies {
   compile 'com.android.support:appcompat-v7:22.2.0'
   compile 'com.android.support:support-v4:22.2.0'
-  compile 'com.squareup:fest-android:1.0.7'
+  compile 'com.google.guava:guava:18.0'
 
   testCompile 'junit:junit:4.12'
-  testCompile 'org.robolectric:robolectric:2.4'
+  testCompile 'org.robolectric:robolectric:3.0-rc3'
+  testCompile 'com.squareup:fest-android:1.0.7'
 }
-

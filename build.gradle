@@ -15,3 +15,5 @@ allprojects {
 		mavenCentral()
 	}
 }
+
+defaultTasks = ['clean', 'test', 'install']

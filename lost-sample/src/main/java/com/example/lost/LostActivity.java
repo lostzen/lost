@@ -4,7 +4,6 @@ import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LostApiClient;
 
-import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.content.Context;
@@ -16,6 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,7 +34,7 @@ import static com.mapzen.android.lost.api.LocationServices.FusedLocationApi;
 /**
  * LOST Activity
  */
-public class LostActivity extends Activity {
+public class LostActivity extends AppCompatActivity {
     private LostFragment fragment;
     private SharedPreferences prefs;
 
