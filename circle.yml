@@ -1,19 +1,7 @@
-machine:
-  pre:
-    - curl -O http://apache.osuosl.org/maven/maven-3/3.1.1/binaries/apache-maven-3.1.1-bin.tar.gz && tar xvf apache-maven-3.1.1-bin.tar.gz -C ~/.m2
-  environment:
-    PATH: $HOME/.m2/apache-maven-3.1.1/bin:$PATH
-    M2_HOME: $HOME/.m2/apache-maven-3.1.1/
-    M2: $HOME/.m2/apache-maven-3.1.1/bin/
-    ANDROID_HOME: /usr/local/android-sdk-linux
-
 dependencies:
   pre:
     - echo y | android update sdk --all --no-ui --force --filter "build-tools-19.0.3,platform-tools,android-18,addon-google_apis-google-18,android-22,extra-android-m2repository"
-    - ./install-android-jar.sh
-    - ./install-support-jar.sh
-    - mvn install -f lost/pom.xml -Dmaven.test.skip=true
 
 test:
   override:
-    - mvn verify
+    - ./gradlew
