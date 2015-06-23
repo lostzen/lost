@@ -286,7 +286,7 @@ public class FusedLocationProviderApiImplTest {
         assertThat(listener.getAllLocations().get(2).getSpeed()).isEqualTo(30f);
     }
 
-    @Test
+    @Test @Ignore("Find a better way to test this without Thread.sleep()")
     public void setMockTrace_shouldRespectFastestInterval() throws Exception {
         api.setMockMode(true);
         api.setMockTrace(getTestGpxTrace());
