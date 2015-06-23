@@ -1,7 +1,3 @@
-dependencies:
-  pre:
-    - echo y | android update sdk --all --no-ui --force --filter "build-tools-19.0.3,platform-tools,android-18,addon-google_apis-google-18,android-22,extra-android-m2repository"
-
 test:
   override:
     - ./gradlew
