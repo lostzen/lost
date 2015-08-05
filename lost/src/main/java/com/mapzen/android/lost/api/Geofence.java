@@ -1,42 +1,63 @@
 package com.mapzen.android.lost.api;
 
+import com.mapzen.android.lost.internal.GeofenceImpl;
+
 public interface Geofence {
 
-    public static final int GEOFENCE_TRANSITION_ENTER = 0x00000001;
-    public static final int GEOFENCE_TRANSITION_EXIT = 0x00000002;
-    public static final int GEOFENCE_TRANSITION_DWELL = 0x00000004;
-    public static final long NEVER_EXPIRE = 0xffffffffffffffffl;
+    int GEOFENCE_TRANSITION_ENTER = 0x00000001;
+    int GEOFENCE_TRANSITION_EXIT = 0x00000002;
+    int GEOFENCE_TRANSITION_DWELL = 0x00000004;
+    long NEVER_EXPIRE = 0xffffffffffffffffl;
 
     String getRequestId();
 
-    public static final class Builder {
+    final class Builder {
+        private GeofenceImpl builtGeofence;
+
+        private double latitude;
+        private double longitude;
+        private float radius;
+        private long durationMillis;
+        private int loiteringDelayMs;
+        private int notificationResponsivenessMs;
+        private String requestId;
+        private int transitionTypes;
+
         public Geofence build () {
-            throw new RuntimeException("Sorry, not yet implemented");
+            builtGeofence = new GeofenceImpl(latitude, longitude, radius, durationMillis, loiteringDelayMs, notificationResponsivenessMs, requestId, transitionTypes);
+            return builtGeofence;
         }
 
-        public Geofence.Builder setCircularRegion (double latitude, double longitude,
-                float radius) {
-            throw new RuntimeException("Sorry, not yet implemented");
+        public Geofence.Builder setCircularRegion(double latitude, double longitude, float radius) {
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.radius = radius;
+            return this;
         }
 
         public Geofence.Builder setExpirationDuration (long durationMillis) {
-            throw new RuntimeException("Sorry, not yet implemented");
+            this.durationMillis = durationMillis;
+            return this;
         }
 
         public Geofence.Builder setLoiteringDelay (int loiteringDelayMs) {
-            throw new RuntimeException("Sorry, not yet implemented");
+            this.loiteringDelayMs = loiteringDelayMs;
+            return this;
         }
 
         public Geofence.Builder setNotificationResponsiveness (int notificationResponsivenessMs) {
-            throw new RuntimeException("Sorry, not yet implemented");
+            this.notificationResponsivenessMs = notificationResponsivenessMs;
+            return this;
         }
 
         public Geofence.Builder setRequestId (String requestId) {
-            throw new RuntimeException("Sorry, not yet implemented");
+            this.requestId = requestId;
+            return this;
         }
 
         public Geofence.Builder setTransitionTypes (int transitionTypes) {
-            throw new RuntimeException("Sorry, not yet implemented");
+            this.transitionTypes = transitionTypes;
+            return this;
         }
     }
 }
