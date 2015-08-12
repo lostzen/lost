@@ -15,7 +15,7 @@ import org.robolectric.annotation.Config;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 @RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21, manifest=Config.NONE)
+@Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
 public class LocationServicesTest {
     private LostApiClient client;
 

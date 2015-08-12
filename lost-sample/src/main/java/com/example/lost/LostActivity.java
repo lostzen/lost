@@ -95,6 +95,8 @@ public class LostActivity extends AppCompatActivity {
             case R.id.settings:
                 onSettingsOptionSelected();
                 break;
+            default:
+                break;
         }
 
         return true;
@@ -162,18 +164,21 @@ public class LostActivity extends AppCompatActivity {
             lat = prefs.getFloat(getString(R.string.mock_lat_key),
                     getResources().getInteger(R.integer.mock_lat_default_value));
         } catch (NumberFormatException e) {
+            // Do nothing.
         }
 
         try {
             lng = prefs.getFloat(getString(R.string.mock_lng_key),
                     getResources().getInteger(R.integer.mock_lng_default_value));
         } catch (NumberFormatException e) {
+            // Do nothing.
         }
 
         try {
             accuracy = prefs.getFloat(getString(R.string.mock_accuracy_key),
                     getResources().getInteger(R.integer.mock_accuracy_default_value));
         } catch (NumberFormatException e) {
+            // Do nothing.
         }
 
         final Location location = new Location("mock");

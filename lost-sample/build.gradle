@@ -1,23 +1,24 @@
 buildscript {
-    repositories {
-        jcenter()
-    }
+  repositories {
+    jcenter()
+  }
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:1.2.3'
-        classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.+'
-    }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:1.2.3'
+    classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.+'
+  }
 }
 
 repositories {
-   mavenLocal()
-   maven { url "http://dl.bintray.com/crankycoder/libMozStumbler" }
-   maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-   maven { url "http://repo.maven.apache.org/maven2" }
+  mavenLocal()
+  maven { url "http://dl.bintray.com/crankycoder/libMozStumbler" }
+  maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+  maven { url "http://repo.maven.apache.org/maven2" }
 }
 
 apply plugin: 'android-sdk-manager'
 apply plugin: 'com.android.application'
+apply plugin: 'checkstyle'
 
 group = 'com.mapzen.android'
 version = '1.0.2-SNAPSHOT'
@@ -25,26 +26,36 @@ version = '1.0.2-SNAPSHOT'
 description = """LOST Sample"""
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.0.2"
+  compileSdkVersion 21
+  buildToolsVersion "21.0.2"
 
-    defaultConfig {
-        applicationId "com.example.lost"
-        minSdkVersion 21
-        targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
-    }
-    buildTypes {
-        //release {
-        //    minifyEnabled false
-        //    proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        //}
-    }
+  defaultConfig {
+    applicationId "com.example.lost"
+    minSdkVersion 21
+    targetSdkVersion 21
+    versionCode 1
+    versionName "1.0"
+  }
+  buildTypes {
+    //release {
+    //    minifyEnabled false
+    //    proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    //}
+  }
+}
+
+task checkstyle(type: Checkstyle) {
+  configFile file("${project.rootDir}/config/checkstyle/checkstyle.xml")
+  source 'src'
+  include '**/*.java'
+  include '**/*.kt'
+  exclude '**/gen/**'
+
+  classpath = files()
 }
 
 dependencies {
-    compile group: 'com.mapzen.android', name: 'lost', version:'1.0.2-SNAPSHOT'
-    compile group: 'com.mapzen.android', name: 'prefs-plus', version:'1.0.0'
-    compile 'com.android.support:appcompat-v7:22.2.0'
+  compile group: 'com.mapzen.android', name: 'lost', version: '1.0.2-SNAPSHOT'
+  compile group: 'com.mapzen.android', name: 'prefs-plus', version: '1.0.0'
+  compile 'com.android.support:appcompat-v7:22.2.0'
 }

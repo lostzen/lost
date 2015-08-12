@@ -81,6 +81,8 @@ public class FusionEngine extends LocationEngine implements LocationListener {
             case LocationRequest.PRIORITY_NO_POWER:
                 enablePassive();
                 break;
+            default:
+                break;
         }
     }
 
