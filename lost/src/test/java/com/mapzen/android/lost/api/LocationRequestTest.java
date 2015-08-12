@@ -13,7 +13,7 @@ import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_HIGH_ACCURACY
 import static org.fest.assertions.api.Assertions.assertThat;
 
 @RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21, manifest=Config.NONE)
+@Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
 public class LocationRequestTest {
     private LocationRequest locationRequest;
 

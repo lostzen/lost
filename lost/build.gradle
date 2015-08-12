@@ -12,15 +12,16 @@ buildscript {
 apply plugin: 'android-sdk-manager'
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'checkstyle'
 
 group = GROUP
 version = VERSION_NAME
 
 allprojects {
-    repositories {
-        mavenLocal()
-        jcenter()
-    }
+  repositories {
+    mavenLocal()
+    jcenter()
+  }
 }
 
 android {
@@ -52,6 +53,16 @@ tasks.withType(Test) {
     events "started", "skipped", "passed", "failed"
     showStandardStreams true
   }
+}
+
+task checkstyle(type: Checkstyle) {
+  configFile file("${project.rootDir}/config/checkstyle/checkstyle.xml")
+  source 'src'
+  include '**/*.java'
+  include '**/*.kt'
+  exclude '**/gen/**'
+
+  classpath = files()
 }
 
 dependencies {
