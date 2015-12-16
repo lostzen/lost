@@ -17,3 +17,5 @@ allprojects {
 }
 
 defaultTasks = ['clean', 'test', 'install', 'checkstyle']
+
+apply from: file('gradle-mvn-push.gradle')
