@@ -74,3 +74,5 @@ dependencies {
   testCompile 'org.robolectric:robolectric:3.0-rc3'
   testCompile 'com.squareup:fest-android:1.0.7'
 }
+
+apply from: file('../gradle-mvn-push.gradle')
