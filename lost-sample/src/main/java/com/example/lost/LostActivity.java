@@ -225,12 +225,14 @@ public class LostActivity extends AppCompatActivity {
         final TextView coordinates = (TextView) view.findViewById(R.id.coordinates);
         final TextView accuracy = (TextView) view.findViewById(R.id.accuracy);
         final TextView speed = (TextView) view.findViewById(R.id.speed);
+        final TextView bearing = (TextView) view.findViewById(R.id.bearing);
         final TextView time = (TextView) view.findViewById(R.id.time);
 
         provider.setText("");
         coordinates.setText("");
         accuracy.setText("");
         speed.setText("");
+        bearing.setText("");
         time.setText("");
     }
 

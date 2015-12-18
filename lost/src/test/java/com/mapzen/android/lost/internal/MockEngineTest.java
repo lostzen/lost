@@ -76,16 +76,40 @@ public class MockEngineTest {
     }
 
     @Test
+    public void setTrace_shouldCalculateBearing() throws Exception {
+        mockEngine.setTrace(getTestGpxTrace());
+        mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
+        Thread.sleep(100);
+        ShadowLooper.runUiThreadTasks();
+        assertThat(callback.locations.get(0).getBearing()).isEqualTo(0.0f);
+        assertThat(callback.locations.get(1).getBearing())
+                .isEqualTo(callback.locations.get(0).bearingTo(callback.locations.get(1)));
+        assertThat(callback.locations.get(2).getBearing())
+                .isEqualTo(callback.locations.get(1).bearingTo(callback.locations.get(2)));
+    }
+
+    @Test
+    public void setTrace_shouldSetHasBearing() throws Exception {
+        mockEngine.setTrace(getTestGpxTrace());
+        mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
+        Thread.sleep(100);
+        ShadowLooper.runUiThreadTasks();
+        assertThat(callback.locations.get(0).hasBearing()).isFalse();
+        assertThat(callback.locations.get(1).hasBearing()).isTrue();
+        assertThat(callback.locations.get(2).hasBearing()).isTrue();
+    }
+
+    @Test
     public void setTrace_shouldRespectFastestInterval() throws Exception {
         mockEngine.setTrace(getTestGpxTrace());
-        mockEngine.setRequest(LocationRequest.create().setFastestInterval(1000));
-        Thread.sleep(1000);
+        mockEngine.setRequest(LocationRequest.create().setFastestInterval(100));
+        Thread.sleep(100);
         ShadowLooper.runUiThreadTasks();
         assertThat(callback.locations).hasSize(1);
-        Thread.sleep(1000);
+        Thread.sleep(100);
         ShadowLooper.runUiThreadTasks();
         assertThat(callback.locations).hasSize(2);
-        Thread.sleep(1000);
+        Thread.sleep(100);
         ShadowLooper.runUiThreadTasks();
         assertThat(callback.locations).hasSize(3);
     }
@@ -93,12 +117,12 @@ public class MockEngineTest {
     @Test
     public void disable_shouldCancelTraceReplay() throws Exception {
         mockEngine.setTrace(getTestGpxTrace());
-        mockEngine.setRequest(LocationRequest.create().setFastestInterval(1000));
-        Thread.sleep(1000);
+        mockEngine.setRequest(LocationRequest.create().setFastestInterval(100));
+        Thread.sleep(100);
         ShadowLooper.runUiThreadTasks();
         assertThat(callback.locations).hasSize(1);
         mockEngine.disable();
-        Thread.sleep(1000);
+        Thread.sleep(100);
         ShadowLooper.runUiThreadTasks();
         assertThat(callback.locations).hasSize(1);
     }
