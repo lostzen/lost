@@ -71,7 +71,7 @@ dependencies {
   compile 'com.google.guava:guava:18.0'
 
   testCompile 'junit:junit:4.12'
-  testCompile 'org.robolectric:robolectric:3.0-rc3'
+  testCompile 'org.robolectric:robolectric:3.0'
   testCompile 'com.squareup:fest-android:1.0.7'
 }
 

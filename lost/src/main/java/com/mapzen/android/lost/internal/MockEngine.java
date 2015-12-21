@@ -76,6 +76,7 @@ public class MockEngine extends LocationEngine {
 
     private class TraceThread extends Thread {
         private boolean canceled;
+        private Location previous;
 
         public void cancel() {
             canceled = true;
@@ -131,6 +132,11 @@ public class MockEngine extends LocationEngine {
             location.setTime(System.currentTimeMillis());
             location.setSpeed(Float.parseFloat(speedList.item(i).getFirstChild().getNodeValue()));
 
+            if (previous != null) {
+                location.setBearing(previous.bearingTo(location));
+            }
+
+            previous = location;
             return location;
         }
 

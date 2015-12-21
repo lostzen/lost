@@ -8,7 +8,6 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
@@ -252,7 +251,7 @@ public class FusedLocationProviderApiImplTest {
         assertThat(listener.getMostRecentLocation()).isEqualTo(mockLocation);
     }
 
-    @Test @Ignore("Find a better way to test this without Thread.sleep()")
+    @Test
     public void setMockTrace_shouldInvokeListenerForEachLocation() throws Exception {
         api.setMockMode(true);
         api.setMockTrace(getTestGpxTrace());
@@ -260,7 +259,7 @@ public class FusedLocationProviderApiImplTest {
         LocationRequest request = LocationRequest.create();
         request.setFastestInterval(0);
         api.requestLocationUpdates(request, listener);
-        Thread.sleep(1000);
+        Thread.sleep(100);
         ShadowLooper.runUiThreadTasks();
         assertThat(listener.getAllLocations()).hasSize(3);
         assertThat(listener.getAllLocations().get(0).getLatitude()).isEqualTo(0.0);
@@ -271,7 +270,7 @@ public class FusedLocationProviderApiImplTest {
         assertThat(listener.getAllLocations().get(2).getLongitude()).isEqualTo(2.1);
     }
 
-    @Test @Ignore("Find a better way to test this without Thread.sleep()")
+    @Test
     public void setMockTrace_shouldBroadcastSpeedWithLocation() throws Exception {
         api.setMockMode(true);
         api.setMockTrace(getTestGpxTrace());
@@ -279,28 +278,28 @@ public class FusedLocationProviderApiImplTest {
         LocationRequest request = LocationRequest.create();
         request.setFastestInterval(0);
         api.requestLocationUpdates(request, listener);
-        Thread.sleep(1000);
+        Thread.sleep(100);
         ShadowLooper.runUiThreadTasks();
         assertThat(listener.getAllLocations().get(0).getSpeed()).isEqualTo(10f);
         assertThat(listener.getAllLocations().get(1).getSpeed()).isEqualTo(20f);
         assertThat(listener.getAllLocations().get(2).getSpeed()).isEqualTo(30f);
     }
 
-    @Test @Ignore("Find a better way to test this without Thread.sleep()")
+    @Test
     public void setMockTrace_shouldRespectFastestInterval() throws Exception {
         api.setMockMode(true);
         api.setMockTrace(getTestGpxTrace());
         TestLocationListener listener = new TestLocationListener();
         LocationRequest request = LocationRequest.create();
-        request.setInterval(1000);
+        request.setInterval(100);
         api.requestLocationUpdates(request, listener);
-        Thread.sleep(1000);
+        Thread.sleep(100);
         ShadowLooper.runUiThreadTasks();
         assertThat(listener.getAllLocations()).hasSize(1);
-        Thread.sleep(1000);
+        Thread.sleep(100);
         ShadowLooper.runUiThreadTasks();
         assertThat(listener.getAllLocations()).hasSize(2);
-        Thread.sleep(1000);
+        Thread.sleep(100);
         ShadowLooper.runUiThreadTasks();
         assertThat(listener.getAllLocations()).hasSize(3);
     }
