@@ -1,6 +1,6 @@
 test:
   override:
-    - ./gradlew
+    - ./gradlew --refresh-dependencies
 
 deployment:
   master:
