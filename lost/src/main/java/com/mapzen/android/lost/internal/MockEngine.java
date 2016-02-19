@@ -133,10 +133,7 @@ public class MockEngine extends LocationEngine {
             if (speedList.item(i) != null && speedList.item(i).getFirstChild() != null) {
                 location.setSpeed(
                         Float.parseFloat(speedList.item(i).getFirstChild().getNodeValue()));
-            } else {
-                location.setSpeed(1f);
             }
-
 
             if (previous != null) {
                 location.setBearing(previous.bearingTo(location));

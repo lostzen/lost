@@ -20,6 +20,7 @@ import android.os.Environment;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.Exception;
 import java.util.ArrayList;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -115,6 +116,19 @@ public class MockEngineTest {
     }
 
     @Test
+    public void setTrace_shouldNotRequireSpeed() throws Exception {
+        mockEngine.setTrace(getTestGpxTrace());
+        Thread.sleep(100);
+        ShadowLooper.runUiThreadTasks();
+        assertThat(callback.locations.get(0).hasSpeed()).isTrue();
+
+        mockEngine.setTrace(getNoSpeedGpxTrace());
+        Thread.sleep(100);
+        ShadowLooper.runUiThreadTasks();
+        assertThat(callback.locations.get(0).hasSpeed()).isFalse();
+    }
+
+    @Test
     public void disable_shouldCancelTraceReplay() throws Exception {
         mockEngine.setTrace(getTestGpxTrace());
         mockEngine.setRequest(LocationRequest.create().setFastestInterval(100));
@@ -127,15 +141,23 @@ public class MockEngineTest {
         assertThat(callback.locations).hasSize(1);
     }
 
-    public static File getTestGpxTrace() throws IOException {
-        String contents = Files.toString(new File("src/test/resources/lost.gpx"), Charsets.UTF_8);
+    public static File getGpxFile(String filename) throws IOException {
+        String contents = Files.toString(new File("src/test/resources/"+filename), Charsets.UTF_8);
         ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
         File directory = Environment.getExternalStorageDirectory();
-        File file = new File(directory, "lost.gpx");
+        File file = new File(directory, filename);
         FileWriter fileWriter = new FileWriter(file, false);
         fileWriter.write(contents);
         fileWriter.close();
         return file;
+    }
+
+    public static File getTestGpxTrace() throws IOException {
+        return getGpxFile("lost.gpx");
+    }
+
+    public static File getNoSpeedGpxTrace() throws IOException {
+        return getGpxFile("lost-no-speed.gpx");
     }
 
     class TestCallback implements LocationEngine.Callback {
