@@ -20,7 +20,6 @@ import android.os.Environment;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.Exception;
 import java.util.ArrayList;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -146,7 +145,8 @@ public class MockEngineTest {
     }
 
     public static File getGpxFile(String filename) throws IOException {
-        String contents = Files.toString(new File("src/test/resources/"+filename), Charsets.UTF_8);
+        String contents = Files.toString(
+                new File("src/test/resources/" + filename), Charsets.UTF_8);
         ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
         File directory = Environment.getExternalStorageDirectory();
         File file = new File(directory, filename);
