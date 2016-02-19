@@ -130,7 +130,10 @@ public class MockEngine extends LocationEngine {
             location.setLatitude(Double.parseDouble(lat));
             location.setLongitude(Double.parseDouble(lng));
             location.setTime(System.currentTimeMillis());
-            location.setSpeed(Float.parseFloat(speedList.item(i).getFirstChild().getNodeValue()));
+            if (speedList.item(i) != null && speedList.item(i).getFirstChild() != null) {
+                location.setSpeed(
+                        Float.parseFloat(speedList.item(i).getFirstChild().getNodeValue()));
+            }
 
             if (previous != null) {
                 location.setBearing(previous.bearingTo(location));
