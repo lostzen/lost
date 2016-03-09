@@ -20,8 +20,8 @@ apply plugin: 'android-sdk-manager'
 apply plugin: 'com.android.application'
 apply plugin: 'checkstyle'
 
-group = 'com.mapzen.android'
-version = '1.0.2-SNAPSHOT'
+group = GROUP
+version = VERSION_NAME
 
 description = """LOST Sample"""
 
