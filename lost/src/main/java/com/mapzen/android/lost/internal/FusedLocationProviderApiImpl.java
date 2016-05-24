@@ -51,6 +51,7 @@ public class FusedLocationProviderApiImpl implements
 
     @Override
     public void removeLocationUpdates(LocationListener listener) {
+        this.locationListener = listener;
         locationEngine.setRequest(null);
     }
 
