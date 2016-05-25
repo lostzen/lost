@@ -55,8 +55,8 @@ task checkstyle(type: Checkstyle) {
 }
 
 dependencies {
-  compile group: 'com.mapzen.android', name: 'lost', version: '1.0.2-SNAPSHOT'
-  compile group: 'com.mapzen.android', name: 'prefs-plus', version: '1.0.0'
+  compile project(':lost')
+  compile 'com.mapzen.android:prefs-plus:1.0.0'
   compile 'com.android.support:appcompat-v7:22.2.0'
 }
 

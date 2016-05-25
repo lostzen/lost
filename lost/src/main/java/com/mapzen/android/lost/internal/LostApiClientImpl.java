@@ -1,6 +1,6 @@
 package com.mapzen.android.lost.internal;
 
-import com.mapzen.android.lost.api.LocationListener;
+import com.mapzen.android.lost.api.FusedLocationProviderApi;
 import com.mapzen.android.lost.api.LocationServices;
 import com.mapzen.android.lost.api.LostApiClient;
 
@@ -28,10 +28,12 @@ public class LostApiClientImpl implements LostApiClient {
 
     @Override
     public void disconnect() {
-        if (LocationServices.FusedLocationApi != null) {
-            LocationServices.FusedLocationApi.removeLocationUpdates((LocationListener) null);
+        if (LocationServices.FusedLocationApi != null && LocationServices.FusedLocationApi
+                instanceof FusedLocationProviderApiImpl) {
+            FusedLocationProviderApiImpl fusedProvider = (FusedLocationProviderApiImpl)
+                    LocationServices.FusedLocationApi;
+            fusedProvider.shutdown();
         }
-
         LocationServices.FusedLocationApi = null;
         LocationServices.GeofencingApi = null;
     }

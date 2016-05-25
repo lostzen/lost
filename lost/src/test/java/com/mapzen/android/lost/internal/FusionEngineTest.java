@@ -367,7 +367,7 @@ public class FusionEngineTest {
         private Location location;
 
         @Override
-        public void reportLocation(Location location) {
+        public void reportLocation(LocationEngine engine, Location location) {
             this.location = location;
         }
     }

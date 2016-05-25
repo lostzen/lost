@@ -169,7 +169,7 @@ public class MockEngineTest {
         private ArrayList<Location> locations = new ArrayList<>();
 
         @Override
-        public void reportLocation(Location location) {
+        public void reportLocation(LocationEngine engine, Location location) {
             lastLocation = location;
             locations.add(location);
         }

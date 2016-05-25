@@ -10,6 +10,9 @@ import android.location.Location;
 import android.os.Looper;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Implementation of the {@link FusedLocationProviderApi}.
@@ -18,24 +21,30 @@ public class FusedLocationProviderApiImpl implements
         FusedLocationProviderApi, LocationEngine.Callback {
 
     private final Context context;
-    private LocationEngine locationEngine;
-    private LocationListener locationListener;
+    private HashMap<LocationRequest, LocationEngine> locationEngines;
+    private HashMap<LocationEngine, List<LocationListener>> engineListeners;
+    private LocationEngine lastLocationEngine;
     private boolean mockMode;
+    private File mockTraceFile;
+    private Location mockLocation;
 
     public FusedLocationProviderApiImpl(Context context) {
         this.context = context;
-        locationEngine = new FusionEngine(context, this);
+        locationEngines = new HashMap<>();
+        engineListeners = new HashMap<>();
+        lastLocationEngine = new FusionEngine(context, null);
     }
 
     @Override
     public Location getLastLocation() {
-        return locationEngine.getLastLocation();
+        return lastLocationEngine.getLastLocation();
     }
 
     @Override
     public void requestLocationUpdates(LocationRequest request, LocationListener listener) {
-        this.locationListener = listener;
-        locationEngine.setRequest(request);
+        LocationEngine engine = locationEngineForRequest(request);
+        addListenerForEngine(engine, listener);
+        engine.setRequest(request);
     }
 
     @Override
@@ -51,8 +60,10 @@ public class FusedLocationProviderApiImpl implements
 
     @Override
     public void removeLocationUpdates(LocationListener listener) {
-        this.locationListener = listener;
-        locationEngine.setRequest(null);
+        LocationEngine engine = removeListenerFromEngine(listener);
+        if (engine != null) {
+            checkShutdownEngine(engine);
+        }
     }
 
     @Override
@@ -69,32 +80,110 @@ public class FusedLocationProviderApiImpl implements
 
     private void toggleMockMode() {
         mockMode = !mockMode;
-        locationEngine.setRequest(null);
+        shutdownAllEngines();
         if (mockMode) {
-            locationEngine = new MockEngine(context, this);
+            lastLocationEngine = new MockEngine(context, null);
         } else {
-            locationEngine = new FusionEngine(context, this);
+            lastLocationEngine = new FusionEngine(context, null);
         }
     }
 
     @Override
     public void setMockLocation(Location mockLocation) {
-        if (locationEngine instanceof MockEngine) {
-            ((MockEngine) locationEngine).setLocation(mockLocation);
+        this.mockLocation = mockLocation;
+        if (mockMode) {
+            ((MockEngine) lastLocationEngine).setLocation(mockLocation);
+            for (LocationEngine engine : locationEngines.values()) {
+                ((MockEngine) engine).setLocation(mockLocation);
+            }
         }
     }
 
     @Override
     public void setMockTrace(File file) {
-        if (locationEngine instanceof MockEngine) {
-            ((MockEngine) locationEngine).setTrace(file);
+        this.mockTraceFile = file;
+        if (mockMode) {
+            for (LocationEngine engine : locationEngines.values()) {
+                ((MockEngine) engine).setTrace(file);
+            }
         }
     }
 
     @Override
-    public void reportLocation(Location location) {
-        if (locationListener != null) {
-            locationListener.onLocationChanged(location);
+    public void reportLocation(LocationEngine engine, Location location) {
+        for (LocationListener listener : engineListeners.get(engine)) {
+            listener.onLocationChanged(location);
         }
+    }
+    
+    public void shutdown() {
+        shutdownAllEngines();
+    }
+
+    /**
+     * First checks for an existing {@link LocationEngine} given a request. Creates a new one if
+     * none exist.
+     * @param request
+     * @return
+     */
+    private LocationEngine locationEngineForRequest(LocationRequest request) {
+        LocationEngine existing = locationEngines.get(request);
+        if (existing == null) {
+            if (mockMode) {
+                existing = new MockEngine(context, this);
+                MockEngine existingMock = (MockEngine) existing;
+                existingMock.setTrace(mockTraceFile);
+                if (mockLocation != null) {
+                    existingMock.setLocation(mockLocation);
+                }
+            } else {
+                existing = new FusionEngine(context, this);
+            }
+            locationEngines.put(request, existing);
+        }
+        return existing;
+    }
+
+    private void checkShutdownEngine(LocationEngine engine) {
+        if (engineListeners.get(engine) == null) {
+            engine.setRequest(null);
+        }
+    }
+
+    private void addListenerForEngine(LocationEngine engine, LocationListener listener) {
+        List existing = engineListeners.get(engine);
+        if (existing == null) {
+            existing = new ArrayList();
+            engineListeners.put(engine, existing);
+        }
+        existing.add(listener);
+    }
+
+    /**
+     * Removes {@link LocationListener} from map of LocationEngine/LocationListeners and
+     * returns the {@link LocationEngine} that the listner was removed from
+     * @param listener
+     * @return
+     */
+    private LocationEngine removeListenerFromEngine(LocationListener listener) {
+        for (LocationEngine engine : engineListeners.keySet()) {
+            List<LocationListener> listeners = engineListeners.get(engine);
+            if (listeners.contains(listener)) {
+                listeners.remove(listener);
+                if (listeners.isEmpty()) {
+                    engineListeners.remove(engine);
+                }
+                return engine;
+            }
+        }
+        return null;
+    }
+
+    private void shutdownAllEngines() {
+        for (LocationEngine engine : locationEngines.values()) {
+            engineListeners.remove(engine);
+            engine.setRequest(null);
+        }
+        locationEngines.clear();
     }
 }
