@@ -115,7 +115,7 @@ public class FusedLocationProviderApiImpl implements
             listener.onLocationChanged(location);
         }
     }
-    
+
     public void shutdown() {
         shutdownAllEngines();
     }
