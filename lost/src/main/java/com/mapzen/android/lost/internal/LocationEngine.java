@@ -64,6 +64,6 @@ public abstract class LocationEngine {
     }
 
     public interface Callback {
-        public void reportLocation(Location location);
+        public void reportLocation(LocationEngine engine, Location location);
     }
 }

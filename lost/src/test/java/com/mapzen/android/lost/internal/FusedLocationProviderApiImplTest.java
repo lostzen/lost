@@ -339,4 +339,33 @@ public class FusedLocationProviderApiImplTest {
             return locations.get(locations.size() - 1);
         }
     }
+
+    @Test public void requestLocationUpdates_shouldNotifyBothListeners() {
+        LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
+        TestLocationListener listener1 = new TestLocationListener();
+        TestLocationListener listener2 = new TestLocationListener();
+        api.requestLocationUpdates(request, listener1);
+        api.requestLocationUpdates(request, listener2);
+        Location location = new Location(GPS_PROVIDER);
+        location.setLatitude(40.0);
+        location.setLongitude(70.0);
+        shadowLocationManager.simulateLocation(location);
+        assertThat(listener1.getAllLocations()).contains(location);
+        assertThat(listener2.getAllLocations()).contains(location);
+    }
+
+    @Test public void requestLocationUpdates_shouldNotNotifyRemovedListener() {
+        LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
+        TestLocationListener listener1 = new TestLocationListener();
+        TestLocationListener listener2 = new TestLocationListener();
+        api.requestLocationUpdates(request, listener1);
+        api.requestLocationUpdates(request, listener2);
+        api.removeLocationUpdates(listener2);
+        Location location = new Location(GPS_PROVIDER);
+        location.setLatitude(40.0);
+        location.setLongitude(70.0);
+        shadowLocationManager.simulateLocation(location);
+        assertThat(listener1.getAllLocations()).contains(location);
+        assertThat(listener2.getAllLocations()).doesNotContain(location);
+    }
 }

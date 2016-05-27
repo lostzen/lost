@@ -34,7 +34,7 @@ public class MockEngine extends LocationEngine {
 
     private Location location;
     private File traceFile;
-    private TraceThread traceThread;
+    protected TraceThread traceThread;
 
     public MockEngine(Context context, FusionEngine.Callback callback) {
         super(context, callback);
@@ -63,7 +63,7 @@ public class MockEngine extends LocationEngine {
     public void setLocation(Location location) {
         this.location = location;
         if (getCallback() != null) {
-            getCallback().reportLocation(location);
+            getCallback().reportLocation(this, location);
         }
     }
 
@@ -74,7 +74,7 @@ public class MockEngine extends LocationEngine {
         traceFile = file;
     }
 
-    private class TraceThread extends Thread {
+    protected class TraceThread extends Thread {
         private boolean canceled;
         private Location previous;
 

@@ -131,12 +131,12 @@ public class FusionEngine extends LocationEngine implements LocationListener {
         if (GPS_PROVIDER.equals(location.getProvider())) {
             gpsLocation = location;
             if (getCallback() != null && isBetterThan(gpsLocation, networkLocation)) {
-                getCallback().reportLocation(location);
+                getCallback().reportLocation(this, location);
             }
         } else if (NETWORK_PROVIDER.equals(location.getProvider())) {
             networkLocation = location;
             if (getCallback() != null && isBetterThan(networkLocation, gpsLocation)) {
-                getCallback().reportLocation(location);
+                getCallback().reportLocation(this, location);
             }
         }
     }
