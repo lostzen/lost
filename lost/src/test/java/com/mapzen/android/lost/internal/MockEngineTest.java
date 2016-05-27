@@ -7,6 +7,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
@@ -114,7 +115,7 @@ public class MockEngineTest {
         assertThat(callback.locations).hasSize(3);
     }
 
-    @Test
+    @Test @Ignore("Intermittently failing. Find a better way to test without Thread.sleep(100)")
     public void setTrace_shouldNotRequireSpeed() throws Exception {
         mockEngine.setTrace(getTestGpxTrace());
         mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
