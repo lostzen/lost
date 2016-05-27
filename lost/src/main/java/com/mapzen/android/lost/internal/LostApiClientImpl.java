@@ -18,8 +18,12 @@ public class LostApiClientImpl implements LostApiClient {
 
     @Override
     public void connect() {
-        LocationServices.FusedLocationApi = new FusedLocationProviderApiImpl(context);
-        LocationServices.GeofencingApi = new GeofencingApiImpl();
+        if (LocationServices.FusedLocationApi == null) {
+            LocationServices.FusedLocationApi = new FusedLocationProviderApiImpl(context);
+        }
+        if (LocationServices.GeofencingApi == null) {
+            LocationServices.GeofencingApi = new GeofencingApiImpl();
+        }
     }
 
     @Override
