@@ -111,8 +111,11 @@ public class FusedLocationProviderApiImpl implements
 
     @Override
     public void reportLocation(LocationEngine engine, Location location) {
-        for (LocationListener listener : engineListeners.get(engine)) {
-            listener.onLocationChanged(location);
+        List<LocationListener> listeners = engineListeners.get(engine);
+        if (listeners != null) {
+            for (LocationListener listener : listeners) {
+                listener.onLocationChanged(location);
+            }
         }
     }
 
