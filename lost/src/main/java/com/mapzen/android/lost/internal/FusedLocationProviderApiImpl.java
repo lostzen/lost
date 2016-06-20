@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.location.Location;
 import android.os.Looper;
+import android.support.annotation.VisibleForTesting;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -123,14 +124,6 @@ public class FusedLocationProviderApiImpl implements
         shutdownAllEngines();
     }
 
-    public List<LocationListener> getListeners() {
-        List<LocationListener> listeners = new ArrayList<>();
-        for (LocationEngine engine : engineListeners.keySet()) {
-            listeners.addAll(engineListeners.get(engine));
-        }
-        return listeners;
-    }
-
     /**
      * First checks for an existing {@link LocationEngine} given a request. Creates a new one if
      * none exist.
@@ -231,5 +224,14 @@ public class FusedLocationProviderApiImpl implements
             engine.setRequest(null);
         }
         locationEngines.clear();
+    }
+
+    @VisibleForTesting
+    public List<LocationListener> getListeners() {
+        List<LocationListener> listeners = new ArrayList<>();
+        for (LocationEngine engine : engineListeners.keySet()) {
+            listeners.addAll(engineListeners.get(engine));
+        }
+        return listeners;
     }
 }
