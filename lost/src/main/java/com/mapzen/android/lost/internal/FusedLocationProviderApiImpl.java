@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.location.Location;
 import android.os.Looper;
+import android.support.annotation.VisibleForTesting;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -42,9 +43,12 @@ public class FusedLocationProviderApiImpl implements
 
     @Override
     public void requestLocationUpdates(LocationRequest request, LocationListener listener) {
+        LocationEngine existing = locationEngines.get(request);
         LocationEngine engine = locationEngineForRequest(request);
         addListenerForEngine(engine, listener);
-        engine.setRequest(request);
+        if (existing == null) {
+            engine.setRequest(request);
+        }
     }
 
     @Override
@@ -80,7 +84,7 @@ public class FusedLocationProviderApiImpl implements
 
     private void toggleMockMode() {
         mockMode = !mockMode;
-        shutdownAllEngines();
+        toggleAllEngines();
         if (mockMode) {
             lastLocationEngine = new MockEngine(context, null);
         } else {
@@ -182,11 +186,55 @@ public class FusedLocationProviderApiImpl implements
         return null;
     }
 
+    private void toggleAllEngines() {
+        HashMap<LocationRequest, LocationEngine> enginesToAdd = new HashMap<>();
+        HashMap<LocationEngine, List<LocationListener>> listenersToAdd = new HashMap<>();
+        for (LocationRequest request : locationEngines.keySet()) {
+            LocationEngine existing = locationEngines.get(request);
+            LocationEngine engineToAdd;
+            if (mockMode) {
+                engineToAdd = new MockEngine(context, this);
+            } else {
+                engineToAdd = new FusionEngine(context, this);
+            }
+            enginesToAdd.put(request, engineToAdd);
+
+            List<LocationListener> listeners = engineListeners.get(existing);
+            listenersToAdd.put(engineToAdd, listeners);
+
+            //Cleanup listeners
+            engineListeners.remove(existing);
+            existing.setRequest(null);
+        }
+        //Cleanup engines
+        locationEngines.clear();
+
+        //Now add new engines/listeners
+        for (LocationRequest request : enginesToAdd.keySet()) {
+            LocationEngine engine = enginesToAdd.get(request);
+            List<LocationListener> listeners = listenersToAdd.get(engine);
+            if (listeners != null) {
+                for (LocationListener listener : listeners) {
+                    requestLocationUpdates(request, listener);
+                }
+            }
+        }
+    }
+
     private void shutdownAllEngines() {
         for (LocationEngine engine : locationEngines.values()) {
             engineListeners.remove(engine);
             engine.setRequest(null);
         }
         locationEngines.clear();
+    }
+
+    @VisibleForTesting
+    List<LocationListener> getListeners() {
+        List<LocationListener> listeners = new ArrayList<>();
+        for (LocationEngine engine : engineListeners.keySet()) {
+            listeners.addAll(engineListeners.get(engine));
+        }
+        return listeners;
     }
 }

@@ -223,6 +223,16 @@ public class FusedLocationProviderApiImplTest {
     }
 
     @Test
+    public void setMockMode_shouldToggleEngines() {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        api.requestLocationUpdates(request, listener);
+        api.setMockMode(true);
+        api.requestLocationUpdates(request, listener);
+        assertThat(api.getListeners()).hasSize(2);
+    }
+
+    @Test
     public void requestLocationUpdates_shouldNotRegisterListenersWithMockModeOn() throws Exception {
         api.setMockMode(true);
         TestLocationListener listener = new TestLocationListener();
