@@ -219,7 +219,7 @@ public class FusedLocationProviderApiImplTest {
         api.requestLocationUpdates(request, listener);
         api.setMockMode(false);
         api.requestLocationUpdates(request, listener);
-        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(4);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(2);
     }
 
     @Test

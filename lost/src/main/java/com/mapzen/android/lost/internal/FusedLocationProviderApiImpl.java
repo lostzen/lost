@@ -43,9 +43,12 @@ public class FusedLocationProviderApiImpl implements
 
     @Override
     public void requestLocationUpdates(LocationRequest request, LocationListener listener) {
+        LocationEngine existing = locationEngines.get(request);
         LocationEngine engine = locationEngineForRequest(request);
         addListenerForEngine(engine, listener);
-        engine.setRequest(request);
+        if (existing == null) {
+            engine.setRequest(request);
+        }
     }
 
     @Override
@@ -227,7 +230,7 @@ public class FusedLocationProviderApiImpl implements
     }
 
     @VisibleForTesting
-    public List<LocationListener> getListeners() {
+    List<LocationListener> getListeners() {
         List<LocationListener> listeners = new ArrayList<>();
         for (LocationEngine engine : engineListeners.keySet()) {
             listeners.addAll(engineListeners.get(engine));
