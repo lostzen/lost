@@ -41,4 +41,14 @@ public class LostApiClientImpl implements LostApiClient {
     public boolean isConnected() {
         return LocationServices.FusedLocationApi != null && LocationServices.GeofencingApi != null;
     }
+
+    @Override
+    public int numberOfListeners() {
+        if (LocationServices.FusedLocationApi == null) {
+            return 0;
+        }
+        FusedLocationProviderApiImpl api
+            = (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
+        return api.getListeners().size();
+    }
 }

@@ -12,6 +12,8 @@ public interface LostApiClient {
 
     public boolean isConnected();
 
+    public int numberOfListeners();
+
     public static final class Builder {
         private final Context context;
 

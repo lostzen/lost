@@ -203,12 +203,12 @@ public class FusedLocationProviderApiImplTest {
     }
 
     @Test
-    public void setMockMode_shouldUnregisterAllListenersWhenTrue() throws Exception {
+    public void setMockMode_shouldToggleAllListenersWhenTrue() throws Exception {
         TestLocationListener listener = new TestLocationListener();
         LocationRequest request = LocationRequest.create();
         api.requestLocationUpdates(request, listener);
         api.setMockMode(true);
-        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
+        assertThat(api.getListeners()).hasSize(1);
     }
 
     @Test
@@ -219,7 +219,7 @@ public class FusedLocationProviderApiImplTest {
         api.requestLocationUpdates(request, listener);
         api.setMockMode(false);
         api.requestLocationUpdates(request, listener);
-        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(2);
+        assertThat(api.getListeners()).hasSize(2);
     }
 
     @Test
