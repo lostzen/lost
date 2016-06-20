@@ -217,8 +217,10 @@ public class FusedLocationProviderApiImpl implements
         for (LocationRequest request : enginesToAdd.keySet()) {
             LocationEngine engine = enginesToAdd.get(request);
             List<LocationListener> listeners = listenersToAdd.get(engine);
-            for (LocationListener listener : listeners) {
-                requestLocationUpdates(request, listener);
+            if (listeners != null) {
+                for (LocationListener listener : listeners) {
+                    requestLocationUpdates(request, listener);
+                }
             }
         }
     }
