@@ -370,5 +370,13 @@ public class FusionEngineTest {
         public void reportLocation(LocationEngine engine, Location location) {
             this.location = location;
         }
+
+        @Override
+        public void reportProviderDisabled(LocationEngine engine, String provider) {
+        }
+
+        @Override
+        public void reportProviderEnabled(LocationEngine engine, String provider) {
+        }
     }
 }

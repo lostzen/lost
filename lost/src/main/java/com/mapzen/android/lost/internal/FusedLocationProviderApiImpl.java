@@ -114,11 +114,36 @@ public class FusedLocationProviderApiImpl implements
     }
 
     @Override
+    public boolean isProviderEnabled(String provider) {
+        return lastLocationEngine.isProviderEnabled(provider);
+    }
+
+    @Override
     public void reportLocation(LocationEngine engine, Location location) {
-        List<LocationListener> listeners = engineListeners.get(engine);
+        final List<LocationListener> listeners = engineListeners.get(engine);
         if (listeners != null) {
             for (LocationListener listener : listeners) {
                 listener.onLocationChanged(location);
+            }
+        }
+    }
+
+    @Override
+    public void reportProviderDisabled(LocationEngine engine, String provider) {
+        final List<LocationListener> listeners = engineListeners.get(engine);
+        if (listeners != null) {
+            for (LocationListener listener : listeners) {
+                listener.onProviderDisabled(provider);
+            }
+        }
+    }
+
+    @Override
+    public void reportProviderEnabled(LocationEngine engine, String provider) {
+        final List<LocationListener> listeners = engineListeners.get(engine);
+        if (listeners != null) {
+            for (LocationListener listener : listeners) {
+                listener.onProviderEnabled(provider);
             }
         }
     }

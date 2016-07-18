@@ -314,6 +314,59 @@ public class FusedLocationProviderApiImplTest {
         assertThat(listener.getAllLocations()).hasSize(3);
     }
 
+    @Test
+    public void isProviderEnabled_shouldReturnProviderStatus() throws Exception {
+        shadowLocationManager.setProviderEnabled(LocationManager.GPS_PROVIDER, true);
+        shadowLocationManager.setProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
+        assertThat(api.isProviderEnabled(LocationManager.GPS_PROVIDER)).isTrue();
+        assertThat(api.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).isTrue();
+
+        shadowLocationManager.setProviderEnabled(LocationManager.GPS_PROVIDER, false);
+        shadowLocationManager.setProviderEnabled(LocationManager.NETWORK_PROVIDER, false);
+        assertThat(api.isProviderEnabled(LocationManager.GPS_PROVIDER)).isFalse();
+        assertThat(api.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).isFalse();
+    }
+
+    @Test
+    public void onProviderDisabled_shouldReportWhenGpsIsDisabled() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
+        api.requestLocationUpdates(request, listener);
+        listener.isGpsEnabled = true;
+        shadowLocationManager.setProviderEnabled(GPS_PROVIDER, false);
+        assertThat(listener.isGpsEnabled).isFalse();
+    }
+
+    @Test
+    public void onProviderDisabled_shouldReportWhenNetworkIsDisabled() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        api.requestLocationUpdates(request, listener);
+        listener.isNetworkEnabled = true;
+        shadowLocationManager.setProviderEnabled(NETWORK_PROVIDER, false);
+        assertThat(listener.isNetworkEnabled).isFalse();
+    }
+
+    @Test
+    public void onProviderEnabled_shouldReportWhenGpsIsEnabled() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
+        api.requestLocationUpdates(request, listener);
+        listener.isGpsEnabled = false;
+        shadowLocationManager.setProviderEnabled(GPS_PROVIDER, true);
+        assertThat(listener.isGpsEnabled).isTrue();
+    }
+
+    @Test
+    public void onProviderEnabled_shouldReportWhenNetworkIsEnabled() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        LocationRequest request = LocationRequest.create();
+        api.requestLocationUpdates(request, listener);
+        listener.isNetworkEnabled = false;
+        shadowLocationManager.setProviderEnabled(NETWORK_PROVIDER, true);
+        assertThat(listener.isNetworkEnabled).isTrue();
+    }
+
     private static Location getTestLocation(String provider, float lat, float lng, long time) {
         Location location = new Location(provider);
         location.setLatitude(lat);
@@ -334,11 +387,41 @@ public class FusedLocationProviderApiImplTest {
     }
 
     class TestLocationListener implements LocationListener {
-        private ArrayList<Location> locations = new ArrayList<Location>();
+        private ArrayList<Location> locations = new ArrayList<>();
+        private boolean isGpsEnabled = true;
+        private boolean isNetworkEnabled = true;
 
         @Override
         public void onLocationChanged(Location location) {
             locations.add(location);
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            switch (provider) {
+                case GPS_PROVIDER:
+                    isGpsEnabled = false;
+                    break;
+                case NETWORK_PROVIDER:
+                    isNetworkEnabled = false;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            switch (provider) {
+                case GPS_PROVIDER:
+                    isGpsEnabled = true;
+                    break;
+                case NETWORK_PROVIDER:
+                    isNetworkEnabled = true;
+                    break;
+                default:
+                    break;
+            }
         }
 
         public List<Location> getAllLocations() {

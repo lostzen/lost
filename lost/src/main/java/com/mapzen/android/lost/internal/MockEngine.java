@@ -46,6 +46,11 @@ public class MockEngine extends LocationEngine {
     }
 
     @Override
+    public boolean isProviderEnabled(String provider) {
+        return false;
+    }
+
+    @Override
     protected void enable() {
         if (traceFile != null) {
             traceThread = new TraceThread();

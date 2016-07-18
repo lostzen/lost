@@ -72,6 +72,14 @@ public class LostApiClientImplTest {
                     @Override
                     public void onLocationChanged(Location location) {
                     }
+
+                    @Override
+                    public void onProviderDisabled(String provider) {
+                    }
+
+                    @Override
+                    public void onProviderEnabled(String provider) {
+                    }
                 });
 
         client.disconnect();
