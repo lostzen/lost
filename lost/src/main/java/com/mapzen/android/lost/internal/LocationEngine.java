@@ -24,6 +24,8 @@ public abstract class LocationEngine {
      */
     public abstract Location getLastLocation();
 
+    public abstract boolean isProviderEnabled(String provider);
+
     /**
      * Enables the engine on receiving a valid location request. Disables the engine on receiving a
      * {@code null} request.

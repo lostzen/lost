@@ -38,6 +38,7 @@ public class FusionEngine extends LocationEngine implements LocationListener {
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     }
 
+    @Override
     public Location getLastLocation() {
         final List<String> providers = locationManager.getAllProviders();
         final long minTime = clock.getCurrentTimeInMillis() - RECENT_UPDATE_THRESHOLD_IN_MILLIS;
@@ -63,6 +64,11 @@ public class FusionEngine extends LocationEngine implements LocationListener {
         }
 
         return bestLocation;
+    }
+
+    @Override
+    public boolean isProviderEnabled(String provider) {
+        return locationManager.isProviderEnabled(provider);
     }
 
     @Override
