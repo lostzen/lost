@@ -405,6 +405,8 @@ public class FusedLocationProviderApiImplTest {
                 case NETWORK_PROVIDER:
                     isNetworkEnabled = false;
                     break;
+                default:
+                    break;
             }
         }
 
@@ -416,6 +418,8 @@ public class FusedLocationProviderApiImplTest {
                     break;
                 case NETWORK_PROVIDER:
                     isNetworkEnabled = true;
+                    break;
+                default:
                     break;
             }
         }
