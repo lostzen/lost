@@ -16,6 +16,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,6 +36,8 @@ import static com.mapzen.android.lost.api.LocationServices.FusedLocationApi;
  * LOST Activity
  */
 public class LostActivity extends AppCompatActivity {
+    private static final String TAG = "LOST Sample";
+
     private LostFragment fragment;
     private SharedPreferences prefs;
 
@@ -44,6 +47,16 @@ public class LostActivity extends AppCompatActivity {
         @Override
         public void onLocationChanged(Location location) {
             fragment.updateLocation(location);
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            Log.d(TAG, "Location provider disabled: " + provider);
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            Log.d(TAG, "Location provider enabled: " + provider);
         }
     };
 
@@ -77,7 +90,13 @@ public class LostActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        disconnect();
+        if (!isBackgroundLocationUpdatesEnabled()) {
+            disconnect();
+        }
+    }
+
+    private boolean isBackgroundLocationUpdatesEnabled() {
+        return prefs.getBoolean(getString(R.string.background_update_key), false);
     }
 
     @Override
@@ -117,6 +136,7 @@ public class LostActivity extends AppCompatActivity {
     }
 
     private void connect() {
+        Log.d(TAG, "Connecting...");
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -191,6 +211,7 @@ public class LostActivity extends AppCompatActivity {
     }
 
     private void disconnect() {
+        Log.d(TAG, "Disconnecting...");
         client.disconnect();
     }
 
