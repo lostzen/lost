@@ -66,6 +66,8 @@ public abstract class LocationEngine {
     }
 
     public interface Callback {
-        public void reportLocation(LocationEngine engine, Location location);
+        void reportLocation(LocationEngine engine, Location location);
+        void reportProviderDisabled(LocationEngine engine, String provider);
+        void reportProviderEnabled(LocationEngine engine, String provider);
     }
 }

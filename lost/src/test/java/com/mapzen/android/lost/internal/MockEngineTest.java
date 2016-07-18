@@ -175,6 +175,14 @@ public class MockEngineTest {
             locations.add(location);
         }
 
+        @Override
+        public void reportProviderDisabled(LocationEngine engine, String provider) {
+        }
+
+        @Override
+        public void reportProviderEnabled(LocationEngine engine, String provider) {
+        }
+
         public void reset() {
             lastLocation = null;
             locations.clear();

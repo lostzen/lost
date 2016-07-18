@@ -153,10 +153,18 @@ public class FusionEngine extends LocationEngine implements LocationListener {
 
     @Override
     public void onProviderEnabled(String provider) {
+        final Callback callback = getCallback();
+        if (callback != null) {
+            callback.reportProviderEnabled(this, provider);
+        }
     }
 
     @Override
     public void onProviderDisabled(String provider) {
+        final Callback callback = getCallback();
+        if (callback != null) {
+            callback.reportProviderDisabled(this, provider);
+        }
     }
 
     public static boolean isBetterThan(Location locationA, Location locationB) {
