@@ -78,22 +78,24 @@ public class FusionEngine extends LocationEngine implements LocationListener {
 
     @Override
     protected void enable() {
-        switch (getRequest().getPriority()) {
-            case LocationRequest.PRIORITY_HIGH_ACCURACY:
-                enableGps();
-                enableNetwork();
-                break;
-            case LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY:
-                enableNetwork();
-                break;
-            case LocationRequest.PRIORITY_LOW_POWER:
-                enableNetwork();
-                break;
-            case LocationRequest.PRIORITY_NO_POWER:
-                enablePassive();
-                break;
-            default:
-                break;
+        for (LocationRequest request : getRequest().getRequests()) {
+            switch (request.getPriority()) {
+                case LocationRequest.PRIORITY_HIGH_ACCURACY:
+                    enableGps(request);
+                    enableNetwork(request);
+                    break;
+                case LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY:
+                    enableNetwork(request);
+                    break;
+                case LocationRequest.PRIORITY_LOW_POWER:
+                    enableNetwork(request);
+                    break;
+                case LocationRequest.PRIORITY_NO_POWER:
+                    enablePassive(request);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -104,33 +106,33 @@ public class FusionEngine extends LocationEngine implements LocationListener {
         }
     }
 
-    private void enableGps() {
+    private void enableGps(LocationRequest request) {
         try {
             locationManager.requestLocationUpdates(GPS_PROVIDER,
-                    getRequest().getFastestInterval(),
-                    getRequest().getSmallestDisplacement(),
+                    request.getFastestInterval(),
+                    request.getSmallestDisplacement(),
                     this);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Unable to register for GPS updates.", e);
         }
     }
 
-    private void enableNetwork() {
+    private void enableNetwork(LocationRequest request) {
         try {
             locationManager.requestLocationUpdates(NETWORK_PROVIDER,
-                    getRequest().getFastestInterval(),
-                    getRequest().getSmallestDisplacement(),
+                    request.getFastestInterval(),
+                    request.getSmallestDisplacement(),
                     this);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Unable to register for network updates.", e);
         }
     }
 
-    private void enablePassive() {
+    private void enablePassive(LocationRequest request) {
         try {
             locationManager.requestLocationUpdates(PASSIVE_PROVIDER,
-                    getRequest().getFastestInterval(),
-                    getRequest().getSmallestDisplacement(),
+                    request.getFastestInterval(),
+                    request.getSmallestDisplacement(),
                     this);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Unable to register for passive updates.", e);
@@ -142,12 +144,12 @@ public class FusionEngine extends LocationEngine implements LocationListener {
         if (GPS_PROVIDER.equals(location.getProvider())) {
             gpsLocation = location;
             if (getCallback() != null && isBetterThan(gpsLocation, networkLocation)) {
-                getCallback().reportLocation(this, location);
+                getCallback().reportLocation(location);
             }
         } else if (NETWORK_PROVIDER.equals(location.getProvider())) {
             networkLocation = location;
             if (getCallback() != null && isBetterThan(networkLocation, gpsLocation)) {
-                getCallback().reportLocation(this, location);
+                getCallback().reportLocation(location);
             }
         }
     }
@@ -160,7 +162,7 @@ public class FusionEngine extends LocationEngine implements LocationListener {
     public void onProviderEnabled(String provider) {
         final Callback callback = getCallback();
         if (callback != null) {
-            callback.reportProviderEnabled(this, provider);
+            callback.reportProviderEnabled(provider);
         }
     }
 
@@ -168,7 +170,7 @@ public class FusionEngine extends LocationEngine implements LocationListener {
     public void onProviderDisabled(String provider) {
         final Callback callback = getCallback();
         if (callback != null) {
-            callback.reportProviderDisabled(this, provider);
+            callback.reportProviderDisabled(provider);
         }
     }
 

@@ -12,11 +12,12 @@ import android.location.Location;
 public abstract class LocationEngine {
     private final Context context;
     private final Callback callback;
-    private LocationRequest request;
+    private LocationRequestUnbundled request;
 
     public LocationEngine(Context context, Callback callback) {
         this.context = context;
         this.callback = callback;
+        request = new LocationRequestUnbundled();
     }
 
     /**
@@ -33,10 +34,11 @@ public abstract class LocationEngine {
      * @param request Valid location request to enable or {@code null} to disable.
      */
     public void setRequest(LocationRequest request) {
-        this.request = request;
         if (request != null) {
+            this.request.addRequest(request);
             enable();
         } else {
+            this.request.removeAllRequests();
             disable();
         }
     }
@@ -61,13 +63,13 @@ public abstract class LocationEngine {
         return callback;
     }
 
-    protected LocationRequest getRequest() {
+    protected LocationRequestUnbundled getRequest() {
         return request;
     }
 
     public interface Callback {
-        void reportLocation(LocationEngine engine, Location location);
-        void reportProviderDisabled(LocationEngine engine, String provider);
-        void reportProviderEnabled(LocationEngine engine, String provider);
+        void reportLocation(Location location);
+        void reportProviderDisabled(String provider);
+        void reportProviderEnabled(String provider);
     }
 }
