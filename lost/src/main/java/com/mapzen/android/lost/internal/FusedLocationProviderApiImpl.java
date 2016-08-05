@@ -8,7 +8,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.location.Location;
 import android.os.Looper;
-import android.support.annotation.VisibleForTesting;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -254,7 +253,6 @@ public class FusedLocationProviderApiImpl implements
         locationEngines.clear();
     }
 
-    @VisibleForTesting
     List<LocationListener> getListeners() {
         List<LocationListener> listeners = new ArrayList<>();
         for (LocationEngine engine : engineListeners.keySet()) {
