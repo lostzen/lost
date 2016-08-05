@@ -6,7 +6,6 @@ import com.mapzen.lost.BuildConfig;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLocationManager;
@@ -32,7 +31,6 @@ import static com.mapzen.android.lost.internal.FusionEngine.RECENT_UPDATE_THRESH
 import static com.mapzen.android.lost.internal.FusionEngine.RECENT_UPDATE_THRESHOLD_IN_NANOS;
 import static com.mapzen.android.lost.internal.SystemClock.MS_TO_NS;
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
