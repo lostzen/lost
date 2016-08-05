@@ -106,8 +106,8 @@ public class LostActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[],
-            int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+        int[] grantResults) {
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             connect();
         } else {
