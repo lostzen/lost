@@ -6,15 +6,20 @@ import com.mapzen.lost.BuildConfig;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLocationManager;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
@@ -27,6 +32,9 @@ import static com.mapzen.android.lost.internal.FusionEngine.RECENT_UPDATE_THRESH
 import static com.mapzen.android.lost.internal.FusionEngine.RECENT_UPDATE_THRESHOLD_IN_NANOS;
 import static com.mapzen.android.lost.internal.SystemClock.MS_TO_NS;
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 import static org.robolectric.Shadows.shadowOf;
 
@@ -128,6 +136,29 @@ public class FusionEngineTest {
         shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, networkLocation);
 
         assertThat(fusionEngine.getLastLocation()).isEqualTo(gpsLocation);
+    }
+
+    @SuppressWarnings("MissingPermission") @Test
+    public void getLastLocation_shouldReturnNullIfNoLocationPermissionsGranted() throws Exception {
+        Context mockContext = mock(Context.class);
+        LocationManager mockLocatinManager = mock(LocationManager.class);
+        List<String> providers = new ArrayList<>(3);
+        providers.add(GPS_PROVIDER);
+        providers.add(NETWORK_PROVIDER);
+        providers.add(PASSIVE_PROVIDER);
+
+        when(mockContext.getSystemService(Context.LOCATION_SERVICE))
+            .thenReturn(mockLocatinManager);
+        when(mockLocatinManager.getAllProviders()).thenReturn(providers);
+        when(mockLocatinManager.getLastKnownLocation(GPS_PROVIDER))
+            .thenThrow(new SecurityException());
+        when(mockLocatinManager.getLastKnownLocation(NETWORK_PROVIDER))
+            .thenThrow(new SecurityException());
+        when(mockLocatinManager.getLastKnownLocation(PASSIVE_PROVIDER))
+            .thenThrow(new SecurityException());
+
+        final FusionEngine fusionEngine = new FusionEngine(mockContext, callback);
+        assertThat(fusionEngine.getLastLocation()).isNull();
     }
 
     @Test
@@ -293,7 +324,7 @@ public class FusionEngineTest {
         assertThat(FusionEngine.isBetterThan(locationA, locationB)).isTrue();
     }
 
-    @Test @Config(sdk = 17)
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1) @Test @Config(sdk = 17)
     public void isBetterThan_shouldReturnTrueIfLocationBIsStale_Api17() throws Exception {
         final long timeInNanos = System.currentTimeMillis() * MS_TO_NS;
         Location locationA = new Location("test");

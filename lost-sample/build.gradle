@@ -4,19 +4,17 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:1.2.3'
-    classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.+'
+    classpath 'com.android.tools.build:gradle:2.1.2'
   }
 }
 
 repositories {
   mavenLocal()
-  maven { url "http://dl.bintray.com/crankycoder/libMozStumbler" }
+  mavenCentral()
   maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
   maven { url "http://repo.maven.apache.org/maven2" }
 }
 
-apply plugin: 'android-sdk-manager'
 apply plugin: 'com.android.application'
 apply plugin: 'checkstyle'
 
@@ -26,21 +24,15 @@ version = VERSION_NAME
 description = """LOST Sample"""
 
 android {
-  compileSdkVersion 21
-  buildToolsVersion "21.0.2"
+  compileSdkVersion 23
+  buildToolsVersion "23.0.3"
 
   defaultConfig {
     applicationId "com.example.lost"
     minSdkVersion 15
-    targetSdkVersion 21
+    targetSdkVersion 23
     versionCode 1
     versionName "1.0"
-  }
-  buildTypes {
-    //release {
-    //    minifyEnabled false
-    //    proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-    //}
   }
 }
 
@@ -57,7 +49,7 @@ task checkstyle(type: Checkstyle) {
 dependencies {
   compile project(':lost')
   compile 'com.mapzen.android:prefs-plus:1.0.0'
-  compile 'com.android.support:appcompat-v7:22.2.0'
+  compile 'com.android.support:appcompat-v7:23.4.0'
 }
 
 apply from: file('../gradle-mvn-push.gradle')

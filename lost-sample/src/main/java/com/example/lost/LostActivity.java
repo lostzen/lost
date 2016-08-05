@@ -4,17 +4,21 @@ import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LostApiClient;
 
+import android.Manifest;
 import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -84,7 +88,13 @@ public class LostActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        connect();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 101);
+        } else {
+            connect();
+        }
     }
 
     @Override
@@ -92,6 +102,16 @@ public class LostActivity extends AppCompatActivity {
         super.onPause();
         if (!isBackgroundLocationUpdatesEnabled()) {
             disconnect();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[],
+            int[] grantResults) {
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            connect();
+        } else {
+            finish();
         }
     }
 
