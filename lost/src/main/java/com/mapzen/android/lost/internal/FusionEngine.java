@@ -48,18 +48,23 @@ public class FusionEngine extends LocationEngine implements LocationListener {
         long bestTime = Long.MIN_VALUE;
 
         for (String provider : providers) {
-            final Location location = locationManager.getLastKnownLocation(provider);
-            if (location != null) {
-                final float accuracy = location.getAccuracy();
-                final long time = location.getTime();
-                if (time > minTime && accuracy < bestAccuracy) {
-                    bestLocation = location;
-                    bestAccuracy = accuracy;
-                    bestTime = time;
-                } else if (time < minTime && bestAccuracy == Float.MAX_VALUE && time > bestTime) {
-                    bestLocation = location;
-                    bestTime = time;
+            try {
+                final Location location = locationManager.getLastKnownLocation(provider);
+                if (location != null) {
+                    final float accuracy = location.getAccuracy();
+                    final long time = location.getTime();
+                    if (time > minTime && accuracy < bestAccuracy) {
+                        bestLocation = location;
+                        bestAccuracy = accuracy;
+                        bestTime = time;
+                    } else if (time < minTime && bestAccuracy == Float.MAX_VALUE
+                            && time > bestTime) {
+                        bestLocation = location;
+                        bestTime = time;
+                    }
                 }
+            } catch (SecurityException e) {
+                Log.e(TAG, "Permissions not granted for provider: " + provider, e);
             }
         }
 
