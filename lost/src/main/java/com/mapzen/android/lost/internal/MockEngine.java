@@ -68,7 +68,7 @@ public class MockEngine extends LocationEngine {
     public void setLocation(Location location) {
         this.location = location;
         if (getCallback() != null) {
-            getCallback().reportLocation(this, location);
+            getCallback().reportLocation(location);
         }
     }
 

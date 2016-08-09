@@ -228,7 +228,9 @@ public class FusedLocationProviderApiImplTest {
         LocationRequest request = LocationRequest.create();
         api.requestLocationUpdates(request, listener);
         api.setMockMode(true);
-        api.requestLocationUpdates(request, listener);
+        TestLocationListener listener2 = new TestLocationListener();
+        LocationRequest request2 = LocationRequest.create();
+        api.requestLocationUpdates(request2, listener2);
         assertThat(api.getListeners()).hasSize(2);
     }
 

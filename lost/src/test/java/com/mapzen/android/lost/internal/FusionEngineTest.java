@@ -396,16 +396,16 @@ public class FusionEngineTest {
         private Location location;
 
         @Override
-        public void reportLocation(LocationEngine engine, Location location) {
+        public void reportLocation(Location location) {
             this.location = location;
         }
 
         @Override
-        public void reportProviderDisabled(LocationEngine engine, String provider) {
+        public void reportProviderDisabled(String provider) {
         }
 
         @Override
-        public void reportProviderEnabled(LocationEngine engine, String provider) {
+        public void reportProviderEnabled(String provider) {
         }
     }
 }

@@ -170,17 +170,17 @@ public class MockEngineTest {
         private ArrayList<Location> locations = new ArrayList<>();
 
         @Override
-        public void reportLocation(LocationEngine engine, Location location) {
+        public void reportLocation(Location location) {
             lastLocation = location;
             locations.add(location);
         }
 
         @Override
-        public void reportProviderDisabled(LocationEngine engine, String provider) {
+        public void reportProviderDisabled(String provider) {
         }
 
         @Override
-        public void reportProviderEnabled(LocationEngine engine, String provider) {
+        public void reportProviderEnabled(String provider) {
         }
 
         public void reset() {
