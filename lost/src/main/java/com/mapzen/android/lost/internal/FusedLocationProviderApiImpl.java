@@ -23,11 +23,13 @@ public class FusedLocationProviderApiImpl implements
     private boolean mockMode;
     private LocationEngine locationEngine;
     private Map<LocationListener, LocationRequest> listenerToRequest;
+    private Map<PendingIntent, LocationRequest> intentToRequest;
 
     public FusedLocationProviderApiImpl(Context context) {
         this.context = context;
         locationEngine = new FusionEngine(context, this);
         listenerToRequest = new HashMap<>();
+        intentToRequest = new HashMap<>();
     }
 
     @Override
@@ -49,7 +51,8 @@ public class FusedLocationProviderApiImpl implements
 
     @Override
     public void requestLocationUpdates(LocationRequest request, PendingIntent callbackIntent) {
-        throw new RuntimeException("Sorry, not yet implemented");
+        intentToRequest.put(callbackIntent, request);
+        locationEngine.setRequest(request);
     }
 
     @Override

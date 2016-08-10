@@ -16,7 +16,9 @@ import org.robolectric.shadows.ShadowEnvironment;
 import org.robolectric.shadows.ShadowLocationManager;
 import org.robolectric.shadows.ShadowLooper;
 
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Environment;
@@ -462,5 +464,15 @@ public class FusedLocationProviderApiImplTest {
         shadowLocationManager.simulateLocation(location);
         assertThat(listener1.getAllLocations()).contains(location);
         assertThat(listener2.getAllLocations()).doesNotContain(location);
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldRegisterGpsAndNetworkListenerViaPendingIntent()
+            throws Exception {
+        PendingIntent pendingIntent = PendingIntent.getService(application, 0, new Intent(), 0);
+        api.requestLocationUpdates(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY),
+            pendingIntent);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners())
+            .hasSize(2);
     }
 }
