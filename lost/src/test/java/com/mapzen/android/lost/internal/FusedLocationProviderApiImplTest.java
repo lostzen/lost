@@ -12,10 +12,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowEnvironment;
 import org.robolectric.shadows.ShadowLocationManager;
 import org.robolectric.shadows.ShadowLooper;
 
+import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +33,8 @@ import java.util.List;
 
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
+import static com.mapzen.android.lost.api.FusedLocationProviderApi.KEY_LOCATION_CHANGED;
+import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
 import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_HIGH_ACCURACY;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.robolectric.RuntimeEnvironment.application;
@@ -474,5 +478,48 @@ public class FusedLocationProviderApiImplTest {
             pendingIntent);
         assertThat(shadowLocationManager.getRequestLocationUpdateListeners())
             .hasSize(2);
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldNotifyOnLocationChangedGpsViaPendingIntent()
+            throws Exception {
+        Intent intent = new Intent(application, TestService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
+        LocationRequest locationRequest = LocationRequest.create()
+                .setPriority(PRIORITY_HIGH_ACCURACY);
+
+        api.requestLocationUpdates(locationRequest, pendingIntent);
+        Location location = new Location(GPS_PROVIDER);
+        shadowLocationManager.simulateLocation(location);
+
+        Intent nextStartedService = ShadowApplication.getInstance().getNextStartedService();
+        assertThat(nextStartedService).isNotNull();
+        assertThat(nextStartedService.getParcelableExtra(KEY_LOCATION_CHANGED)).isEqualTo(location);
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldNotifyOnLocationChangedNetworkViaPendingIntent()
+            throws Exception {
+        Intent intent = new Intent(application, TestService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
+        LocationRequest locationRequest = LocationRequest.create()
+                .setPriority(PRIORITY_BALANCED_POWER_ACCURACY);
+
+        api.requestLocationUpdates(locationRequest, pendingIntent);
+        Location location = new Location(NETWORK_PROVIDER);
+        shadowLocationManager.simulateLocation(location);
+
+        Intent nextStartedService = ShadowApplication.getInstance().getNextStartedService();
+        assertThat(nextStartedService).isNotNull();
+        assertThat(nextStartedService.getParcelableExtra(KEY_LOCATION_CHANGED)).isEqualTo(location);
+    }
+
+    public class TestService extends IntentService {
+        public TestService() {
+            super("test");
+        }
+
+        @Override protected void onHandleIntent(Intent intent) {
+        }
     }
 }

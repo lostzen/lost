@@ -8,6 +8,8 @@ import java.io.File;
 
 public interface FusedLocationProviderApi {
 
+    String KEY_LOCATION_CHANGED = "com.lost.android.location.LOCATION";
+
     Location getLastLocation();
 
     void removeLocationUpdates(LocationListener listener);
