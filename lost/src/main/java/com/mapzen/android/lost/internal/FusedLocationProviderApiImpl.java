@@ -69,7 +69,10 @@ public class FusedLocationProviderApiImpl implements
 
     @Override
     public void removeLocationUpdates(PendingIntent callbackIntent) {
-        throw new RuntimeException("Sorry, not yet implemented");
+        intentToRequest.remove(callbackIntent);
+        if (intentToRequest.isEmpty()) {
+            locationEngine.setRequest(null);
+        }
     }
 
     @Override
