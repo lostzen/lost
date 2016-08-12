@@ -2,7 +2,6 @@ package com.mapzen.android.lost.api;
 
 import android.app.Activity;
 import android.app.PendingIntent;
-import android.content.Intent;
 import android.content.IntentSender;
 
 public class Status {
@@ -58,8 +57,9 @@ public class Status {
 
   public void startResolutionForResult(Activity activity, int requestCode) throws
       IntentSender.SendIntentException {
-    if(this.hasResolution()) {
-      activity.startIntentSenderForResult(this.mPendingIntent.getIntentSender(), requestCode, (Intent)null, 0, 0, 0);
+    if (this.hasResolution()) {
+      activity.startIntentSenderForResult(this.mPendingIntent.getIntentSender(), requestCode,
+          null, 0, 0, 0);
     }
   }
 

@@ -4,7 +4,6 @@ import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationServices;
 import com.mapzen.android.lost.api.LostApiClient;
-import com.mapzen.android.lost.api.SettingsApi;
 import com.mapzen.lost.BuildConfig;
 
 import org.junit.After;

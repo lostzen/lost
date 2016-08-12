@@ -7,13 +7,11 @@ import com.mapzen.android.lost.api.LocationSettingsResult;
 import com.mapzen.android.lost.api.LocationSettingsStates;
 import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.android.lost.api.PendingResult;
-import com.mapzen.android.lost.api.ResultCallback;
 import com.mapzen.android.lost.api.Status;
 
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -22,7 +20,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 public class SettingsApiActivity extends AppCompatActivity {
 
@@ -185,14 +182,14 @@ public class SettingsApiActivity extends AppCompatActivity {
     }
   }
   private void updateTextViewStates(LocationSettingsStates states) {
-    gpsPresent.setText(states.isGpsPresent() ? "Y":"N");
-    gpsUsable.setText(states.isGpsUsable() ? "Y":"N");
-    networkPresent.setText(states.isNetworkLocationPresent() ? "Y":"N");
-    networkUsable.setText(states.isNetworkLocationUsable() ? "Y":"N");
-    locationPresent.setText(states.isLocationPresent() ? "Y":"N");
-    locationUsable.setText(states.isLocationUsable() ? "Y":"N");
-    blePresent.setText(states.isBlePresent() ? "Y":"N");
-    bleUsable.setText(states.isBleUsable() ? "Y":"N");
+    gpsPresent.setText(states.isGpsPresent() ? "Y" : "N");
+    gpsUsable.setText(states.isGpsUsable() ? "Y" : "N");
+    networkPresent.setText(states.isNetworkLocationPresent() ? "Y" : "N");
+    networkUsable.setText(states.isNetworkLocationUsable() ? "Y" : "N");
+    locationPresent.setText(states.isLocationPresent() ? "Y" : "N");
+    locationUsable.setText(states.isLocationUsable() ? "Y" : "N");
+    blePresent.setText(states.isBlePresent() ? "Y" : "N");
+    bleUsable.setText(states.isBleUsable() ? "Y" : "N");
   }
 
   @Override
@@ -200,6 +197,8 @@ public class SettingsApiActivity extends AppCompatActivity {
     switch (requestCode) {
       case REQUEST_CHECK_SETTINGS:
         checkLocationSettings();
+        break;
+      default:
         break;
     }
   }

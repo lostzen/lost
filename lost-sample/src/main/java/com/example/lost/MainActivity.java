@@ -56,7 +56,8 @@ public class MainActivity extends AppCompatActivity {
         View view;
         ViewHolder holder;
         if (convertView == null) {
-          view = LayoutInflater.from(MainActivity.this).inflate(R.layout.sample_item, parent, false);
+          view = LayoutInflater.from(MainActivity.this).inflate(R.layout.sample_item, parent,
+              false);
           holder = new ViewHolder(view);
           view.setTag(holder);
         } else {

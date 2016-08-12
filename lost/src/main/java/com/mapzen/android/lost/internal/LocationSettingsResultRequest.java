@@ -28,7 +28,13 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static com.mapzen.android.lost.api.Status.*;
+import static com.mapzen.android.lost.api.Status.SUCCESS;
+import static com.mapzen.android.lost.api.Status.RESOLUTION_REQUIRED;
+import static com.mapzen.android.lost.api.Status.INTERRUPTED;
+import static com.mapzen.android.lost.api.Status.INTERNAL_ERROR;
+import static com.mapzen.android.lost.api.Status.TIMEOUT;
+import static com.mapzen.android.lost.api.Status.CANCELLED;
+import static com.mapzen.android.lost.api.Status.SETTINGS_CHANGE_UNAVAILABLE;
 
 public class LocationSettingsResultRequest extends PendingResult<LocationSettingsResult> {
 
@@ -155,6 +161,8 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
         case LocationRequest.PRIORITY_LOW_POWER:
           needNetwork = true;
           break;
+        default:
+          break;
       }
     }
     boolean needBle = settingsRequest.getNeedBle();
@@ -190,12 +198,12 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
       }
       PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
       status = new Status(RESOLUTION_REQUIRED, pendingIntent);
-    } else if(resolutionUnavailable) {
+    } else if (resolutionUnavailable) {
       status = new Status(SETTINGS_CHANGE_UNAVAILABLE);
     } else {
       status = new Status(SUCCESS);
     }
-    final LocationSettingsStates states = new LocationSettingsStates(gpsUsable,networkUsable,
+    final LocationSettingsStates states = new LocationSettingsStates(gpsUsable, networkUsable,
         bleUsable, gpsPresent, networkPresent, blePresent);
     return new LocationSettingsResult(status, states);
   }
