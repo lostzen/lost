@@ -85,11 +85,18 @@ public final class LocationResult implements Parcelable {
    * other instance.
    */
   @Override public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     final LocationResult that = (LocationResult) o;
-    if (this.locations.size() != that.locations.size()) return false;
+    if (this.locations.size() != that.locations.size()) {
+      return false;
+    }
 
     final Iterator<Location> thisIterator = this.locations.iterator();
     final Iterator<Location> thatIterator = that.locations.iterator();
