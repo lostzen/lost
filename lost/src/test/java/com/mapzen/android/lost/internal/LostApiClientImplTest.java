@@ -4,6 +4,7 @@ import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationServices;
 import com.mapzen.android.lost.api.LostApiClient;
+import com.mapzen.android.lost.api.SettingsApi;
 import com.mapzen.lost.BuildConfig;
 
 import org.junit.After;
@@ -51,6 +52,14 @@ public class LostApiClientImplTest {
     }
 
     @Test
+    public void connect_shouldCreateSettingsApiImpl() throws Exception {
+        client.connect();
+        assertThat(LocationServices.SettingsApi)
+            .isInstanceOf(SettingsApiImpl.class);
+    }
+
+
+    @Test
     public void disconnect_shouldRemoveFusedLocationProviderApiImpl() throws Exception {
         client.connect();
         client.disconnect();
@@ -62,6 +71,13 @@ public class LostApiClientImplTest {
         client.connect();
         client.disconnect();
         assertThat(LocationServices.GeofencingApi).isNull();
+    }
+
+    @Test
+    public void disconnect_shouldRemoveSettingsApiImpl() throws Exception {
+        client.connect();
+        client.disconnect();
+        assertThat(LocationServices.SettingsApi).isNull();
     }
 
     @Test

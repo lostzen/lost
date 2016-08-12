@@ -15,7 +15,14 @@
         android:required="false" />
     <uses-feature android:name="android.hardware.wifi" />
 
-    <!-- Wow. This is insane. You require an empty tag. -->
-    <application />
+
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+
+    <application>
+
+        <activity android:name="com.mapzen.android.lost.internal.ResolveLocationActivity"/>
+
+    </application>
 
 </manifest>

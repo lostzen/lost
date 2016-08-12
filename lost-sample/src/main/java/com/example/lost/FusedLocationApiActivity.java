@@ -39,7 +39,7 @@ import static com.mapzen.android.lost.api.LocationServices.FusedLocationApi;
 /**
  * LOST Activity
  */
-public class LostActivity extends AppCompatActivity {
+public class FusedLocationApiActivity extends AppCompatActivity {
     private static final String TAG = "LOST Sample";
 
     private LostFragment fragment;

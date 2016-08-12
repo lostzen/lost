@@ -5,4 +5,6 @@ public class LocationServices {
     public static FusedLocationProviderApi FusedLocationApi;
 
     public static GeofencingApi GeofencingApi;
+
+    public static SettingsApi SettingsApi;
 }
