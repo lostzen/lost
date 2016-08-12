@@ -11,12 +11,10 @@ import com.mapzen.android.lost.api.Status;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 
 import java.util.concurrent.Callable;
@@ -28,20 +26,23 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static com.mapzen.android.lost.api.Status.SUCCESS;
-import static com.mapzen.android.lost.api.Status.RESOLUTION_REQUIRED;
-import static com.mapzen.android.lost.api.Status.INTERRUPTED;
-import static com.mapzen.android.lost.api.Status.INTERNAL_ERROR;
-import static com.mapzen.android.lost.api.Status.TIMEOUT;
 import static com.mapzen.android.lost.api.Status.CANCELLED;
+import static com.mapzen.android.lost.api.Status.INTERNAL_ERROR;
+import static com.mapzen.android.lost.api.Status.INTERRUPTED;
+import static com.mapzen.android.lost.api.Status.RESOLUTION_REQUIRED;
 import static com.mapzen.android.lost.api.Status.SETTINGS_CHANGE_UNAVAILABLE;
+import static com.mapzen.android.lost.api.Status.SUCCESS;
+import static com.mapzen.android.lost.api.Status.TIMEOUT;
 
 public class LocationSettingsResultRequest extends PendingResult<LocationSettingsResult> {
 
   private final Context context;
+  private final BluetoothAdapter bluetoothAdapter;
+  private final PackageManager packageManager;
+  private final LocationManager locationManager;
+  private final PendingIntentGenerator pendingIntentGenerator;
   private final LocationSettingsRequest settingsRequest;
   private ResultCallback<? super LocationSettingsResult> resultCallback;
-  private final LocationManager locationManager;
 
   AsyncTask locationResultTask = new AsyncTask() {
 
@@ -87,10 +88,14 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
     }
   };
 
-  public LocationSettingsResultRequest(Context ctx, LocationSettingsRequest request) {
+  public LocationSettingsResultRequest(Context ctx, BluetoothAdapter btAdapter, PackageManager pm,
+      LocationManager lm, PendingIntentGenerator generator,  LocationSettingsRequest request) {
     context = ctx;
+    bluetoothAdapter = btAdapter;
+    packageManager = pm;
+    locationManager = lm;
+    pendingIntentGenerator = generator;
     settingsRequest = request;
-    locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
   }
 
   @NonNull @Override public LocationSettingsResult await() {
@@ -167,15 +172,14 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
     }
     boolean needBle = settingsRequest.getNeedBle();
 
-    PackageManager pm = context.getPackageManager();
-    BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
     boolean gpsUsable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-    boolean gpsPresent = pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS);
+    boolean gpsPresent = packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS);
     boolean networkUsable = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-    boolean networkPresent = pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK);
+    boolean networkPresent = packageManager.hasSystemFeature(
+        PackageManager.FEATURE_LOCATION_NETWORK);
     boolean bleUsable = bluetoothAdapter.isEnabled();
-    boolean blePresent = pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+    boolean blePresent = packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
 
     boolean hasGpsResolution = needGps && gpsPresent && !gpsUsable;
     boolean hasNetworkResolution = needNetwork && networkPresent && !networkUsable;
@@ -190,13 +194,7 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
 
     final Status status;
     if (hasResolution) {
-      Intent intent;
-      if (hasBleResolution) {
-        intent = new Intent(context, ResolveLocationActivity.class);
-      } else {
-        intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-      }
-      PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+      PendingIntent pendingIntent = pendingIntentGenerator.generatePendingIntent(hasBleResolution);
       status = new Status(RESOLUTION_REQUIRED, pendingIntent);
     } else if (resolutionUnavailable) {
       status = new Status(SETTINGS_CHANGE_UNAVAILABLE);
