@@ -550,6 +550,30 @@ public class FusedLocationProviderApiImplTest {
         assertThat(ShadowApplication.getInstance().getNextStartedService()).isNull();
     }
 
+    @Test
+    public void removeLocationUpdates_shouldNotKillEngineIfListenerStillActive() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        api.requestLocationUpdates(LocationRequest.create(), listener);
+
+        PendingIntent pendingIntent = PendingIntent.getService(application, 0, new Intent(), 0);
+        api.requestLocationUpdates(LocationRequest.create(), pendingIntent);
+
+        api.removeLocationUpdates(pendingIntent);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isNotEmpty();
+    }
+
+    @Test
+    public void removeLocationUpdates_shouldNotKillEngineIfIntentStillActive() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        api.requestLocationUpdates(LocationRequest.create(), listener);
+
+        PendingIntent pendingIntent = PendingIntent.getService(application, 0, new Intent(), 0);
+        api.requestLocationUpdates(LocationRequest.create(), pendingIntent);
+
+        api.removeLocationUpdates(listener);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isNotEmpty();
+    }
+
     /**
      * Due to a bug in Robolectric that allows the same location listener to be registered twice,
      * we need to manually clear the `ShadowLocationManager` to prevent duplicate listeners.

@@ -62,15 +62,21 @@ public class FusedLocationProviderApiImpl implements
     @Override
     public void removeLocationUpdates(LocationListener listener) {
         listenerToRequest.remove(listener);
-        if (listenerToRequest.isEmpty()) {
-            locationEngine.setRequest(null);
-        }
+        checkAllListenersAndPendingIntents();
     }
 
     @Override
     public void removeLocationUpdates(PendingIntent callbackIntent) {
         intentToRequest.remove(callbackIntent);
-        if (intentToRequest.isEmpty()) {
+        checkAllListenersAndPendingIntents();
+    }
+
+    /**
+     * Checks if any listeners or pending intents are still registered for location updates. If not,
+     * then shutdown the location engine.
+     */
+    private void checkAllListenersAndPendingIntents() {
+        if (listenerToRequest.isEmpty() && intentToRequest.isEmpty()) {
             locationEngine.setRequest(null);
         }
     }
