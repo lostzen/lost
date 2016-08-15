@@ -178,7 +178,7 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
     boolean networkUsable = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     boolean networkPresent = packageManager.hasSystemFeature(
         PackageManager.FEATURE_LOCATION_NETWORK);
-    boolean bleUsable = bluetoothAdapter.isEnabled();
+    boolean bleUsable = bluetoothAdapter != null && bluetoothAdapter.isEnabled();
     boolean blePresent = packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
 
     boolean hasGpsResolution = needGps && gpsPresent && !gpsUsable;
