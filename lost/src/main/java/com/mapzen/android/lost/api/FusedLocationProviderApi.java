@@ -8,6 +8,8 @@ import java.io.File;
 
 public interface FusedLocationProviderApi {
 
+    @Deprecated String KEY_LOCATION_CHANGED = "com.mapzen.android.lost.LOCATION";
+
     Location getLastLocation();
 
     void removeLocationUpdates(LocationListener listener);

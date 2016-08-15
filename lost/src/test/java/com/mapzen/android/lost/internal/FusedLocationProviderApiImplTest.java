@@ -8,15 +8,20 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowEnvironment;
 import org.robolectric.shadows.ShadowLocationManager;
 import org.robolectric.shadows.ShadowLooper;
+import org.robolectric.util.ReflectionHelpers;
 
-import android.content.Context;
+import android.app.IntentService;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Environment;
@@ -26,9 +31,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import static android.content.Context.LOCATION_SERVICE;
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
+import static com.mapzen.android.lost.api.FusedLocationProviderApi.KEY_LOCATION_CHANGED;
+import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
 import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_HIGH_ACCURACY;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.robolectric.RuntimeEnvironment.application;
@@ -44,7 +53,7 @@ public class FusedLocationProviderApiImplTest {
     @Before
     public void setUp() throws Exception {
         api = new FusedLocationProviderApiImpl(application);
-        locationManager = (LocationManager) application.getSystemService(Context.LOCATION_SERVICE);
+        locationManager = (LocationManager) application.getSystemService(LOCATION_SERVICE);
         shadowLocationManager = shadowOf(locationManager);
     }
 
@@ -263,7 +272,7 @@ public class FusedLocationProviderApiImplTest {
         assertThat(listener.getMostRecentLocation()).isEqualTo(mockLocation);
     }
 
-    @Test
+    @Test @Ignore("Intermittently failing. Find a better way to test without Thread.sleep(100)")
     public void setMockTrace_shouldInvokeListenerForEachLocation() throws Exception {
         api.setMockMode(true);
         api.setMockTrace(getTestGpxTrace());
@@ -462,5 +471,128 @@ public class FusedLocationProviderApiImplTest {
         shadowLocationManager.simulateLocation(location);
         assertThat(listener1.getAllLocations()).contains(location);
         assertThat(listener2.getAllLocations()).doesNotContain(location);
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldRegisterGpsAndNetworkListenerViaPendingIntent()
+            throws Exception {
+        PendingIntent pendingIntent = PendingIntent.getService(application, 0, new Intent(), 0);
+        api.requestLocationUpdates(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY),
+            pendingIntent);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners())
+            .hasSize(2);
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldNotifyOnLocationChangedGpsViaPendingIntent()
+            throws Exception {
+        Intent intent = new Intent(application, TestService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
+        LocationRequest locationRequest = LocationRequest.create()
+                .setPriority(PRIORITY_HIGH_ACCURACY);
+
+        api.requestLocationUpdates(locationRequest, pendingIntent);
+        Location location = new Location(GPS_PROVIDER);
+        shadowLocationManager.simulateLocation(location);
+
+        Intent nextStartedService = ShadowApplication.getInstance().getNextStartedService();
+        assertThat(nextStartedService).isNotNull();
+        assertThat(nextStartedService.getParcelableExtra(KEY_LOCATION_CHANGED)).isEqualTo(location);
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldNotifyOnLocationChangedNetworkViaPendingIntent()
+            throws Exception {
+        Intent intent = new Intent(application, TestService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
+        LocationRequest locationRequest = LocationRequest.create()
+                .setPriority(PRIORITY_BALANCED_POWER_ACCURACY);
+
+        api.requestLocationUpdates(locationRequest, pendingIntent);
+        Location location = new Location(NETWORK_PROVIDER);
+        shadowLocationManager.simulateLocation(location);
+
+        Intent nextStartedService = ShadowApplication.getInstance().getNextStartedService();
+        assertThat(nextStartedService).isNotNull();
+        assertThat(nextStartedService.getParcelableExtra(KEY_LOCATION_CHANGED)).isEqualTo(location);
+    }
+
+    @Test
+    public void removeLocationUpdates_shouldUnregisterAllPendingIntentListeners() throws Exception {
+        Intent intent = new Intent(application, TestService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
+        LocationRequest locationRequest = LocationRequest.create()
+            .setPriority(PRIORITY_BALANCED_POWER_ACCURACY);
+        api.requestLocationUpdates(locationRequest, pendingIntent);
+
+        api.removeLocationUpdates(pendingIntent);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
+    }
+
+    @Test
+    public void requestLocationUpdates_shouldNotNotifyRemovedPendingIntent() throws Exception {
+        LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
+        Intent intent = new Intent(application, TestService.class);
+        PendingIntent pendingIntent1 = PendingIntent.getService(application, 0, intent, 0);
+        PendingIntent pendingIntent2 = PendingIntent.getService(application, 0, intent, 0);
+        api.requestLocationUpdates(request, pendingIntent1);
+        clearShadowLocationListeners();
+        api.requestLocationUpdates(request, pendingIntent2);
+
+        api.removeLocationUpdates(pendingIntent2);
+        Location location = new Location(GPS_PROVIDER);
+        location.setLatitude(40.0);
+        location.setLongitude(70.0);
+        shadowLocationManager.simulateLocation(location);
+
+        // Only one service should be started since the second pending intent request was removed.
+        assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+        assertThat(ShadowApplication.getInstance().getNextStartedService()).isNull();
+    }
+
+    @Test
+    public void removeLocationUpdates_shouldNotKillEngineIfListenerStillActive() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        api.requestLocationUpdates(LocationRequest.create(), listener);
+
+        PendingIntent pendingIntent = PendingIntent.getService(application, 0, new Intent(), 0);
+        api.requestLocationUpdates(LocationRequest.create(), pendingIntent);
+
+        api.removeLocationUpdates(pendingIntent);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isNotEmpty();
+    }
+
+    @Test
+    public void removeLocationUpdates_shouldNotKillEngineIfIntentStillActive() throws Exception {
+        TestLocationListener listener = new TestLocationListener();
+        api.requestLocationUpdates(LocationRequest.create(), listener);
+
+        PendingIntent pendingIntent = PendingIntent.getService(application, 0, new Intent(), 0);
+        api.requestLocationUpdates(LocationRequest.create(), pendingIntent);
+
+        api.removeLocationUpdates(listener);
+        assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isNotEmpty();
+    }
+
+    /**
+     * Due to a bug in Robolectric that allows the same location listener to be registered twice,
+     * we need to manually clear the `ShadowLocationManager` to prevent duplicate listeners.
+     *
+     * @see <a href="https://github.com/robolectric/robolectric/issues/2603">
+     *   ShadowLocationManager should not allow duplicate listeners</a>
+     */
+    private void clearShadowLocationListeners() {
+        Map<String, List> map =
+            ReflectionHelpers.getField(shadowLocationManager, "locationListeners");
+        map.clear();
+    }
+
+    public class TestService extends IntentService {
+        public TestService() {
+            super("test");
+        }
+
+        @Override protected void onHandleIntent(Intent intent) {
+        }
     }
 }

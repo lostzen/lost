@@ -6,8 +6,10 @@ import com.mapzen.android.lost.api.LocationRequest;
 
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Looper;
+import android.util.Log;
 
 import java.io.File;
 import java.util.HashMap;
@@ -19,15 +21,19 @@ import java.util.Map;
 public class FusedLocationProviderApiImpl implements
         FusedLocationProviderApi, LocationEngine.Callback {
 
+    private static final String TAG = FusedLocationProviderApiImpl.class.getSimpleName();
+
     private final Context context;
     private boolean mockMode;
     private LocationEngine locationEngine;
     private Map<LocationListener, LocationRequest> listenerToRequest;
+    private Map<PendingIntent, LocationRequest> intentToRequest;
 
     public FusedLocationProviderApiImpl(Context context) {
         this.context = context;
         locationEngine = new FusionEngine(context, this);
         listenerToRequest = new HashMap<>();
+        intentToRequest = new HashMap<>();
     }
 
     @Override
@@ -49,20 +55,30 @@ public class FusedLocationProviderApiImpl implements
 
     @Override
     public void requestLocationUpdates(LocationRequest request, PendingIntent callbackIntent) {
-        throw new RuntimeException("Sorry, not yet implemented");
+        intentToRequest.put(callbackIntent, request);
+        locationEngine.setRequest(request);
     }
 
     @Override
     public void removeLocationUpdates(LocationListener listener) {
         listenerToRequest.remove(listener);
-        if (listenerToRequest.isEmpty()) {
-            locationEngine.setRequest(null);
-        }
+        checkAllListenersAndPendingIntents();
     }
 
     @Override
     public void removeLocationUpdates(PendingIntent callbackIntent) {
-        throw new RuntimeException("Sorry, not yet implemented");
+        intentToRequest.remove(callbackIntent);
+        checkAllListenersAndPendingIntents();
+    }
+
+    /**
+     * Checks if any listeners or pending intents are still registered for location updates. If not,
+     * then shutdown the location engine.
+     */
+    private void checkAllListenersAndPendingIntents() {
+        if (listenerToRequest.isEmpty() && intentToRequest.isEmpty()) {
+            locationEngine.setRequest(null);
+        }
     }
 
     @Override
@@ -105,6 +121,14 @@ public class FusedLocationProviderApiImpl implements
     public void reportLocation(Location location) {
         for (LocationListener listener : listenerToRequest.keySet()) {
             listener.onLocationChanged(location);
+        }
+
+        for (PendingIntent intent : intentToRequest.keySet()) {
+            try {
+                intent.send(context, 0, new Intent().putExtra(KEY_LOCATION_CHANGED, location));
+            } catch (PendingIntent.CanceledException e) {
+                Log.e(TAG, "Unable to send pending intent: " + intent);
+            }
         }
     }
 
