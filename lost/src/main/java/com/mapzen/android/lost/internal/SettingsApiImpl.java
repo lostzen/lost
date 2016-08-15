@@ -33,7 +33,7 @@ public class SettingsApiImpl implements SettingsApi {
     LocationManager locationManager = (LocationManager) context.getSystemService(
         Context.LOCATION_SERVICE);
     PendingIntentGenerator generator = new PendingIntentGenerator(context);
-    return new LocationSettingsResultRequest(context, bluetoothAdapter, pm, locationManager,
+    return new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager,
         generator, request);
   }
 }

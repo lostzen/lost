@@ -10,11 +10,8 @@ import com.mapzen.android.lost.api.Status;
 
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
-import android.os.AsyncTask;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 
 import java.util.concurrent.Callable;
@@ -22,11 +19,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static com.mapzen.android.lost.api.Status.CANCELLED;
 import static com.mapzen.android.lost.api.Status.INTERNAL_ERROR;
 import static com.mapzen.android.lost.api.Status.INTERRUPTED;
 import static com.mapzen.android.lost.api.Status.RESOLUTION_REQUIRED;
@@ -36,7 +31,6 @@ import static com.mapzen.android.lost.api.Status.TIMEOUT;
 
 public class LocationSettingsResultRequest extends PendingResult<LocationSettingsResult> {
 
-  private final Context context;
   private final BluetoothAdapter bluetoothAdapter;
   private final PackageManager packageManager;
   private final LocationManager locationManager;
@@ -44,53 +38,10 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
   private final LocationSettingsRequest settingsRequest;
   private ResultCallback<? super LocationSettingsResult> resultCallback;
 
-  AsyncTask locationResultTask = new AsyncTask() {
+  Future<LocationSettingsResult> future;
 
-    FutureTask<LocationSettingsResult> locationSettingTask = new FutureTask(new Callable() {
-      @Override public Object call() throws Exception {
-        return generateLocationSettingsResult();
-      }
-    });
-
-    @Override protected Object doInBackground(Object[] params) {
-      long time = -1;
-      TimeUnit timeUnit = TimeUnit.MILLISECONDS;
-      if (params != null) {
-        time = (long) params[0];
-        timeUnit = (TimeUnit) params[1];
-      }
-
-      LocationSettingsResult result;
-      try {
-        if (params != null) {
-          result = locationSettingTask.get(time, timeUnit);
-        } else {
-          result = locationSettingTask.get();
-        }
-      } catch (InterruptedException e) {
-        if (isCancelled()) {
-          result = createResultForStatus(CANCELLED);
-        } else {
-          result = createResultForStatus(INTERRUPTED);
-        }
-      } catch (ExecutionException e) {
-        result = createResultForStatus(INTERNAL_ERROR);
-      } catch (TimeoutException e) {
-        result = createResultForStatus(TIMEOUT);
-      }
-      postLocationSettingsResult(result);
-      return null;
-    }
-
-    @Override protected void onCancelled() {
-      super.onCancelled();
-      locationSettingTask.cancel(true);
-    }
-  };
-
-  public LocationSettingsResultRequest(Context ctx, BluetoothAdapter btAdapter, PackageManager pm,
+  public LocationSettingsResultRequest(BluetoothAdapter btAdapter, PackageManager pm,
       LocationManager lm, PendingIntentGenerator generator,  LocationSettingsRequest request) {
-    context = ctx;
     bluetoothAdapter = btAdapter;
     packageManager = pm;
     locationManager = lm;
@@ -103,54 +54,36 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
   }
 
   @NonNull @Override public LocationSettingsResult await(long time, @NonNull TimeUnit timeUnit) {
-    ExecutorService executor = Executors.newSingleThreadExecutor();
-    Future<LocationSettingsResult> future = executor.submit(new Callable() {
-      public LocationSettingsResult call() throws Exception {
-        return generateLocationSettingsResult();
-      }
-    });
-    LocationSettingsResult result;
-    try {
-      result = future.get(time, timeUnit);
-    } catch (TimeoutException e) {
-      result = createResultForStatus(TIMEOUT);
-    } catch (InterruptedException e) {
-      result = createResultForStatus(INTERRUPTED);
-    } catch (ExecutionException e) {
-      result = createResultForStatus(INTERNAL_ERROR);
-    }
-    executor.shutdownNow();
-
-    return result;
-  }
-
-  private LocationSettingsResult createResultForStatus(int statusType) {
-    Status status = new Status(statusType);
-    return new LocationSettingsResult(status, null);
+    return generateLocationSettingsResult(time, timeUnit);
   }
 
   @Override public void cancel() {
-    if (locationResultTask != null && !locationResultTask.isCancelled()) {
-      locationResultTask.cancel(true);
+    if (future != null && !future.isCancelled()) {
+      future.cancel(true);
     }
   }
 
 
   @Override public boolean isCanceled() {
-    return locationResultTask.isCancelled();
+    if (future == null) {
+      return false;
+    }
+    return future.isCancelled();
   }
 
   @Override
   public void setResultCallback(@NonNull ResultCallback<? super LocationSettingsResult> callback) {
     resultCallback = callback;
-    locationResultTask.execute();
+    LocationSettingsResult result = generateLocationSettingsResult();
+    resultCallback.onResult(result);
   }
 
   @Override
   public void setResultCallback(@NonNull ResultCallback<? super LocationSettingsResult> callback,
       long time, @NonNull TimeUnit timeUnit) {
     resultCallback = callback;
-    locationResultTask.execute(time, timeUnit);
+    LocationSettingsResult result = generateLocationSettingsResult(time, timeUnit);
+    resultCallback.onResult(result);
   }
 
   private LocationSettingsResult generateLocationSettingsResult() {
@@ -206,13 +139,30 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
     return new LocationSettingsResult(status, states);
   }
 
-  private void postLocationSettingsResult(final LocationSettingsResult result) {
-    Runnable runnable = new Runnable() {
-      @Override
-      public void run() {
-        resultCallback.onResult(result);
+  private LocationSettingsResult generateLocationSettingsResult(long time, TimeUnit timeUnit) {
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    future = executor.submit(new Callable() {
+      public LocationSettingsResult call() throws Exception {
+        return generateLocationSettingsResult();
       }
-    };
-    new Handler(context.getMainLooper()).post(runnable);
+    });
+    LocationSettingsResult result;
+    try {
+      result = future.get(time, timeUnit);
+    } catch (TimeoutException e) {
+      result = createResultForStatus(TIMEOUT);
+    } catch (InterruptedException e) {
+      result = createResultForStatus(INTERRUPTED);
+    } catch (ExecutionException e) {
+      result = createResultForStatus(INTERNAL_ERROR);
+    }
+    executor.shutdownNow();
+
+    return result;
+  }
+
+  private LocationSettingsResult createResultForStatus(int statusType) {
+    Status status = new Status(statusType);
+    return new LocationSettingsResult(status, null);
   }
 }
