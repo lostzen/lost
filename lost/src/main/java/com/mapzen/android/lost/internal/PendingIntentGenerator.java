@@ -7,7 +7,7 @@ import android.provider.Settings;
 
 public class PendingIntentGenerator {
 
-  Context context;
+  private final Context context;
 
   public PendingIntentGenerator(Context context) {
     this.context = context;
