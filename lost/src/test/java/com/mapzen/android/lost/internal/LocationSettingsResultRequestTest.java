@@ -295,36 +295,7 @@ public class LocationSettingsResultRequestTest {
     LocationSettingsResult resultRequest = settingsResultRequest.await(1000, TimeUnit.MILLISECONDS);
     assertThat(resultRequest.getStatus().getStatusCode()).isEqualTo(Status.TIMEOUT);
   }
-
-  @Test
-  public void cancel_shouldReturnCancelResult() {
-    when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
-    when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
-    when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
-    when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true);
-    when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
-    when(bluetoothAdapter.isEnabled()).thenReturn(true);
-
-    DelayTestPendingIntentGenerator delayedGenerator = new DelayTestPendingIntentGenerator(
-     context);
-    final LocationSettingsResultRequest settingsResultRequest = new LocationSettingsResultRequest(
-     bluetoothAdapter, pm, locationManager, delayedGenerator, request);
-
-    Thread thread = new Thread(new Runnable() {
-      @Override public void run() {
-        settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-          @Override public void onResult(@NonNull LocationSettingsResult result) {
-            assertThat(result.getStatus().getStatusCode()).isEqualTo(Status.CANCELLED);
-            assertThat(settingsResultRequest.isCanceled()).isTrue();
-          }
-        });
-      }
-    });
-    thread.start();
-
-    settingsResultRequest.cancel();
-  }
-
+  
   @Test
   public void setResultCallback_shouldReturnSuccessfulResult() {
     when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true);
