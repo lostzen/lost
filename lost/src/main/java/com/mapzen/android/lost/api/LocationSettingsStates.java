@@ -49,5 +49,4 @@ public class LocationSettingsStates {
   public boolean isBlePresent() {
     return this.blePresent;
   }
-
 }

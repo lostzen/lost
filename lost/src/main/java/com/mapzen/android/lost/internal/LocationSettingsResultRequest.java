@@ -41,7 +41,7 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
   Future<LocationSettingsResult> future;
 
   public LocationSettingsResultRequest(BluetoothAdapter btAdapter, PackageManager pm,
-      LocationManager lm, PendingIntentGenerator generator,  LocationSettingsRequest request) {
+      LocationManager lm, PendingIntentGenerator generator, LocationSettingsRequest request) {
     bluetoothAdapter = btAdapter;
     packageManager = pm;
     locationManager = lm;
@@ -62,7 +62,6 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
       future.cancel(true);
     }
   }
-
 
   @Override public boolean isCanceled() {
     if (future == null) {
@@ -105,12 +104,11 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
     }
     boolean needBle = settingsRequest.getNeedBle();
 
-
     boolean gpsUsable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     boolean gpsPresent = packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS);
     boolean networkUsable = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-    boolean networkPresent = packageManager.hasSystemFeature(
-        PackageManager.FEATURE_LOCATION_NETWORK);
+    boolean networkPresent =
+        packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK);
     boolean bleUsable = bluetoothAdapter != null && bluetoothAdapter.isEnabled();
     boolean blePresent = packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
 
@@ -122,8 +120,8 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
     boolean gpsResolutionUnavailable = needGps && !gpsPresent;
     boolean networkResolutionUnavailable = needNetwork && !networkPresent;
     boolean bleResolutionUnavailable = needBle && !blePresent;
-    boolean resolutionUnavailable = gpsResolutionUnavailable || networkResolutionUnavailable
-        || bleResolutionUnavailable;
+    boolean resolutionUnavailable =
+        gpsResolutionUnavailable || networkResolutionUnavailable || bleResolutionUnavailable;
 
     final Status status;
     if (hasResolution) {
@@ -134,8 +132,9 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
     } else {
       status = new Status(SUCCESS);
     }
-    final LocationSettingsStates states = new LocationSettingsStates(gpsUsable, networkUsable,
-        bleUsable, gpsPresent, networkPresent, blePresent);
+    final LocationSettingsStates states =
+        new LocationSettingsStates(gpsUsable, networkUsable, bleUsable, gpsPresent, networkPresent,
+            blePresent);
     return new LocationSettingsResult(status, states);
   }
 

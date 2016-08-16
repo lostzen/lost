@@ -9,41 +9,39 @@ import android.content.Context;
  * Implementation for {@link LostApiClient}. Constructs API implementations with {@link Context}.
  */
 public class LostApiClientImpl implements LostApiClient {
-    private final Context context;
+  private final Context context;
 
-    public LostApiClientImpl(Context context) {
-        this.context = context;
-    }
+  public LostApiClientImpl(Context context) {
+    this.context = context;
+  }
 
-    @Override
-    public void connect() {
-        if (LocationServices.FusedLocationApi == null) {
-            LocationServices.FusedLocationApi = new FusedLocationProviderApiImpl(context);
-        }
-        if (LocationServices.GeofencingApi == null) {
-            LocationServices.GeofencingApi = new GeofencingApiImpl();
-        }
-        if (LocationServices.SettingsApi == null) {
-            LocationServices.SettingsApi = new SettingsApiImpl(context);
-        }
+  @Override public void connect() {
+    if (LocationServices.FusedLocationApi == null) {
+      LocationServices.FusedLocationApi = new FusedLocationProviderApiImpl(context);
     }
+    if (LocationServices.GeofencingApi == null) {
+      LocationServices.GeofencingApi = new GeofencingApiImpl();
+    }
+    if (LocationServices.SettingsApi == null) {
+      LocationServices.SettingsApi = new SettingsApiImpl(context);
+    }
+  }
 
-    @Override
-    public void disconnect() {
-        if (LocationServices.FusedLocationApi != null && LocationServices.FusedLocationApi
-                instanceof FusedLocationProviderApiImpl) {
-            FusedLocationProviderApiImpl fusedProvider = (FusedLocationProviderApiImpl)
-                    LocationServices.FusedLocationApi;
-            fusedProvider.shutdown();
-        }
-        LocationServices.FusedLocationApi = null;
-        LocationServices.GeofencingApi = null;
-        LocationServices.SettingsApi = null;
+  @Override public void disconnect() {
+    if (LocationServices.FusedLocationApi != null
+        && LocationServices.FusedLocationApi instanceof FusedLocationProviderApiImpl) {
+      FusedLocationProviderApiImpl fusedProvider =
+          (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
+      fusedProvider.shutdown();
     }
+    LocationServices.FusedLocationApi = null;
+    LocationServices.GeofencingApi = null;
+    LocationServices.SettingsApi = null;
+  }
 
-    @Override
-    public boolean isConnected() {
-        return LocationServices.FusedLocationApi != null && LocationServices.GeofencingApi != null
-            && LocationServices.SettingsApi != null;
-    }
+  @Override public boolean isConnected() {
+    return LocationServices.FusedLocationApi != null
+        && LocationServices.GeofencingApi != null
+        && LocationServices.SettingsApi != null;
+  }
 }

@@ -15,8 +15,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 /**
  * {@link LocationResult} test class.
  */
-@RunWith(RobolectricTestRunner.class)
-public class LocationResultTest {
+@RunWith(RobolectricTestRunner.class) public class LocationResultTest {
 
   @Test public void shouldNotBeNull() throws Exception {
     assertThat(LocationResult.create(null)).isNotNull();

@@ -6,21 +6,21 @@ import android.content.Context;
 
 public interface LostApiClient {
 
-    public void connect();
+  void connect();
 
-    public void disconnect();
+  void disconnect();
 
-    public boolean isConnected();
+  boolean isConnected();
 
-    public static final class Builder {
-        private final Context context;
+  final class Builder {
+    private final Context context;
 
-        public Builder(Context context) {
-            this.context = context;
-        }
-
-        public LostApiClient build() {
-            return new LostApiClientImpl(context);
-        }
+    public Builder(Context context) {
+      this.context = context;
     }
+
+    public LostApiClient build() {
+      return new LostApiClientImpl(context);
+    }
+  }
 }

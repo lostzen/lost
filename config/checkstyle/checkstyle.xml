@@ -40,7 +40,7 @@
         <property name="minimum" value="0"/>
         <property name="maximum" value="0"/>
         <property name="message" value="Line has trailing spaces."/>
-        <property name="severity" value="info"/>
+        <property name="severity" value="error"/>
     </module>
 
     <module name="TreeWalker">

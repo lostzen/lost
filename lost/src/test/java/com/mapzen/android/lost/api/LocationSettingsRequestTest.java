@@ -13,8 +13,7 @@ public class LocationSettingsRequestTest {
   List<LocationRequest> requests;
   LocationSettingsRequest request;
 
-  @Before
-  public void setup() {
+  @Before public void setup() {
     requests = new ArrayList<>();
     LocationRequest highAccuracy = LocationRequest.create().setPriority(
         LocationRequest.PRIORITY_HIGH_ACCURACY); //gps + wifi
@@ -29,17 +28,16 @@ public class LocationSettingsRequestTest {
     requests.add(lowPower);
     requests.add(noPower);
 
-    request = new LocationSettingsRequest.Builder()
-        .addAllLocationRequests(requests).setNeedBle(true).build();
+    request = new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
+        .setNeedBle(true)
+        .build();
   }
 
-  @Test
-  public void shouldHaveRequests() {
+  @Test public void shouldHaveRequests() {
     assertThat(request.getLocationRequests()).isEqualTo(requests);
   }
 
-  @Test
-  public void shouldNeedBle() {
+  @Test public void shouldNeedBle() {
     assertThat(request.getNeedBle()).isTrue();
   }
 }

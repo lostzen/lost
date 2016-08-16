@@ -80,9 +80,9 @@ public final class LocationResult implements Parcelable {
   }
 
   /**
-   * Two instances of {@link LocationResult} are considered to be equal if they have the same number
-   * of locations and the timestamp on each location matches the timestamp of its counterpart in the
-   * other instance.
+   * Two instances of {@link LocationResult} are considered to be equal if they have the same
+   * number of locations and the timestamp on each location matches the timestamp of its counterpart
+   * in the other instance.
    */
   @Override public boolean equals(Object o) {
     if (this == o) {

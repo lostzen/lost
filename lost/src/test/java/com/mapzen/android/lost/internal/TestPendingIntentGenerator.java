@@ -5,7 +5,6 @@ import org.mockito.Mockito;
 import android.app.PendingIntent;
 import android.content.Context;
 
-
 public class TestPendingIntentGenerator extends PendingIntentGenerator {
 
   public TestPendingIntentGenerator(Context context) {

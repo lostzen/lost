@@ -55,11 +55,11 @@ public class Status {
     this.mPendingIntent = pendingIntent;
   }
 
-  public void startResolutionForResult(Activity activity, int requestCode) throws
-      IntentSender.SendIntentException {
+  public void startResolutionForResult(Activity activity, int requestCode)
+      throws IntentSender.SendIntentException {
     if (this.hasResolution()) {
-      activity.startIntentSenderForResult(this.mPendingIntent.getIntentSender(), requestCode,
-          null, 0, 0, 0);
+      activity.startIntentSenderForResult(this.mPendingIntent.getIntentSender(), requestCode, null,
+          0, 0, 0);
     }
   }
 
@@ -90,5 +90,4 @@ public class Status {
   public PendingIntent getResolution() {
     return this.mPendingIntent;
   }
-
 }

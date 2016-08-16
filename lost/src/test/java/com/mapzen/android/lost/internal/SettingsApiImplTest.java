@@ -19,21 +19,18 @@ public class SettingsApiImplTest {
   Context context;
   SettingsApiImpl settingsApi;
 
-  @Before
-  public void setup() {
+  @Before public void setup() {
     context = Mockito.mock(Context.class);
     BluetoothAdapter adapter = Mockito.mock(BluetoothAdapter.class);
     settingsApi = new SettingsApiImpl(context, adapter);
   }
 
-  @Test
-  public void checkLocationSettings_shouldCreateLocationSettingsResultRequest() {
-    LocationSettingsRequest request = new LocationSettingsRequest.Builder()
-        .build();
+  @Test public void checkLocationSettings_shouldCreateLocationSettingsResultRequest() {
+    LocationSettingsRequest request = new LocationSettingsRequest.Builder().build();
     LostApiClient apiClient = new LostApiClient.Builder(context).build();
 
-    PendingResult<LocationSettingsResult> result = settingsApi.checkLocationSettings(
-        apiClient, request);
+    PendingResult<LocationSettingsResult> result =
+        settingsApi.checkLocationSettings(apiClient, request);
     assertThat(result).isInstanceOf(LocationSettingsResultRequest.class);
   }
 }

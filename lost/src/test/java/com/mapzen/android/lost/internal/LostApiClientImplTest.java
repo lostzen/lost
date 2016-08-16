@@ -24,99 +24,80 @@ import static org.robolectric.Shadows.shadowOf;
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
 public class LostApiClientImplTest {
-    private LostApiClient client;
+  private LostApiClient client;
 
-    @Before
-    public void setUp() throws Exception {
-        client = new LostApiClient.Builder(application).build();
-    }
+  @Before public void setUp() throws Exception {
+    client = new LostApiClient.Builder(application).build();
+  }
 
-    @After
-    public void tearDown() throws Exception {
-        client.disconnect();
-    }
+  @After public void tearDown() throws Exception {
+    client.disconnect();
+  }
 
-    @Test
-    public void connect_shouldCreateFusedLocationProviderApiImpl() throws Exception {
-        client.connect();
-        assertThat(LocationServices.FusedLocationApi)
-                .isInstanceOf(FusedLocationProviderApiImpl.class);
-    }
+  @Test public void connect_shouldCreateFusedLocationProviderApiImpl() throws Exception {
+    client.connect();
+    assertThat(LocationServices.FusedLocationApi).isInstanceOf(FusedLocationProviderApiImpl.class);
+  }
 
-    @Test
-    public void connect_shouldCreateGeofencingApiImpl() throws Exception {
-        client.connect();
-        assertThat(LocationServices.GeofencingApi)
-                .isInstanceOf(GeofencingApiImpl.class);
-    }
+  @Test public void connect_shouldCreateGeofencingApiImpl() throws Exception {
+    client.connect();
+    assertThat(LocationServices.GeofencingApi).isInstanceOf(GeofencingApiImpl.class);
+  }
 
-    @Test
-    public void connect_shouldCreateSettingsApiImpl() throws Exception {
-        client.connect();
-        assertThat(LocationServices.SettingsApi)
-            .isInstanceOf(SettingsApiImpl.class);
-    }
+  @Test public void connect_shouldCreateSettingsApiImpl() throws Exception {
+    client.connect();
+    assertThat(LocationServices.SettingsApi).isInstanceOf(SettingsApiImpl.class);
+  }
 
+  @Test public void disconnect_shouldRemoveFusedLocationProviderApiImpl() throws Exception {
+    client.connect();
+    client.disconnect();
+    assertThat(LocationServices.FusedLocationApi).isNull();
+  }
 
-    @Test
-    public void disconnect_shouldRemoveFusedLocationProviderApiImpl() throws Exception {
-        client.connect();
-        client.disconnect();
-        assertThat(LocationServices.FusedLocationApi).isNull();
-    }
+  @Test public void disconnect_shouldRemoveGeofencingApiImpl() throws Exception {
+    client.connect();
+    client.disconnect();
+    assertThat(LocationServices.GeofencingApi).isNull();
+  }
 
-    @Test
-    public void disconnect_shouldRemoveGeofencingApiImpl() throws Exception {
-        client.connect();
-        client.disconnect();
-        assertThat(LocationServices.GeofencingApi).isNull();
-    }
+  @Test public void disconnect_shouldRemoveSettingsApiImpl() throws Exception {
+    client.connect();
+    client.disconnect();
+    assertThat(LocationServices.SettingsApi).isNull();
+  }
 
-    @Test
-    public void disconnect_shouldRemoveSettingsApiImpl() throws Exception {
-        client.connect();
-        client.disconnect();
-        assertThat(LocationServices.SettingsApi).isNull();
-    }
+  @Test public void disconnect_shouldUnregisterLocationUpdateListeners() throws Exception {
+    client.connect();
+    LocationServices.FusedLocationApi.requestLocationUpdates(LocationRequest.create(),
+        new LocationListener() {
+          @Override public void onLocationChanged(Location location) {
+          }
 
-    @Test
-    public void disconnect_shouldUnregisterLocationUpdateListeners() throws Exception {
-        client.connect();
-        LocationServices.FusedLocationApi.requestLocationUpdates(LocationRequest.create(),
-                new LocationListener() {
-                    @Override
-                    public void onLocationChanged(Location location) {
-                    }
+          @Override public void onProviderDisabled(String provider) {
+          }
 
-                    @Override
-                    public void onProviderDisabled(String provider) {
-                    }
+          @Override public void onProviderEnabled(String provider) {
+          }
+        });
 
-                    @Override
-                    public void onProviderEnabled(String provider) {
-                    }
-                });
+    client.disconnect();
+    LocationManager lm = (LocationManager) application.getSystemService(LOCATION_SERVICE);
+    assertThat(shadowOf(lm).getRequestLocationUpdateListeners()).isEmpty();
+  }
 
-        client.disconnect();
-        LocationManager lm = (LocationManager) application.getSystemService(LOCATION_SERVICE);
-        assertThat(shadowOf(lm).getRequestLocationUpdateListeners()).isEmpty();
-    }
+  @Test public void isConnected_shouldReturnFalseBeforeConnected() throws Exception {
+    assertThat(client.isConnected()).isFalse();
+  }
 
-    @Test
-    public void isConnected_shouldReturnFalseBeforeConnected() throws Exception {
-        assertThat(client.isConnected()).isFalse();
-    }
+  @Test public void isConnected_shouldReturnTrueAfterConnected() throws Exception {
+    client.connect();
+    assertThat(client.isConnected()).isTrue();
+  }
 
-    @Test
-    public void isConnected_shouldReturnTrueAfterConnected() throws Exception {
-        client.connect();
-        assertThat(client.isConnected()).isTrue();
-    }
-
-    @Test
-    public void isConnected_shouldReturnFalseAfterDisconnected() throws Exception {
-        client.connect();
-        client.disconnect();
-        assertThat(client.isConnected()).isFalse();
-    }
+  @Test public void isConnected_shouldReturnFalseAfterDisconnected() throws Exception {
+    client.connect();
+    client.disconnect();
+    assertThat(client.isConnected()).isFalse();
+  }
 }
