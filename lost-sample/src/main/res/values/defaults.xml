@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <bool name="background_update_default_value">false</bool>
-    <integer name="interval_default_value">1000</integer>
-    <integer name="displacement_default_value">0</integer>
-    <integer name="priority_default_value">102</integer>
-    <bool name="mock_mode_default_value">false</bool>
-    <integer name="mock_lat_default_value">0</integer>
-    <integer name="mock_lng_default_value">0</integer>
-    <integer name="mock_accuracy_default_value">30</integer>
-    <bool name="mock_trace_default_value">false</bool>
-    <string name="mock_gpx_file_default_value">lost.gpx</string>
+  <bool name="background_update_default_value">false</bool>
+  <integer name="interval_default_value">1000</integer>
+  <integer name="displacement_default_value">0</integer>
+  <integer name="priority_default_value">102</integer>
+  <bool name="mock_mode_default_value">false</bool>
+  <integer name="mock_lat_default_value">0</integer>
+  <integer name="mock_lng_default_value">0</integer>
+  <integer name="mock_accuracy_default_value">30</integer>
+  <bool name="mock_trace_default_value">false</bool>
+  <string name="mock_gpx_file_default_value">lost.gpx</string>
 </resources>

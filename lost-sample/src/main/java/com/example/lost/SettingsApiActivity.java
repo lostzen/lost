@@ -81,19 +81,19 @@ public class SettingsApiActivity extends AppCompatActivity {
 
   private void checkLocationSettings() {
     ArrayList<LocationRequest> requests = new ArrayList<>();
-    LocationRequest highAccuracy = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_HIGH_ACCURACY); //gps + wifi
+    LocationRequest highAccuracy =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); //gps + wifi
     requests.add(highAccuracy);
 
     boolean needBle = true;
-    LocationSettingsRequest request = new LocationSettingsRequest.Builder()
-        .addAllLocationRequests(requests)
-        .setNeedBle(needBle)
-        .build();
+    LocationSettingsRequest request =
+        new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
+            .setNeedBle(needBle)
+            .build();
     LostApiClient apiClient = new LostApiClient.Builder(this).build();
     apiClient.connect();
     result = LocationServices.SettingsApi.checkLocationSettings(apiClient, request);
-    
+
     LocationSettingsResult locationSettingsResult = result.await();
 
     LocationSettingsStates states = locationSettingsResult.getLocationSettingsStates();
@@ -134,6 +134,7 @@ public class SettingsApiActivity extends AppCompatActivity {
       e.printStackTrace();
     }
   }
+
   private void updateTextViewStates(LocationSettingsStates states) {
     gpsPresent.setText(states.isGpsPresent() ? "Y" : "N");
     gpsUsable.setText(states.isGpsUsable() ? "Y" : "N");
@@ -145,8 +146,7 @@ public class SettingsApiActivity extends AppCompatActivity {
     bleUsable.setText(states.isBleUsable() ? "Y" : "N");
   }
 
-  @Override
-  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+  @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     switch (requestCode) {
       case REQUEST_CHECK_SETTINGS:
         checkLocationSettings();

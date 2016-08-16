@@ -27,5 +27,4 @@ public class Sample {
   public Class<? extends AppCompatActivity> getActivityClass() {
     return activityClass;
   }
-
 }
