@@ -83,17 +83,7 @@ public class SettingsApiActivity extends AppCompatActivity {
     ArrayList<LocationRequest> requests = new ArrayList<>();
     LocationRequest highAccuracy = LocationRequest.create().setPriority(
         LocationRequest.PRIORITY_HIGH_ACCURACY); //gps + wifi
-    LocationRequest balancedPowerAccuracy = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY); // wifi
-    LocationRequest lowPower = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_LOW_POWER); // wifi
-    LocationRequest noPower = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_NO_POWER); // gps or wifi or none
-
     requests.add(highAccuracy);
-    //requests.add(balancedPowerAccuracy);
-    //requests.add(lowPower);
-    //requests.add(noPower);
 
     boolean needBle = true;
     LocationSettingsRequest request = new LocationSettingsRequest.Builder()
@@ -103,44 +93,7 @@ public class SettingsApiActivity extends AppCompatActivity {
     LostApiClient apiClient = new LostApiClient.Builder(this).build();
     apiClient.connect();
     result = LocationServices.SettingsApi.checkLocationSettings(apiClient, request);
-
-    //result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-    //  @Override public void onResult(@NonNull LocationSettingsResult result) {
-    //
-    //    LocationSettingsStates states = result.getLocationSettingsStates();
-    //    if (states != null) {
-    //      updateTextViewStates(states);
-    //    }
-    //
-    //    Status status = result.getStatus();
-    //    switch (status.getStatusCode()) {
-    //      case Status.SUCCESS:
-    //        resolveLocationSettings.setEnabled(false);
-    //        break;
-    //      case Status.RESOLUTION_REQUIRED:
-    //        requestStatus = status;
-    //        resolveLocationSettings.setEnabled(true);
-    //        break;
-    //      case Status.INTERNAL_ERROR:
-    //        Log.d(TAG, "INTERNAL ERROR");
-    //        break;
-    //      case Status.INTERRUPTED:
-    //        Log.d(TAG, "INTERRUPTED");
-    //        break;
-    //      case Status.TIMEOUT:
-    //        Log.d(TAG, "TIMEOUT");
-    //        break;
-    //      case Status.CANCELLED:
-    //        Log.d(TAG, "CANCELLED");
-    //        break;
-    //      default:
-    //        break;
-    //    }
-    //  }
-    //}, 3, TimeUnit.SECONDS);
-
-
-    //LocationSettingsResult locationSettingsResult = result.await(1, TimeUnit.SECONDS);
+    
     LocationSettingsResult locationSettingsResult = result.await();
 
     LocationSettingsStates states = locationSettingsResult.getLocationSettingsStates();
