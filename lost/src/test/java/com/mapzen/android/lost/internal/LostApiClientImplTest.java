@@ -51,6 +51,14 @@ public class LostApiClientImplTest {
     }
 
     @Test
+    public void connect_shouldCreateSettingsApiImpl() throws Exception {
+        client.connect();
+        assertThat(LocationServices.SettingsApi)
+            .isInstanceOf(SettingsApiImpl.class);
+    }
+
+
+    @Test
     public void disconnect_shouldRemoveFusedLocationProviderApiImpl() throws Exception {
         client.connect();
         client.disconnect();
@@ -62,6 +70,13 @@ public class LostApiClientImplTest {
         client.connect();
         client.disconnect();
         assertThat(LocationServices.GeofencingApi).isNull();
+    }
+
+    @Test
+    public void disconnect_shouldRemoveSettingsApiImpl() throws Exception {
+        client.connect();
+        client.disconnect();
+        assertThat(LocationServices.SettingsApi).isNull();
     }
 
     @Test

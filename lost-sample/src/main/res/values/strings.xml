@@ -39,5 +39,20 @@
 
     <string name="mock_gpx_file_key">mock_gpx_file_key</string>
     <string name="mock_gpx_file_title">GPX Filename</string>
+    <string name="sample_fused_location_api_title">FusedLocationApi</string>
+    <string name="sample_fused_location_api_description">Demonstrates how to request location updates using the FusedLocationApi</string>
+    <string name="sample_settings_api_title">SettingsApi</string>
+    <string name="sample_settings_api_description">Demonstrates how to use the SettingsApi to request network status and resolve issues with the current status when it isn\'t enabled</string>
+    <string name="gps_present">Gps present:</string>
+    <string name="gps_usable">Gps usable:</string>
+    <string name="network_present">Network present:</string>
+    <string name="network_usable">Network usable:</string>
+    <string name="location_present">Location present:</string>
+    <string name="location_usable">Location usable:</string>
+    <string name="ble_present">Ble present:</string>
+    <string name="ble_usable">Ble usable:</string>
+    <string name="check_location_settings">Check location settings</string>
+    <string name="resolve_location_settings">Resolve location settings</string>
+    <string name="cancel">Cancel</string>
 
 </resources>

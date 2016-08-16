@@ -23,6 +23,9 @@ public class LostApiClientImpl implements LostApiClient {
         if (LocationServices.GeofencingApi == null) {
             LocationServices.GeofencingApi = new GeofencingApiImpl();
         }
+        if (LocationServices.SettingsApi == null) {
+            LocationServices.SettingsApi = new SettingsApiImpl(context);
+        }
     }
 
     @Override
@@ -35,10 +38,12 @@ public class LostApiClientImpl implements LostApiClient {
         }
         LocationServices.FusedLocationApi = null;
         LocationServices.GeofencingApi = null;
+        LocationServices.SettingsApi = null;
     }
 
     @Override
     public boolean isConnected() {
-        return LocationServices.FusedLocationApi != null && LocationServices.GeofencingApi != null;
+        return LocationServices.FusedLocationApi != null && LocationServices.GeofencingApi != null
+            && LocationServices.SettingsApi != null;
     }
 }

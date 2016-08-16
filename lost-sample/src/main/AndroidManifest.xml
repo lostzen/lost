@@ -4,6 +4,8 @@
     package="com.example.lost">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
 
     <application
         android:label="@string/app_name"
@@ -11,8 +13,8 @@
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
         <activity
-            android:label="@string/app_name"
-            android:name=".LostActivity">
+            android:name=".MainActivity"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -21,8 +23,13 @@
         </activity>
 
         <activity
+            android:name=".FusedLocationApiActivity"/>
+
+        <activity
             android:label="@string/settings"
             android:name=".SettingsActivity" />
+
+        <activity android:name=".SettingsApiActivity"/>
 
     </application>
 </manifest>
