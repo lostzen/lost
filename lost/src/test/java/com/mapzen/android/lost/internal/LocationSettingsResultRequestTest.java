@@ -22,8 +22,7 @@ import java.util.concurrent.TimeUnit;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("MissingPermission")
-public class LocationSettingsResultRequestTest {
+@SuppressWarnings("MissingPermission") public class LocationSettingsResultRequestTest {
 
   Context context;
   BluetoothAdapter bluetoothAdapter;
@@ -33,8 +32,7 @@ public class LocationSettingsResultRequestTest {
   LocationSettingsRequest request;
   LocationSettingsResultRequest resultRequest;
 
-  @Before
-  public void setup() {
+  @Before public void setup() {
     context = Mockito.mock(Context.class);
     bluetoothAdapter = Mockito.mock(BluetoothAdapter.class);
     pm = Mockito.mock(PackageManager.class);
@@ -42,20 +40,19 @@ public class LocationSettingsResultRequestTest {
     generator = new TestPendingIntentGenerator(context);
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
-    LocationRequest highAccuracy = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_HIGH_ACCURACY); //gps + wifi
+    LocationRequest highAccuracy =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); //gps + wifi
     requests.add(highAccuracy);
-    request = new LocationSettingsRequest.Builder()
-        .addAllLocationRequests(requests)
+    request = new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
         .setNeedBle(true)
         .build();
 
-    resultRequest = new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager,
-        generator, request);
+    resultRequest =
+        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+            request);
   }
 
-  @Test
-  public void await_shouldReturnSuccessfulResult() {
+  @Test public void await_shouldReturnSuccessfulResult() {
     when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
     when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
@@ -75,8 +72,7 @@ public class LocationSettingsResultRequestTest {
     assertThat(result.getLocationSettingsStates().isBleUsable()).isTrue();
   }
 
-  @Test
-  public void await_shouldReturnGpsUsableIfGpsEnabled() {
+  @Test public void await_shouldReturnGpsUsableIfGpsEnabled() {
     when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
@@ -94,8 +90,7 @@ public class LocationSettingsResultRequestTest {
     assertThat(result.getLocationSettingsStates().isBleUsable()).isFalse();
   }
 
-  @Test
-  public void await_shouldReturnNetworkUsableIfNetworkEnabled() {
+  @Test public void await_shouldReturnNetworkUsableIfNetworkEnabled() {
     when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
@@ -113,8 +108,7 @@ public class LocationSettingsResultRequestTest {
     assertThat(result.getLocationSettingsStates().isBleUsable()).isFalse();
   }
 
-  @Test
-  public void await_shouldReturnLocationUsableIfNetworkOrGpsEnabled() {
+  @Test public void await_shouldReturnLocationUsableIfNetworkOrGpsEnabled() {
     when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
@@ -148,8 +142,7 @@ public class LocationSettingsResultRequestTest {
     assertThat(result.getLocationSettingsStates().isBleUsable()).isFalse();
   }
 
-  @Test
-  public void await_shouldReturnBleUsableIfBleEnabled() {
+  @Test public void await_shouldReturnBleUsableIfBleEnabled() {
     when(bluetoothAdapter.isEnabled()).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
@@ -167,137 +160,136 @@ public class LocationSettingsResultRequestTest {
     assertThat(result.getLocationSettingsStates().isBleUsable()).isTrue();
   }
 
-  @Test
-  public void await_balancedLowPower_noBle_shouldReturnStatusResolutionRequired() {
+  @Test public void await_balancedLowPower_noBle_shouldReturnStatusResolutionRequired() {
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
-    LocationRequest balanced = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-    LocationRequest lowPower = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_LOW_POWER);
+    LocationRequest balanced =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+    LocationRequest lowPower =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_LOW_POWER);
     requests.add(balanced);
     requests.add(lowPower);
-    LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder()
-        .addAllLocationRequests(requests)
-        .setNeedBle(false)
-        .build();
-    LocationSettingsResultRequest settingsResultRequest = new LocationSettingsResultRequest(
-        bluetoothAdapter, pm, locationManager, generator, settingsRequest);
+    LocationSettingsRequest settingsRequest =
+        new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
+            .setNeedBle(false)
+            .build();
+    LocationSettingsResultRequest settingsResultRequest =
+        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+            settingsRequest);
 
     LocationSettingsResult result = settingsResultRequest.await();
     assertThat(result.getStatus().getStatusCode()).isEqualTo(Status.RESOLUTION_REQUIRED);
   }
 
-  @Test
-  public void await_balancedLowPower_needBle_shouldReturnStatusResolutionRequired() {
+  @Test public void await_balancedLowPower_needBle_shouldReturnStatusResolutionRequired() {
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
-    LocationRequest balanced = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-    LocationRequest lowPower = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_LOW_POWER);
+    LocationRequest balanced =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+    LocationRequest lowPower =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_LOW_POWER);
     requests.add(balanced);
     requests.add(lowPower);
-    LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder()
-        .addAllLocationRequests(requests)
-        .setNeedBle(true)
-        .build();
-    LocationSettingsResultRequest settingsResultRequest = new LocationSettingsResultRequest(
-        bluetoothAdapter, pm, locationManager, generator, settingsRequest);
+    LocationSettingsRequest settingsRequest =
+        new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
+            .setNeedBle(true)
+            .build();
+    LocationSettingsResultRequest settingsResultRequest =
+        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+            settingsRequest);
 
     LocationSettingsResult result = settingsResultRequest.await();
     assertThat(result.getStatus().getStatusCode()).isEqualTo(Status.RESOLUTION_REQUIRED);
   }
 
-  @Test
-  public void await_balancedLowPower_noBle_shouldReturnStatusSuccess() {
+  @Test public void await_balancedLowPower_noBle_shouldReturnStatusSuccess() {
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
     when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
-    LocationRequest balanced = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-    LocationRequest lowPower = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_LOW_POWER);
+    LocationRequest balanced =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+    LocationRequest lowPower =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_LOW_POWER);
     requests.add(balanced);
     requests.add(lowPower);
-    LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder()
-        .addAllLocationRequests(requests)
-        .setNeedBle(false)
-        .build();
-    LocationSettingsResultRequest settingsResultRequest = new LocationSettingsResultRequest(
-        bluetoothAdapter, pm, locationManager, generator, settingsRequest);
+    LocationSettingsRequest settingsRequest =
+        new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
+            .setNeedBle(false)
+            .build();
+    LocationSettingsResultRequest settingsResultRequest =
+        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+            settingsRequest);
 
     LocationSettingsResult result = settingsResultRequest.await();
     assertThat(result.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
   }
 
-  @Test
-  public void await_noPower_noBle_shouldReturnStatusSuccess() {
+  @Test public void await_noPower_noBle_shouldReturnStatusSuccess() {
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
-    LocationRequest noPower = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_NO_POWER);
+    LocationRequest noPower =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_NO_POWER);
     requests.add(noPower);
-    LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder()
-        .addAllLocationRequests(requests)
-        .setNeedBle(false)
-        .build();
-    LocationSettingsResultRequest settingsResultRequest = new LocationSettingsResultRequest(
-        bluetoothAdapter, pm, locationManager, generator, settingsRequest);
+    LocationSettingsRequest settingsRequest =
+        new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
+            .setNeedBle(false)
+            .build();
+    LocationSettingsResultRequest settingsResultRequest =
+        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+            settingsRequest);
 
     LocationSettingsResult result = settingsResultRequest.await();
     assertThat(result.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
   }
 
-  @Test
-  public void await_noPower_needBle_shouldReturnStatusResolutionRequired() {
+  @Test public void await_noPower_needBle_shouldReturnStatusResolutionRequired() {
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
-    LocationRequest noPower = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_NO_POWER);
+    LocationRequest noPower =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_NO_POWER);
     requests.add(noPower);
-    LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder()
-        .addAllLocationRequests(requests)
-        .setNeedBle(true)
-        .build();
-    LocationSettingsResultRequest settingsResultRequest = new LocationSettingsResultRequest(
-        bluetoothAdapter, pm, locationManager, generator, settingsRequest);
+    LocationSettingsRequest settingsRequest =
+        new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
+            .setNeedBle(true)
+            .build();
+    LocationSettingsResultRequest settingsResultRequest =
+        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+            settingsRequest);
 
     LocationSettingsResult result = settingsResultRequest.await();
     assertThat(result.getStatus().getStatusCode()).isEqualTo(Status.RESOLUTION_REQUIRED);
   }
 
-  @Test
-  public void awaitTimeout_shouldTimeoutAfterInterval() {
+  @Test public void awaitTimeout_shouldTimeoutAfterInterval() {
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
 
     DelayTestPendingIntentGenerator delayedGenerator = new DelayTestPendingIntentGenerator(context);
-    LocationSettingsResultRequest settingsResultRequest = new LocationSettingsResultRequest(
-        bluetoothAdapter, pm, locationManager, delayedGenerator, request);
+    LocationSettingsResultRequest settingsResultRequest =
+        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, delayedGenerator,
+            request);
 
     LocationSettingsResult resultRequest = settingsResultRequest.await(1000, TimeUnit.MILLISECONDS);
     assertThat(resultRequest.getStatus().getStatusCode()).isEqualTo(Status.TIMEOUT);
   }
-  
-  @Test
-  public void setResultCallback_shouldReturnSuccessfulResult() {
+
+  @Test public void setResultCallback_shouldReturnSuccessfulResult() {
     when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
     when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
@@ -320,8 +312,7 @@ public class LocationSettingsResultRequestTest {
     });
   }
 
-  @Test
-  public void setResultCallback_shouldReturnGpsUsableIfGpsEnabled() {
+  @Test public void setResultCallback_shouldReturnGpsUsableIfGpsEnabled() {
     when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
@@ -342,8 +333,7 @@ public class LocationSettingsResultRequestTest {
     });
   }
 
-  @Test
-  public void setResultCallback_shouldReturnNetworkUsableIfNetworkEnabled() {
+  @Test public void setResultCallback_shouldReturnNetworkUsableIfNetworkEnabled() {
     when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
@@ -362,11 +352,9 @@ public class LocationSettingsResultRequestTest {
         assertThat(result.getLocationSettingsStates().isBleUsable()).isFalse();
       }
     });
-
   }
 
-  @Test
-  public void setResultCallback_shouldReturnLocationUsableIfNetworkOrGpsEnabled() {
+  @Test public void setResultCallback_shouldReturnLocationUsableIfNetworkOrGpsEnabled() {
     when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
@@ -385,7 +373,6 @@ public class LocationSettingsResultRequestTest {
         assertThat(result.getLocationSettingsStates().isBleUsable()).isFalse();
       }
     });
-
 
     when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(false);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(false);
@@ -407,8 +394,7 @@ public class LocationSettingsResultRequestTest {
     });
   }
 
-  @Test
-  public void setResultCallback_shouldReturnBleUsableIfBleEnabled() {
+  @Test public void setResultCallback_shouldReturnBleUsableIfBleEnabled() {
     when(bluetoothAdapter.isEnabled()).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
@@ -436,18 +422,19 @@ public class LocationSettingsResultRequestTest {
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
-    LocationRequest balanced = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-    LocationRequest lowPower = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_LOW_POWER);
+    LocationRequest balanced =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+    LocationRequest lowPower =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_LOW_POWER);
     requests.add(balanced);
     requests.add(lowPower);
-    LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder()
-        .addAllLocationRequests(requests)
-        .setNeedBle(false)
-        .build();
-    LocationSettingsResultRequest settingsResultRequest = new LocationSettingsResultRequest(
-        bluetoothAdapter, pm, locationManager, generator, settingsRequest);
+    LocationSettingsRequest settingsRequest =
+        new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
+            .setNeedBle(false)
+            .build();
+    LocationSettingsResultRequest settingsResultRequest =
+        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+            settingsRequest);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
       @Override public void onResult(@NonNull LocationSettingsResult result) {
@@ -463,18 +450,19 @@ public class LocationSettingsResultRequestTest {
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
-    LocationRequest balanced = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-    LocationRequest lowPower = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_LOW_POWER);
+    LocationRequest balanced =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+    LocationRequest lowPower =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_LOW_POWER);
     requests.add(balanced);
     requests.add(lowPower);
-    LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder()
-        .addAllLocationRequests(requests)
-        .setNeedBle(true)
-        .build();
-    LocationSettingsResultRequest settingsResultRequest = new LocationSettingsResultRequest(
-        bluetoothAdapter, pm, locationManager, generator, settingsRequest);
+    LocationSettingsRequest settingsRequest =
+        new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
+            .setNeedBle(true)
+            .build();
+    LocationSettingsResultRequest settingsResultRequest =
+        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+            settingsRequest);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
       @Override public void onResult(@NonNull LocationSettingsResult result) {
@@ -483,26 +471,26 @@ public class LocationSettingsResultRequestTest {
     });
   }
 
-  @Test
-  public void setResultCallback_balancedLowPower_noBle_shouldReturnStatusSuccess() {
+  @Test public void setResultCallback_balancedLowPower_noBle_shouldReturnStatusSuccess() {
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
     when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
-    LocationRequest balanced = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-    LocationRequest lowPower = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_LOW_POWER);
+    LocationRequest balanced =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+    LocationRequest lowPower =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_LOW_POWER);
     requests.add(balanced);
     requests.add(lowPower);
-    LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder()
-        .addAllLocationRequests(requests)
-        .setNeedBle(false)
-        .build();
-    LocationSettingsResultRequest settingsResultRequest = new LocationSettingsResultRequest(
-        bluetoothAdapter, pm, locationManager, generator, settingsRequest);
+    LocationSettingsRequest settingsRequest =
+        new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
+            .setNeedBle(false)
+            .build();
+    LocationSettingsResultRequest settingsResultRequest =
+        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+            settingsRequest);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
       @Override public void onResult(@NonNull LocationSettingsResult result) {
@@ -511,22 +499,22 @@ public class LocationSettingsResultRequestTest {
     });
   }
 
-  @Test
-  public void setResultCallback_noPower_noBle_shouldReturnStatusSuccess() {
+  @Test public void setResultCallback_noPower_noBle_shouldReturnStatusSuccess() {
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
-    LocationRequest noPower = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_NO_POWER);
+    LocationRequest noPower =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_NO_POWER);
     requests.add(noPower);
-    LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder()
-        .addAllLocationRequests(requests)
-        .setNeedBle(false)
-        .build();
-    LocationSettingsResultRequest settingsResultRequest = new LocationSettingsResultRequest(
-        bluetoothAdapter, pm, locationManager, generator, settingsRequest);
+    LocationSettingsRequest settingsRequest =
+        new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
+            .setNeedBle(false)
+            .build();
+    LocationSettingsResultRequest settingsResultRequest =
+        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+            settingsRequest);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
       @Override public void onResult(@NonNull LocationSettingsResult result) {
@@ -535,22 +523,22 @@ public class LocationSettingsResultRequestTest {
     });
   }
 
-  @Test
-  public void setResultCallback_noPower_needBle_shouldReturnStatusResolutionRequired() {
+  @Test public void setResultCallback_noPower_needBle_shouldReturnStatusResolutionRequired() {
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
-    LocationRequest noPower = LocationRequest.create().setPriority(
-        LocationRequest.PRIORITY_NO_POWER);
+    LocationRequest noPower =
+        LocationRequest.create().setPriority(LocationRequest.PRIORITY_NO_POWER);
     requests.add(noPower);
-    LocationSettingsRequest settingsRequest = new LocationSettingsRequest.Builder()
-        .addAllLocationRequests(requests)
-        .setNeedBle(true)
-        .build();
-    LocationSettingsResultRequest settingsResultRequest = new LocationSettingsResultRequest(
-        bluetoothAdapter, pm, locationManager, generator, settingsRequest);
+    LocationSettingsRequest settingsRequest =
+        new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
+            .setNeedBle(true)
+            .build();
+    LocationSettingsResultRequest settingsResultRequest =
+        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+            settingsRequest);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
       @Override public void onResult(@NonNull LocationSettingsResult result) {
@@ -559,15 +547,15 @@ public class LocationSettingsResultRequestTest {
     });
   }
 
-  @Test
-  public void setResultCallbackTimeout_shouldTimeoutAfterInterval() {
+  @Test public void setResultCallbackTimeout_shouldTimeoutAfterInterval() {
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
 
     DelayTestPendingIntentGenerator delayedGenerator = new DelayTestPendingIntentGenerator(context);
-    LocationSettingsResultRequest settingsResultRequest = new LocationSettingsResultRequest(
-        bluetoothAdapter, pm, locationManager, delayedGenerator, request);
+    LocationSettingsResultRequest settingsResultRequest =
+        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, delayedGenerator,
+            request);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
       @Override public void onResult(@NonNull LocationSettingsResult result) {

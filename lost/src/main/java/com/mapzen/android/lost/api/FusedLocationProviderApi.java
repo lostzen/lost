@@ -8,25 +8,25 @@ import java.io.File;
 
 public interface FusedLocationProviderApi {
 
-    @Deprecated String KEY_LOCATION_CHANGED = "com.mapzen.android.lost.LOCATION";
+  @Deprecated String KEY_LOCATION_CHANGED = "com.mapzen.android.lost.LOCATION";
 
-    Location getLastLocation();
+  Location getLastLocation();
 
-    void removeLocationUpdates(LocationListener listener);
+  void removeLocationUpdates(LocationListener listener);
 
-    void removeLocationUpdates(PendingIntent callbackIntent);
+  void removeLocationUpdates(PendingIntent callbackIntent);
 
-    void requestLocationUpdates(LocationRequest request, LocationListener listener, Looper looper);
+  void requestLocationUpdates(LocationRequest request, LocationListener listener, Looper looper);
 
-    void requestLocationUpdates(LocationRequest request, LocationListener listener);
+  void requestLocationUpdates(LocationRequest request, LocationListener listener);
 
-    void requestLocationUpdates(LocationRequest request, PendingIntent callbackIntent);
+  void requestLocationUpdates(LocationRequest request, PendingIntent callbackIntent);
 
-    void setMockLocation(Location mockLocation);
+  void setMockLocation(Location mockLocation);
 
-    void setMockMode(boolean isMockMode);
+  void setMockMode(boolean isMockMode);
 
-    void setMockTrace(final File file);
+  void setMockTrace(final File file);
 
-    boolean isProviderEnabled(String provider);
+  boolean isProviderEnabled(String provider);
 }

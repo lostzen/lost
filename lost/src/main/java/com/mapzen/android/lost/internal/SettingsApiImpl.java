@@ -30,10 +30,10 @@ public class SettingsApiImpl implements SettingsApi {
   public PendingResult<LocationSettingsResult> checkLocationSettings(LostApiClient apiClient,
       LocationSettingsRequest request) {
     PackageManager pm = context.getPackageManager();
-    LocationManager locationManager = (LocationManager) context.getSystemService(
-        Context.LOCATION_SERVICE);
+    LocationManager locationManager =
+        (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     PendingIntentGenerator generator = new PendingIntentGenerator(context);
-    return new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager,
-        generator, request);
+    return new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+        request);
   }
 }

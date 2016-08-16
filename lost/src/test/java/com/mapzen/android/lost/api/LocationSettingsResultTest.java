@@ -11,20 +11,17 @@ public class LocationSettingsResultTest {
   LocationSettingsStates states;
   LocationSettingsResult result;
 
-  @Before
-  public void setup() {
+  @Before public void setup() {
     status = new Status(Status.SUCCESS);
     states = new LocationSettingsStates(true, true, true, true, true, true);
     result = new LocationSettingsResult(status, states);
   }
 
-  @Test
-  public void shouldHaveStatus() {
+  @Test public void shouldHaveStatus() {
     assertThat(result.getStatus()).isEqualTo(status);
   }
 
-  @Test
-  public void shouldHaveStates() {
+  @Test public void shouldHaveStates() {
     assertThat(result.getLocationSettingsStates()).isEqualTo(states);
   }
 }

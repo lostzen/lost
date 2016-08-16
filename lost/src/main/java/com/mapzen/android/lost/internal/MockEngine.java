@@ -24,149 +24,141 @@ import javax.xml.xpath.XPathFactory;
  * Mock implementation of LocationEngine that reports single locations and/or full GPX traces.
  */
 public class MockEngine extends LocationEngine {
-    public static final String MOCK_PROVIDER = "mock";
+  public static final String MOCK_PROVIDER = "mock";
 
-    // GPX tags
-    public static final String TAG_TRACK_POINT = "trkpt";
-    public static final String TAG_SPEED = "speed";
-    public static final String TAG_LAT = "lat";
-    public static final String TAG_LNG = "lon";
+  // GPX tags
+  public static final String TAG_TRACK_POINT = "trkpt";
+  public static final String TAG_SPEED = "speed";
+  public static final String TAG_LAT = "lat";
+  public static final String TAG_LNG = "lon";
 
-    private Location location;
-    private File traceFile;
-    protected TraceThread traceThread;
+  private Location location;
+  private File traceFile;
+  protected TraceThread traceThread;
 
-    public MockEngine(Context context, FusionEngine.Callback callback) {
-        super(context, callback);
+  public MockEngine(Context context, FusionEngine.Callback callback) {
+    super(context, callback);
+  }
+
+  @Override public Location getLastLocation() {
+    return location;
+  }
+
+  @Override public boolean isProviderEnabled(String provider) {
+    return false;
+  }
+
+  @Override protected void enable() {
+    if (traceFile != null) {
+      traceThread = new TraceThread();
+      traceThread.start();
+    }
+  }
+
+  @Override protected void disable() {
+    if (traceThread != null) {
+      traceThread.cancel();
+    }
+  }
+
+  public void setLocation(Location location) {
+    this.location = location;
+    if (getCallback() != null) {
+      getCallback().reportLocation(location);
+    }
+  }
+
+  /**
+   * Set a GPX trace file to be replayed as mock locations.
+   */
+  public void setTrace(File file) {
+    traceFile = file;
+  }
+
+  protected class TraceThread extends Thread {
+    private boolean canceled;
+    private Location previous;
+
+    public void cancel() {
+      canceled = true;
+      interrupt();
     }
 
-    @Override
-    public Location getLastLocation() {
-        return location;
+    @Override public void run() {
+      final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      final XPath xPath = XPathFactory.newInstance().newXPath();
+      final String expression = "//" + TAG_TRACK_POINT;
+      final String speedExpression = "//" + TAG_SPEED;
+
+      NodeList nodeList = null;
+      NodeList speedList = null;
+      try {
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document document = builder.parse(traceFile);
+        nodeList = (NodeList) xPath.compile(expression).evaluate(document, XPathConstants.NODESET);
+        speedList =
+            (NodeList) xPath.compile(speedExpression).evaluate(document, XPathConstants.NODESET);
+      } catch (ParserConfigurationException e) {
+        e.printStackTrace();
+      } catch (SAXException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
+        e.printStackTrace();
+      } catch (XPathExpressionException e) {
+        e.printStackTrace();
+      }
+
+      parse(nodeList, speedList);
     }
 
-    @Override
-    public boolean isProviderEnabled(String provider) {
-        return false;
+    private void parse(NodeList nodeList, NodeList speedList) {
+      if (nodeList != null) {
+        for (int i = 0; i < nodeList.getLength(); i++) {
+          postMockLocation(nodeToLocation(nodeList, speedList, i));
+          sleepFastestInterval();
+        }
+      }
     }
 
-    @Override
-    protected void enable() {
-        if (traceFile != null) {
-            traceThread = new TraceThread();
-            traceThread.start();
-        }
+    private Location nodeToLocation(NodeList nodeList, NodeList speedList, int i) {
+      final Node node = nodeList.item(i);
+      String lat = node.getAttributes().getNamedItem(TAG_LAT).getNodeValue();
+      String lng = node.getAttributes().getNamedItem(TAG_LNG).getNodeValue();
+
+      final Location location = new Location(MOCK_PROVIDER);
+      location.setLatitude(Double.parseDouble(lat));
+      location.setLongitude(Double.parseDouble(lng));
+      location.setTime(System.currentTimeMillis());
+      if (speedList.item(i) != null && speedList.item(i).getFirstChild() != null) {
+        location.setSpeed(Float.parseFloat(speedList.item(i).getFirstChild().getNodeValue()));
+      }
+
+      if (previous != null) {
+        location.setBearing(previous.bearingTo(location));
+      }
+
+      previous = location;
+      return location;
     }
 
-    @Override
-    protected void disable() {
-        if (traceThread != null) {
-            traceThread.cancel();
+    private void sleepFastestInterval() {
+      if (getRequest() != null) {
+        try {
+          Thread.sleep(getRequest().getFastestInterval());
+        } catch (InterruptedException e) {
+          canceled = true;
         }
+      }
     }
 
-    public void setLocation(Location location) {
-        this.location = location;
-        if (getCallback() != null) {
-            getCallback().reportLocation(location);
+    private void postMockLocation(final Location mockLocation) {
+      new Handler(getContext().getMainLooper()).post(new Runnable() {
+        @Override public void run() {
+          if (!canceled) {
+            setLocation(mockLocation);
+          }
         }
+      });
     }
-
-    /**
-     * Set a GPX trace file to be replayed as mock locations.
-     */
-    public void setTrace(File file) {
-        traceFile = file;
-    }
-
-    protected class TraceThread extends Thread {
-        private boolean canceled;
-        private Location previous;
-
-        public void cancel() {
-            canceled = true;
-            interrupt();
-        }
-
-        @Override
-        public void run() {
-            final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            final XPath xPath = XPathFactory.newInstance().newXPath();
-            final String expression = "//" + TAG_TRACK_POINT;
-            final String speedExpression = "//" + TAG_SPEED;
-
-            NodeList nodeList = null;
-            NodeList speedList = null;
-            try {
-                DocumentBuilder builder = factory.newDocumentBuilder();
-                Document document = builder.parse(traceFile);
-                nodeList = (NodeList) xPath.compile(expression)
-                        .evaluate(document, XPathConstants.NODESET);
-                speedList = (NodeList) xPath.compile(speedExpression)
-                        .evaluate(document, XPathConstants.NODESET);
-            } catch (ParserConfigurationException e) {
-                e.printStackTrace();
-            } catch (SAXException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (XPathExpressionException e) {
-                e.printStackTrace();
-            }
-
-            parse(nodeList, speedList);
-        }
-
-        private void parse(NodeList nodeList, NodeList speedList) {
-            if (nodeList != null) {
-                for (int i = 0; i < nodeList.getLength(); i++) {
-                    postMockLocation(nodeToLocation(nodeList, speedList, i));
-                    sleepFastestInterval();
-                }
-            }
-        }
-
-        private Location nodeToLocation(NodeList nodeList, NodeList speedList, int i) {
-            final Node node = nodeList.item(i);
-            String lat = node.getAttributes().getNamedItem(TAG_LAT).getNodeValue();
-            String lng = node.getAttributes().getNamedItem(TAG_LNG).getNodeValue();
-
-            final Location location = new Location(MOCK_PROVIDER);
-            location.setLatitude(Double.parseDouble(lat));
-            location.setLongitude(Double.parseDouble(lng));
-            location.setTime(System.currentTimeMillis());
-            if (speedList.item(i) != null && speedList.item(i).getFirstChild() != null) {
-                location.setSpeed(
-                        Float.parseFloat(speedList.item(i).getFirstChild().getNodeValue()));
-            }
-
-            if (previous != null) {
-                location.setBearing(previous.bearingTo(location));
-            }
-
-            previous = location;
-            return location;
-        }
-
-        private void sleepFastestInterval() {
-            if (getRequest() != null) {
-                try {
-                    Thread.sleep(getRequest().getFastestInterval());
-                } catch (InterruptedException e) {
-                    canceled = true;
-                }
-            }
-        }
-
-        private void postMockLocation(final Location mockLocation) {
-            new Handler(getContext().getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    if (!canceled) {
-                        setLocation(mockLocation);
-                    }
-                }
-            });
-        }
-    }
+  }
 }

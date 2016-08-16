@@ -13,24 +13,20 @@ public class StatusTest {
   PendingIntent pendingIntent;
   Status status;
 
-  @Before
-  public void setup() {
+  @Before public void setup() {
     pendingIntent = Mockito.mock(PendingIntent.class);
     status = new Status(Status.SUCCESS, pendingIntent);
   }
 
-  @Test
-  public void shouldHaveSuccessStatus() {
+  @Test public void shouldHaveSuccessStatus() {
     assertThat(status.getStatusCode()).isEqualTo(Status.SUCCESS);
   }
 
-  @Test
-  public void shouldHavePendingIntent() {
+  @Test public void shouldHavePendingIntent() {
     assertThat(status.getResolution()).isEqualTo(pendingIntent);
   }
 
-  @Test
-  public void shouldHaveStatusMessage() {
+  @Test public void shouldHaveStatusMessage() {
     assertThat(status.getStatusMessage()).isEqualTo("SUCCESS");
   }
 }

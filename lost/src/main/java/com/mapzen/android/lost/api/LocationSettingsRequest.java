@@ -1,6 +1,5 @@
 package com.mapzen.android.lost.api;
 
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
