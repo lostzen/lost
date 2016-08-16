@@ -17,7 +17,9 @@ public class ResolveLocationActivity extends Activity {
     super.onCreate(savedInstanceState);
 
     BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-    adapter.enable();
+    if (adapter != null) {
+      adapter.enable();
+    }
 
     Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
     settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
