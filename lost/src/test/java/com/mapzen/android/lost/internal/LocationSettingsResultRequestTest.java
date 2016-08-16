@@ -54,7 +54,7 @@ public class LocationSettingsResultRequestTest {
   }
 
   @Test
-  public void await_shouldReturnSuccessfullResult() {
+  public void await_shouldReturnSuccessfulResult() {
     when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
     when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
@@ -325,7 +325,7 @@ public class LocationSettingsResultRequestTest {
   }
 
   @Test
-  public void setResultCallback_shouldReturnSuccessfullResult() {
+  public void setResultCallback_shouldReturnSuccessfulResult() {
     when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
     when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
