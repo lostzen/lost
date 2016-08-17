@@ -1,7 +1,6 @@
 package com.mapzen.android.lost.api;
 
 import android.app.PendingIntent;
-import android.content.Intent;
 import android.location.Location;
 import android.os.Looper;
 import android.support.annotation.RequiresPermission;
@@ -14,8 +13,8 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 public interface FusedLocationProviderApi {
 
   /**
-   * @deprecated Use {@link LocationResult#hasResult(Intent)} and
-   * {@link LocationResult#extractResult(Intent)}.
+   * @deprecated Use {@link LocationResult#hasResult(android.content.Intent)} and
+   * {@link LocationResult#extractResult(android.content.Intent)}.
    */
   @Deprecated String KEY_LOCATION_CHANGED = "com.mapzen.android.lost.LOCATION";
 
