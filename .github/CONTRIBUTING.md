@@ -47,7 +47,7 @@ Build and install the sample application on your USB device or emulator using th
 
 ## Writing tests
 
-Good test coverage is important guard against defects and regressions in the LOST framework. All classes should have unit test classes. All public methods should have unit tests. Those classes and methods should have all their possible states well tested.
+Good test coverage is an important guard against defects and regressions in the LOST framework. All classes should have unit test classes. All public methods should have unit tests. Those classes and methods should have all their possible states well tested.
 
 ## Code style
 
