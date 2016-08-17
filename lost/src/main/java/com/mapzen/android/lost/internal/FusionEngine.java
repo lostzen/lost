@@ -114,13 +114,13 @@ public class FusionEngine extends LocationEngine implements LocationListener {
     }
   }
 
-  @Override protected void disable() {
+  @Override protected void disable() throws SecurityException {
     if (locationManager != null) {
       locationManager.removeUpdates(this);
     }
   }
 
-  private void enableGps(long interval) {
+  private void enableGps(long interval) throws SecurityException {
     try {
       locationManager.requestLocationUpdates(GPS_PROVIDER, interval, 0, this);
     } catch (IllegalArgumentException e) {
@@ -128,7 +128,7 @@ public class FusionEngine extends LocationEngine implements LocationListener {
     }
   }
 
-  private void enableNetwork(long interval) {
+  private void enableNetwork(long interval) throws SecurityException {
     try {
       locationManager.requestLocationUpdates(NETWORK_PROVIDER, interval, 0, this);
     } catch (IllegalArgumentException e) {
@@ -136,7 +136,7 @@ public class FusionEngine extends LocationEngine implements LocationListener {
     }
   }
 
-  private void enablePassive(long interval) {
+  private void enablePassive(long interval) throws SecurityException {
     try {
       locationManager.requestLocationUpdates(PASSIVE_PROVIDER, interval, 0, this);
     } catch (IllegalArgumentException e) {
