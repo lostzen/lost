@@ -1,6 +1,7 @@
 package com.mapzen.android.lost.api;
 
 import android.app.PendingIntent;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Looper;
 import android.support.annotation.RequiresPermission;
@@ -9,6 +10,10 @@ import java.io.File;
 
 public interface FusedLocationProviderApi {
 
+  /**
+   * @deprecated Use {@link LocationResult#hasResult(Intent)} and
+   * {@link LocationResult#extractResult(Intent)}.
+   */
   @Deprecated String KEY_LOCATION_CHANGED = "com.mapzen.android.lost.LOCATION";
 
   @RequiresPermission(anyOf = {
@@ -50,5 +55,9 @@ public interface FusedLocationProviderApi {
   })
   void setMockTrace(final File file);
 
-  boolean isProviderEnabled(String provider);
+  /**
+   * @deprecated Use {@link SettingsApi#checkLocationSettings(LostApiClient,
+   * LocationSettingsRequest)}.
+   */
+  @Deprecated boolean isProviderEnabled(String provider);
 }
