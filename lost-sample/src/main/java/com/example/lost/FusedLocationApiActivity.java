@@ -39,7 +39,8 @@ import static com.mapzen.android.lost.api.LocationServices.FusedLocationApi;
 /**
  * LOST Activity
  */
-public class FusedLocationApiActivity extends AppCompatActivity {
+public class FusedLocationApiActivity extends AppCompatActivity implements
+    LostApiClient.ConnectionCallbacks {
   private static final String TAG = "LOST Sample";
 
   private LostFragment fragment;
@@ -73,7 +74,7 @@ public class FusedLocationApiActivity extends AppCompatActivity {
           .add(android.R.id.content, fragment, LostFragment.TAG)
           .commit();
       fragment.setListAdapter(new LostAdapter(this));
-      client = new LostApiClient.Builder(this).build();
+      client = new LostApiClient.Builder(this).addConnectionCallbacks(this).build();
       fragment.client = client;
     } else {
       client = fragment.client;
@@ -147,41 +148,48 @@ public class FusedLocationApiActivity extends AppCompatActivity {
     return prefs.getBoolean(getString(R.string.mock_mode_key), false);
   }
 
+  @Override public void onConnected() {
+    FusedLocationApi.setMockMode(isMockModePrefEnabled());
+
+    if (prefs.getBoolean(getString(R.string.mock_mode_gpx_key), false)) {
+      String filename = prefs.getString(getString(R.string.mock_gpx_file_key), null);
+      File file = new File(Environment.getExternalStorageDirectory(), filename);
+      FusedLocationApi.setMockTrace(file);
+    }
+
+    final String intervalKey = getString(R.string.interval_key);
+    final String displacementKey = getString(R.string.displacement_key);
+    final String priorityKey = getString(R.string.priority_key);
+
+    final Resources res = getResources();
+    final LocationRequest locationRequest = LocationRequest.create()
+        .setInterval(
+            prefs.getInt(intervalKey, res.getInteger(R.integer.interval_default_value)))
+        .setSmallestDisplacement(
+            prefs.getInt(displacementKey, res.getInteger(R.integer.displacement_default_value)))
+        .setPriority(
+            prefs.getInt(priorityKey, res.getInteger(R.integer.priority_default_value)));
+
+    FusedLocationApi.requestLocationUpdates(locationRequest, listener);
+
+    if (isMockModePrefEnabled()) {
+      setMockLocation();
+    }
+
+    if (fragment.lastKnownLocation == null) {
+      fragment.setLastKnownLocation(FusedLocationApi.getLastLocation());
+    }
+  }
+
+  @Override public void onConnectionSuspended() {
+
+  }
+
   private void connect() {
     Log.d(TAG, "Connecting...");
     new Handler().postDelayed(new Runnable() {
       @Override public void run() {
         client.connect();
-        FusedLocationApi.setMockMode(isMockModePrefEnabled());
-
-        if (prefs.getBoolean(getString(R.string.mock_mode_gpx_key), false)) {
-          String filename = prefs.getString(getString(R.string.mock_gpx_file_key), null);
-          File file = new File(Environment.getExternalStorageDirectory(), filename);
-          FusedLocationApi.setMockTrace(file);
-        }
-
-        final String intervalKey = getString(R.string.interval_key);
-        final String displacementKey = getString(R.string.displacement_key);
-        final String priorityKey = getString(R.string.priority_key);
-
-        final Resources res = getResources();
-        final LocationRequest locationRequest = LocationRequest.create()
-            .setInterval(
-                prefs.getInt(intervalKey, res.getInteger(R.integer.interval_default_value)))
-            .setSmallestDisplacement(
-                prefs.getInt(displacementKey, res.getInteger(R.integer.displacement_default_value)))
-            .setPriority(
-                prefs.getInt(priorityKey, res.getInteger(R.integer.priority_default_value)));
-
-        FusedLocationApi.requestLocationUpdates(locationRequest, listener);
-
-        if (isMockModePrefEnabled()) {
-          setMockLocation();
-        }
-
-        if (fragment.lastKnownLocation == null) {
-          fragment.setLastKnownLocation(FusedLocationApi.getLastLocation());
-        }
       }
     }, 300);
   }
