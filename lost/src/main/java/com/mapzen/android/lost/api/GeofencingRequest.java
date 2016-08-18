@@ -24,7 +24,7 @@ public class GeofencingRequest {
       return new GeofencingRequest(geofences);
     }
 
-    public GeofencingRequest.Builder addGeofence (Geofence geofence) {
+    public GeofencingRequest.Builder addGeofence(Geofence geofence) {
       if (geofence == null) {
         throw new IllegalArgumentException("Geofence cannot be null");
       }
