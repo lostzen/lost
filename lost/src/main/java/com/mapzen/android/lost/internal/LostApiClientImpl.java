@@ -28,8 +28,7 @@ public class LostApiClientImpl implements LostApiClient {
       FusedLocationProviderApiImpl fusedApi = new FusedLocationProviderApiImpl(context);
       fusedApi.connect(connectionCallbacks);
       LocationServices.FusedLocationApi = fusedApi;
-    }
-    else if (connectionCallbacks != null) {
+    } else if (connectionCallbacks != null) {
       connectionCallbacks.onConnected();
     }
   }

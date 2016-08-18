@@ -2,6 +2,8 @@ package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
+import com.mapzen.android.lost.api.LocationServices;
+import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.lost.BuildConfig;
 
 import com.google.common.base.Charsets;
@@ -65,7 +67,7 @@ public class FusedLocationProviderServiceImplTest {
         FusedLocationProviderService.FusedLocationProviderBinder.class);
     when(stubBinder.getService()).thenReturn(mock(FusedLocationProviderService.class));
     shadowOf(application).setComponentNameAndServiceForBindService(
-        new ComponentName("com.mapzen.lost","FusedLocationProviderService"), stubBinder);
+        new ComponentName("com.mapzen.lost", "FusedLocationProviderService"), stubBinder);
   }
 
   @Test public void shouldNotBeNull() throws Exception {
@@ -554,6 +556,26 @@ public class FusedLocationProviderServiceImplTest {
 
     api.removeLocationUpdates(listener);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isNotEmpty();
+  }
+
+  @Test public void shutdown_shouldUnregisterLocationUpdateListeners() throws Exception {
+    LostApiClient client = new LostApiClient.Builder(application).build();
+    client.connect();
+    LocationServices.FusedLocationApi.requestLocationUpdates(LocationRequest.create(),
+        new LocationListener() {
+          @Override public void onLocationChanged(Location location) {
+          }
+
+          @Override public void onProviderDisabled(String provider) {
+          }
+
+          @Override public void onProviderEnabled(String provider) {
+          }
+        });
+
+    api.shutdown();
+    LocationManager lm = (LocationManager) application.getSystemService(LOCATION_SERVICE);
+    assertThat(shadowOf(lm).getRequestLocationUpdateListeners()).isEmpty();
   }
 
   /**

@@ -3,7 +3,6 @@ package com.mapzen.android.lost.api;
 import com.mapzen.android.lost.internal.LostApiClientImpl;
 
 import android.content.Context;
-import android.os.Bundle;
 
 public interface LostApiClient {
 
