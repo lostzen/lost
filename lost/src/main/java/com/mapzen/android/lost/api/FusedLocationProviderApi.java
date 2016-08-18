@@ -21,26 +21,23 @@ public interface FusedLocationProviderApi {
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   Location getLastLocation();
 
-  void removeLocationUpdates(LocationListener listener);
-
-  void removeLocationUpdates(PendingIntent callbackIntent);
+  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+  void requestLocationUpdates(LocationRequest request, LocationListener listener);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   void requestLocationUpdates(LocationRequest request, LocationListener listener, Looper looper);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  void requestLocationUpdates(LocationRequest request, LocationListener listener);
-
-  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   void requestLocationUpdates(LocationRequest request, PendingIntent callbackIntent);
 
-  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  void setMockLocation(Location mockLocation);
+  void removeLocationUpdates(LocationListener listener);
 
-  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+  void removeLocationUpdates(PendingIntent callbackIntent);
+
   void setMockMode(boolean isMockMode);
 
-  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+  void setMockLocation(Location mockLocation);
+
   void setMockTrace(final File file);
 
   /**
