@@ -13,6 +13,7 @@ import android.content.ServiceConnection;
 import android.location.Location;
 import android.os.IBinder;
 import android.os.Looper;
+import android.util.Log;
 
 import java.io.File;
 import java.util.Map;
@@ -23,6 +24,8 @@ import java.util.Map;
 public class FusedLocationProviderApiImpl
     implements FusedLocationProviderApi {
 
+  private static final String TAG = FusedLocationProviderApiImpl.class.getSimpleName();
+
   private final Context context;
   private FusedLocationProviderService service;
 
@@ -30,17 +33,21 @@ public class FusedLocationProviderApiImpl
     @Override public void onServiceConnected(ComponentName name, IBinder binder) {
       FusedLocationProviderService.FusedLocationProviderBinder fusedBinder =
           (FusedLocationProviderService.FusedLocationProviderBinder) binder;
-      service = fusedBinder.getService();
+      if (fusedBinder != null) {
+        service = fusedBinder.getService();
+      }
 
       if (connectionCallbacks != null) {
         connectionCallbacks.onConnected();
       }
+      Log.d(TAG, "[onServiceConnected]");
     }
 
     @Override public void onServiceDisconnected(ComponentName name) {
       if (connectionCallbacks != null) {
         connectionCallbacks.onConnectionSuspended();
       }
+      Log.d(TAG, "[onServiceDisconnected]");
     }
   };
 
@@ -51,8 +58,11 @@ public class FusedLocationProviderApiImpl
   }
 
   public void connect(LostApiClient.ConnectionCallbacks callbacks) {
-    connectionCallbacks = callbacks;
     Intent intent = new Intent(context, FusedLocationProviderService.class);
+    context.startService(intent);
+
+    connectionCallbacks = callbacks;
+    intent = new Intent(context, FusedLocationProviderService.class);
     context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
   }
 
@@ -104,5 +114,9 @@ public class FusedLocationProviderApiImpl
 
   public Map<LocationListener, LocationRequest> getListeners() {
     return service.getListeners();
+  }
+
+  public FusedLocationProviderService getService() {
+    return service;
   }
 }

@@ -13,22 +13,16 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
-
-import static com.mapzen.android.lost.api.FusedLocationProviderApi.KEY_LOCATION_CHANGED;
 
 /**
  * Service which runs the fused location provider in the background.
  */
-public class FusedLocationProviderService extends Service implements LocationEngine.Callback {
+public class FusedLocationProviderService extends Service {
 
   private static final String TAG = FusedLocationProviderService.class.getSimpleName();
 
-  private boolean mockMode;
-  private LocationEngine locationEngine;
-  private Map<LocationListener, LocationRequest> listenerToRequest;
-  private Map<PendingIntent, LocationRequest> intentToRequest;
+  private FusedLocationProviderServiceImpl serviceImpl;
 
   private final IBinder binder = new FusedLocationProviderBinder();
 
@@ -45,111 +39,53 @@ public class FusedLocationProviderService extends Service implements LocationEng
 
   @Override public void onCreate() {
     super.onCreate();
-    locationEngine = new FusionEngine(this, this);
-    listenerToRequest = new HashMap<>();
-    intentToRequest = new HashMap<>();
+    serviceImpl = new FusedLocationProviderServiceImpl(this);
+    Log.d(TAG, "[onCreate]");
   }
 
   @Override public void onDestroy() {
     super.onDestroy();
-    listenerToRequest.clear();
-    locationEngine.setRequest(null);
+    serviceImpl.shutdown();
+    Log.d(TAG, "[onDestroy]");
   }
 
   public Location getLastLocation() {
-    return locationEngine.getLastLocation();
+    return serviceImpl.getLastLocation();
   }
 
   public void requestLocationUpdates(LocationRequest request, LocationListener listener) {
-    listenerToRequest.put(listener, request);
-    locationEngine.setRequest(request);
+    serviceImpl.requestLocationUpdates(request, listener);
   }
 
   public void requestLocationUpdates(LocationRequest request, PendingIntent callbackIntent) {
-    intentToRequest.put(callbackIntent, request);
-    locationEngine.setRequest(request);
+    serviceImpl.requestLocationUpdates(request, callbackIntent);
   }
 
   public void removeLocationUpdates(LocationListener listener) {
-    listenerToRequest.remove(listener);
-    checkAllListenersAndPendingIntents();
+    serviceImpl.removeLocationUpdates(listener);
   }
 
   public void removeLocationUpdates(PendingIntent callbackIntent) {
-    intentToRequest.remove(callbackIntent);
-    checkAllListenersAndPendingIntents();
-  }
-
-  /**
-   * Checks if any listeners or pending intents are still registered for location updates. If not,
-   * then shutdown the location engine.
-   */
-  private void checkAllListenersAndPendingIntents() {
-    if (listenerToRequest.isEmpty() && intentToRequest.isEmpty()) {
-      locationEngine.setRequest(null);
-    }
+    serviceImpl.removeLocationUpdates(callbackIntent);
   }
 
   public void setMockMode(boolean isMockMode) {
-    if (mockMode != isMockMode) {
-      toggleMockMode();
-    }
-  }
-
-  private void toggleMockMode() {
-    mockMode = !mockMode;
-    locationEngine.setRequest(null);
-    if (mockMode) {
-      locationEngine = new MockEngine(this, this);
-    } else {
-      locationEngine = new FusionEngine(this, this);
-    }
+    serviceImpl.setMockMode(isMockMode);
   }
 
   public void setMockLocation(Location mockLocation) {
-    if (mockMode) {
-      ((MockEngine) locationEngine).setLocation(mockLocation);
-    }
+    serviceImpl.setMockLocation(mockLocation);
   }
 
   public void setMockTrace(File file) {
-    if (mockMode) {
-      ((MockEngine) locationEngine).setTrace(file);
-    }
+    serviceImpl.setMockTrace(file);
   }
 
   public boolean isProviderEnabled(String provider) {
-    return locationEngine.isProviderEnabled(provider);
-  }
-
-  public void reportLocation(Location location) {
-    for (LocationListener listener : listenerToRequest.keySet()) {
-      listener.onLocationChanged(location);
-    }
-
-    for (PendingIntent intent : intentToRequest.keySet()) {
-      try {
-        intent.send(this, 0, new Intent().putExtra(
-            KEY_LOCATION_CHANGED, location));
-      } catch (PendingIntent.CanceledException e) {
-        Log.e(TAG, "Unable to send pending intent: " + intent);
-      }
-    }
-  }
-
-  public void reportProviderDisabled(String provider) {
-    for (LocationListener listener : listenerToRequest.keySet()) {
-      listener.onProviderDisabled(provider);
-    }
-  }
-
-  public void reportProviderEnabled(String provider) {
-    for (LocationListener listener : listenerToRequest.keySet()) {
-      listener.onProviderEnabled(provider);
-    }
+    return serviceImpl.isProviderEnabled(provider);
   }
 
   public Map<LocationListener, LocationRequest> getListeners() {
-    return listenerToRequest;
+    return serviceImpl.getListeners();
   }
 }
