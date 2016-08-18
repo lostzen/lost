@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface GeofencingApi {
 
+  void addGeofences(GeofencingRequest geofencingRequest, PendingIntent pendingIntent);
+
   void addGeofences(List<Geofence> geofences, PendingIntent pendingIntent);
 
   void removeGeofences(List<String> geofenceRequestIds);
