@@ -1,17 +1,21 @@
 package com.mapzen.android.lost.api;
 
+import com.mapzen.android.lost.internal.ParcelableGeofence;
+
 public interface Geofence {
 
-  int GEOFENCE_TRANSITION_ENTER = 0x00000001;
-  int GEOFENCE_TRANSITION_EXIT = 0x00000002;
-  int GEOFENCE_TRANSITION_DWELL = 0x00000004;
-  long NEVER_EXPIRE = 0xffffffffffffffffL;
+  int GEOFENCE_TRANSITION_ENTER = 1;
+  int GEOFENCE_TRANSITION_EXIT = 2;
+  int GEOFENCE_TRANSITION_DWELL = 4;
+  long NEVER_EXPIRE = -1L;
 
   String getRequestId();
 
   final class Builder {
+    private String requestId;
+
     public Geofence build() {
-      throw new RuntimeException("Sorry, not yet implemented");
+      return new ParcelableGeofence(requestId);
     }
 
     public Geofence.Builder setCircularRegion(double latitude, double longitude, float radius) {
@@ -31,7 +35,8 @@ public interface Geofence {
     }
 
     public Geofence.Builder setRequestId(String requestId) {
-      throw new RuntimeException("Sorry, not yet implemented");
+      this.requestId = requestId;
+      return this;
     }
 
     public Geofence.Builder setTransitionTypes(int transitionTypes) {
