@@ -68,6 +68,9 @@ public class FusedLocationProviderApiImpl
 
   public void disconnect() {
     context.unbindService(serviceConnection);
+
+    Intent intent = new Intent(context, FusedLocationProviderService.class);
+    context.stopService(intent);
   }
 
   @Override public Location getLastLocation() {
