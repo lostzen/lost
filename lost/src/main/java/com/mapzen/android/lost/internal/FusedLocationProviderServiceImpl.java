@@ -35,6 +35,7 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
 
   public void shutdown() {
     listenerToRequest.clear();
+    intentToRequest.clear();
     locationEngine.setRequest(null);
   }
 
@@ -133,5 +134,9 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
 
   public Map<LocationListener, LocationRequest> getListeners() {
     return listenerToRequest;
+  }
+
+  public Map<PendingIntent, LocationRequest> getPendingIntents() {
+    return intentToRequest;
   }
 }

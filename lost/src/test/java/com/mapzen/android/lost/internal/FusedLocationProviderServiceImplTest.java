@@ -562,21 +562,32 @@ public class FusedLocationProviderServiceImplTest {
     LostApiClient client = new LostApiClient.Builder(application).build();
     client.connect();
     LocationServices.FusedLocationApi.requestLocationUpdates(LocationRequest.create(),
-        new LocationListener() {
-          @Override public void onLocationChanged(Location location) {
-          }
-
-          @Override public void onProviderDisabled(String provider) {
-          }
-
-          @Override public void onProviderEnabled(String provider) {
-          }
-        });
+        new TestLocationListener());
 
     api.shutdown();
     LocationManager lm = (LocationManager) application.getSystemService(LOCATION_SERVICE);
     assertThat(shadowOf(lm).getRequestLocationUpdateListeners()).isEmpty();
   }
+
+  @Test public void shutdown_shouldClearListeners() {
+    LostApiClient client = new LostApiClient.Builder(application).build();
+    client.connect();
+    LocationServices.FusedLocationApi.requestLocationUpdates(LocationRequest.create(),
+        new TestLocationListener());
+    api.shutdown();
+    assertThat(api.getListeners()).isEmpty();
+  }
+
+  @Test public void shutdown_shouldClearPendingIntents() {
+    LostApiClient client = new LostApiClient.Builder(application).build();
+    client.connect();
+    LocationServices.FusedLocationApi.requestLocationUpdates(LocationRequest.create(),
+        mock(PendingIntent.class));
+    api.shutdown();
+    assertThat(api.getPendingIntents()).isEmpty();
+  }
+
+
 
   /**
    * Due to a bug in Robolectric that allows the same location listener to be registered twice,
@@ -598,4 +609,5 @@ public class FusedLocationProviderServiceImplTest {
     @Override protected void onHandleIntent(Intent intent) {
     }
   }
+
 }
