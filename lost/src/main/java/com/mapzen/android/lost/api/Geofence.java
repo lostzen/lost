@@ -13,17 +13,25 @@ public interface Geofence {
 
   final class Builder {
     private String requestId;
+    private double latitude;
+    private double longitude;
+    private float radius;
+    private long durationMillis;
 
     public Geofence build() {
-      return new ParcelableGeofence(requestId);
+      return new ParcelableGeofence(requestId, latitude, longitude, radius, durationMillis);
     }
 
     public Geofence.Builder setCircularRegion(double latitude, double longitude, float radius) {
-      throw new RuntimeException("Sorry, not yet implemented");
+      this.latitude = latitude;
+      this.longitude = longitude;
+      this.radius = radius;
+      return this;
     }
 
     public Geofence.Builder setExpirationDuration(long durationMillis) {
-      throw new RuntimeException("Sorry, not yet implemented");
+      this.durationMillis = durationMillis;
+      return this;
     }
 
     public Geofence.Builder setLoiteringDelay(int loiteringDelayMs) {

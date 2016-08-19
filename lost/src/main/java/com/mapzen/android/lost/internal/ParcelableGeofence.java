@@ -8,12 +8,43 @@ import android.os.Parcelable;
 public class ParcelableGeofence implements Geofence, Parcelable {
   private final String requestId;
 
-  public ParcelableGeofence(String requestId) {
+  private double latitude;
+  private double longitude;
+  private float radius;
+  private long durationMillis;
+
+  public ParcelableGeofence(String requestId, double latitude, double longitude, float radius,
+      long durationMillis) {
     this.requestId = requestId;
+    this.latitude = latitude;
+    this.longitude = longitude;
+    this.radius = radius;
+
+    if (durationMillis < 0) {
+      this.durationMillis = NEVER_EXPIRE;
+    } else {
+      this.durationMillis = durationMillis;
+    }
   }
 
   @Override public String getRequestId() {
     return requestId;
+  }
+
+  public double getLatitude() {
+    return latitude;
+  }
+
+  public double getLongitude() {
+    return longitude;
+  }
+
+  public float getRadius() {
+    return radius;
+  }
+
+  public long getDuration() {
+    return durationMillis;
   }
 
   // Parcelable
