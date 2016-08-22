@@ -3,46 +3,82 @@ package com.mapzen.android.lost.internal;
 import com.mapzen.android.lost.api.FusedLocationProviderApi;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
+import com.mapzen.android.lost.api.LostApiClient;
 
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.location.Location;
+import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Implementation of the {@link FusedLocationProviderApi}.
  */
 public class FusedLocationProviderApiImpl
-    implements FusedLocationProviderApi, LocationEngine.Callback {
+    implements FusedLocationProviderApi {
 
   private static final String TAG = FusedLocationProviderApiImpl.class.getSimpleName();
 
   private final Context context;
-  private boolean mockMode;
-  private LocationEngine locationEngine;
-  private Map<LocationListener, LocationRequest> listenerToRequest;
-  private Map<PendingIntent, LocationRequest> intentToRequest;
+  private FusedLocationProviderService service;
+
+  private final ServiceConnection serviceConnection = new ServiceConnection() {
+    @Override public void onServiceConnected(ComponentName name, IBinder binder) {
+      FusedLocationProviderService.FusedLocationProviderBinder fusedBinder =
+          (FusedLocationProviderService.FusedLocationProviderBinder) binder;
+      if (fusedBinder != null) {
+        service = fusedBinder.getService();
+      }
+
+      if (connectionCallbacks != null) {
+        connectionCallbacks.onConnected();
+      }
+      Log.d(TAG, "[onServiceConnected]");
+    }
+
+    @Override public void onServiceDisconnected(ComponentName name) {
+      if (connectionCallbacks != null) {
+        connectionCallbacks.onConnectionSuspended();
+      }
+      Log.d(TAG, "[onServiceDisconnected]");
+    }
+  };
+
+  LostApiClient.ConnectionCallbacks connectionCallbacks;
 
   public FusedLocationProviderApiImpl(Context context) {
     this.context = context;
-    locationEngine = new FusionEngine(context, this);
-    listenerToRequest = new HashMap<>();
-    intentToRequest = new HashMap<>();
+  }
+
+  public void connect(LostApiClient.ConnectionCallbacks callbacks) {
+    Intent intent = new Intent(context, FusedLocationProviderService.class);
+    context.startService(intent);
+
+    connectionCallbacks = callbacks;
+    intent = new Intent(context, FusedLocationProviderService.class);
+    context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+  }
+
+  public void disconnect() {
+    context.unbindService(serviceConnection);
+
+    Intent intent = new Intent(context, FusedLocationProviderService.class);
+    context.stopService(intent);
   }
 
   @Override public Location getLastLocation() {
-    return locationEngine.getLastLocation();
+    return service.getLastLocation();
   }
 
   @Override public void requestLocationUpdates(LocationRequest request, LocationListener listener) {
-    listenerToRequest.put(listener, request);
-    locationEngine.setRequest(request);
+    service.requestLocationUpdates(request, listener);
   }
 
   @Override public void requestLocationUpdates(LocationRequest request, LocationListener listener,
@@ -52,94 +88,38 @@ public class FusedLocationProviderApiImpl
 
   @Override
   public void requestLocationUpdates(LocationRequest request, PendingIntent callbackIntent) {
-    intentToRequest.put(callbackIntent, request);
-    locationEngine.setRequest(request);
+    service.requestLocationUpdates(request, callbackIntent);
   }
 
   @Override public void removeLocationUpdates(LocationListener listener) {
-    listenerToRequest.remove(listener);
-    checkAllListenersAndPendingIntents();
+    service.removeLocationUpdates(listener);
   }
 
   @Override public void removeLocationUpdates(PendingIntent callbackIntent) {
-    intentToRequest.remove(callbackIntent);
-    checkAllListenersAndPendingIntents();
-  }
-
-  /**
-   * Checks if any listeners or pending intents are still registered for location updates. If not,
-   * then shutdown the location engine.
-   */
-  private void checkAllListenersAndPendingIntents() {
-    if (listenerToRequest.isEmpty() && intentToRequest.isEmpty()) {
-      locationEngine.setRequest(null);
-    }
+    service.removeLocationUpdates(callbackIntent);
   }
 
   @Override public void setMockMode(boolean isMockMode) {
-    if (mockMode != isMockMode) {
-      toggleMockMode();
-    }
-  }
-
-  private void toggleMockMode() {
-    mockMode = !mockMode;
-    locationEngine.setRequest(null);
-    if (mockMode) {
-      locationEngine = new MockEngine(context, this);
-    } else {
-      locationEngine = new FusionEngine(context, this);
-    }
+    service.setMockMode(isMockMode);
   }
 
   @Override public void setMockLocation(Location mockLocation) {
-    if (mockMode) {
-      ((MockEngine) locationEngine).setLocation(mockLocation);
-    }
+    service.setMockLocation(mockLocation);
   }
 
   @Override public void setMockTrace(File file) {
-    if (mockMode) {
-      ((MockEngine) locationEngine).setTrace(file);
-    }
+    service.setMockTrace(file);
   }
 
   @Override public boolean isProviderEnabled(String provider) {
-    return locationEngine.isProviderEnabled(provider);
-  }
-
-  @Override public void reportLocation(Location location) {
-    for (LocationListener listener : listenerToRequest.keySet()) {
-      listener.onLocationChanged(location);
-    }
-
-    for (PendingIntent intent : intentToRequest.keySet()) {
-      try {
-        intent.send(context, 0, new Intent().putExtra(KEY_LOCATION_CHANGED, location));
-      } catch (PendingIntent.CanceledException e) {
-        Log.e(TAG, "Unable to send pending intent: " + intent);
-      }
-    }
-  }
-
-  @Override public void reportProviderDisabled(String provider) {
-    for (LocationListener listener : listenerToRequest.keySet()) {
-      listener.onProviderDisabled(provider);
-    }
-  }
-
-  @Override public void reportProviderEnabled(String provider) {
-    for (LocationListener listener : listenerToRequest.keySet()) {
-      listener.onProviderEnabled(provider);
-    }
-  }
-
-  public void shutdown() {
-    listenerToRequest.clear();
-    locationEngine.setRequest(null);
+    return service.isProviderEnabled(provider);
   }
 
   public Map<LocationListener, LocationRequest> getListeners() {
-    return listenerToRequest;
+    return service.getListeners();
+  }
+
+  public FusedLocationProviderService getService() {
+    return service;
   }
 }

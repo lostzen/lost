@@ -16,6 +16,8 @@
 
     <activity android:name="com.mapzen.android.lost.internal.ResolveLocationActivity"/>
 
+    <service android:name="com.mapzen.android.lost.internal.FusedLocationProviderService"/>
+
   </application>
 
 </manifest>

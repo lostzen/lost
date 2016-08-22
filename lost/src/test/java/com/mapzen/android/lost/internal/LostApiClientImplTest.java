@@ -13,11 +13,14 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
+import android.content.ComponentName;
 import android.location.Location;
 import android.location.LocationManager;
 
 import static android.content.Context.LOCATION_SERVICE;
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 import static org.robolectric.Shadows.shadowOf;
 
@@ -28,6 +31,13 @@ public class LostApiClientImplTest {
 
   @Before public void setUp() throws Exception {
     client = new LostApiClient.Builder(application).build();
+
+    FusedLocationProviderService.FusedLocationProviderBinder stubBinder = mock(
+        FusedLocationProviderService.FusedLocationProviderBinder.class);
+    when(stubBinder.getService()).thenReturn(mock(FusedLocationProviderService.class));
+    shadowOf(application).setComponentNameAndServiceForBindService(
+        new ComponentName("com.mapzen.lost", "FusedLocationProviderService"), stubBinder);
+
   }
 
   @After public void tearDown() throws Exception {
@@ -86,7 +96,8 @@ public class LostApiClientImplTest {
     assertThat(shadowOf(lm).getRequestLocationUpdateListeners()).isEmpty();
   }
 
-  @Test public void isConnected_shouldReturnFalseBeforeConnected() throws Exception {
+  @Test
+  public void isConnected_shouldReturnFalseBeforeConnected() throws Exception {
     assertThat(client.isConnected()).isFalse();
   }
 

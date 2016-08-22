@@ -10,20 +10,26 @@ import android.content.Context;
  */
 public class LostApiClientImpl implements LostApiClient {
   private final Context context;
+  private final ConnectionCallbacks connectionCallbacks;
 
-  public LostApiClientImpl(Context context) {
+  public LostApiClientImpl(Context context, ConnectionCallbacks callbacks) {
     this.context = context;
+    this.connectionCallbacks = callbacks;
   }
 
   @Override public void connect() {
-    if (LocationServices.FusedLocationApi == null) {
-      LocationServices.FusedLocationApi = new FusedLocationProviderApiImpl(context);
-    }
     if (LocationServices.GeofencingApi == null) {
       LocationServices.GeofencingApi = new GeofencingApiImpl();
     }
     if (LocationServices.SettingsApi == null) {
       LocationServices.SettingsApi = new SettingsApiImpl(context);
+    }
+    if (LocationServices.FusedLocationApi == null) {
+      FusedLocationProviderApiImpl fusedApi = new FusedLocationProviderApiImpl(context);
+      fusedApi.connect(connectionCallbacks);
+      LocationServices.FusedLocationApi = fusedApi;
+    } else if (connectionCallbacks != null) {
+      connectionCallbacks.onConnected();
     }
   }
 
@@ -32,7 +38,7 @@ public class LostApiClientImpl implements LostApiClient {
         && LocationServices.FusedLocationApi instanceof FusedLocationProviderApiImpl) {
       FusedLocationProviderApiImpl fusedProvider =
           (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
-      fusedProvider.shutdown();
+      fusedProvider.disconnect();
     }
     LocationServices.FusedLocationApi = null;
     LocationServices.GeofencingApi = null;
