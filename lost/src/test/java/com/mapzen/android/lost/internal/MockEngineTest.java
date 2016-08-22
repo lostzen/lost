@@ -124,7 +124,7 @@ public class MockEngineTest {
     assertThat(callback.locations.get(0).hasSpeed()).isFalse();
   }
 
-  @Test @Ignore("Failing")
+  @Test @Ignore("Intermittently failing. Find a better way to test without Thread.sleep(100)")
   public void disable_shouldCancelTraceReplay() throws Exception {
     mockEngine.setTrace(getTestGpxTrace());
     mockEngine.setRequest(LocationRequest.create().setFastestInterval(100));
