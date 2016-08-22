@@ -59,5 +59,10 @@
   <string name="cancel">Cancel</string>
   <string name="connect">Connect</string>
   <string name="disconnect">Disconnect</string>
+  <string name="request_id">requestId</string>
+  <string name="latitude">latitude</string>
+  <string name="longitude">longitude</string>
+  <string name="radius">radius</string>
+  <string name="create">Create</string>
 
 </resources>

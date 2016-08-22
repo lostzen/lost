@@ -35,5 +35,9 @@
     <activity android:name=".GeofencingApiActivity"/>
     <activity android:name=".SettingsApiActivity"/>
 
+    <service
+        android:name=".GeofenceIntentService"
+        android:exported="false">
+    </service>
   </application>
 </manifest>
