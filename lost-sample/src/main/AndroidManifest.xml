@@ -32,6 +32,7 @@
         android:label="@string/settings"
         android:name=".SettingsActivity"/>
 
+    <activity android:name=".GeofencingApiActivity"/>
     <activity android:name=".SettingsApiActivity"/>
 
   </application>
