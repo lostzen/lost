@@ -567,6 +567,7 @@ public class FusedLocationProviderServiceImplTest {
     api.shutdown();
     LocationManager lm = (LocationManager) application.getSystemService(LOCATION_SERVICE);
     assertThat(shadowOf(lm).getRequestLocationUpdateListeners()).isEmpty();
+    client.disconnect();
   }
 
   @Test public void shutdown_shouldClearListeners() {
@@ -576,6 +577,7 @@ public class FusedLocationProviderServiceImplTest {
         new TestLocationListener());
     api.shutdown();
     assertThat(api.getListeners()).isEmpty();
+    client.disconnect();
   }
 
   @Test public void shutdown_shouldClearPendingIntents() {
@@ -585,9 +587,8 @@ public class FusedLocationProviderServiceImplTest {
         mock(PendingIntent.class));
     api.shutdown();
     assertThat(api.getPendingIntents()).isEmpty();
+    client.disconnect();
   }
-
-
 
   /**
    * Due to a bug in Robolectric that allows the same location listener to be registered twice,

@@ -98,9 +98,6 @@ public class LostApiClientImplTest {
 
   @Test
   public void isConnected_shouldReturnFalseBeforeConnected() throws Exception {
-    LocationServices.FusedLocationApi = null;
-    LocationServices.GeofencingApi = null;
-    LocationServices.SettingsApi = null;
     assertThat(client.isConnected()).isFalse();
   }
 
