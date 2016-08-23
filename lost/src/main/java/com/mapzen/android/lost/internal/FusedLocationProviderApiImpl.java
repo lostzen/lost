@@ -1,6 +1,8 @@
 package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.api.FusedLocationProviderApi;
+import com.mapzen.android.lost.api.LocationAvailability;
+import com.mapzen.android.lost.api.LocationCallback;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LostApiClient;
@@ -77,6 +79,10 @@ public class FusedLocationProviderApiImpl
     return service.getLastLocation();
   }
 
+  @Override public LocationAvailability getLocationAvailability() {
+    return service.getLocationAvailability();
+  }
+
   @Override public void requestLocationUpdates(LocationRequest request, LocationListener listener) {
     service.requestLocationUpdates(request, listener);
   }
@@ -84,6 +90,11 @@ public class FusedLocationProviderApiImpl
   @Override public void requestLocationUpdates(LocationRequest request, LocationListener listener,
       Looper looper) {
     throw new RuntimeException("Sorry, not yet implemented");
+  }
+
+  @Override public void requestLocationUpdates(LocationRequest request, LocationCallback callback,
+      Looper looper) {
+    service.requestLocationUpdates(request, callback, looper);
   }
 
   @Override
@@ -97,6 +108,10 @@ public class FusedLocationProviderApiImpl
 
   @Override public void removeLocationUpdates(PendingIntent callbackIntent) {
     service.removeLocationUpdates(callbackIntent);
+  }
+
+  @Override public void removeLocationUpdates(LocationCallback callback) {
+    service.removeLocationUpdates(callback);
   }
 
   @Override public void setMockMode(boolean isMockMode) {

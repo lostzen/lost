@@ -21,6 +21,8 @@ public interface FusedLocationProviderApi {
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   Location getLastLocation();
 
+  LocationAvailability getLocationAvailability();
+
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   void requestLocationUpdates(LocationRequest request, LocationListener listener);
 
@@ -28,11 +30,16 @@ public interface FusedLocationProviderApi {
   void requestLocationUpdates(LocationRequest request, LocationListener listener, Looper looper);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+  void requestLocationUpdates(LocationRequest request, LocationCallback callback, Looper looper);
+
+  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   void requestLocationUpdates(LocationRequest request, PendingIntent callbackIntent);
 
   void removeLocationUpdates(LocationListener listener);
 
   void removeLocationUpdates(PendingIntent callbackIntent);
+
+  void removeLocationUpdates(LocationCallback callback);
 
   void setMockMode(boolean isMockMode);
 

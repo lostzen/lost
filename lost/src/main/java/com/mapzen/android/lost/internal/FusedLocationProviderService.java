@@ -1,5 +1,7 @@
 package com.mapzen.android.lost.internal;
 
+import com.mapzen.android.lost.api.LocationAvailability;
+import com.mapzen.android.lost.api.LocationCallback;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 
@@ -9,6 +11,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -53,6 +56,10 @@ public class FusedLocationProviderService extends Service {
     return serviceImpl.getLastLocation();
   }
 
+  public LocationAvailability getLocationAvailability() {
+    return serviceImpl.getLocationAvailability();
+  }
+
   public void requestLocationUpdates(LocationRequest request, LocationListener listener) {
     serviceImpl.requestLocationUpdates(request, listener);
   }
@@ -61,12 +68,21 @@ public class FusedLocationProviderService extends Service {
     serviceImpl.requestLocationUpdates(request, callbackIntent);
   }
 
+  public void requestLocationUpdates(LocationRequest request, LocationCallback callback,
+      Looper looper) {
+    serviceImpl.requestLocationUpdates(request, callback, looper);
+  }
+
   public void removeLocationUpdates(LocationListener listener) {
     serviceImpl.removeLocationUpdates(listener);
   }
 
   public void removeLocationUpdates(PendingIntent callbackIntent) {
     serviceImpl.removeLocationUpdates(callbackIntent);
+  }
+
+  public void removeLocationUpdates(LocationCallback callback) {
+    serviceImpl.removeLocationUpdates(callback);
   }
 
   public void setMockMode(boolean isMockMode) {

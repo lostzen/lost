@@ -13,6 +13,7 @@ import org.robolectric.annotation.Config;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.location.Location;
+import android.os.Looper;
 
 import java.io.File;
 
@@ -49,6 +50,11 @@ public class FusedLocationProviderApiImplTest {
     verify(service).getLastLocation();
   }
 
+  @Test public void getLocationAvailability_shouldCallService() {
+    api.getLocationAvailability();
+    verify(service).getLocationAvailability();
+  }
+
   @Test public void requestLocationUpdates_listener_shouldCallService() {
     LocationRequest request = LocationRequest.create();
     LocationListener listener = new TestLocationListener();
@@ -59,15 +65,16 @@ public class FusedLocationProviderApiImplTest {
   @Test(expected = RuntimeException.class)
   public void requestLocationUpdates_shouldThrowException() {
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(request, null, null);
+    TestLocationListener listener = new TestLocationListener();
+    api.requestLocationUpdates(request, listener, null);
   }
 
-  @Test
-  public void requestLocationUpdates_pendingIntent_shouldCallService() {
+  @Test public void requestLocationUpdates_callback_shouldCallService() {
     LocationRequest request = LocationRequest.create();
-    PendingIntent callbackIntent = mock(PendingIntent.class);
-    api.requestLocationUpdates(request, callbackIntent);
-    verify(service).requestLocationUpdates(request, callbackIntent);
+    TestLocationCallback callback = new TestLocationCallback();
+    Looper looper = Looper.myLooper();
+    api.requestLocationUpdates(request, callback, looper);
+    verify(service).requestLocationUpdates(request, callback, looper);
   }
 
   @Test public void removeLocationUpdates_listener_shouldCallService() {
@@ -80,6 +87,12 @@ public class FusedLocationProviderApiImplTest {
     PendingIntent callbackIntent = mock(PendingIntent.class);
     api.removeLocationUpdates(callbackIntent);
     verify(service).removeLocationUpdates(callbackIntent);
+  }
+
+  @Test public void removeLocationUpdates_callback_shouldCallService() {
+    TestLocationCallback callback = new TestLocationCallback();
+    service.removeLocationUpdates(callback);
+    verify(service).removeLocationUpdates(callback);
   }
 
   @Test public void setMockMode_shouldCallService() {
