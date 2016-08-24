@@ -40,9 +40,10 @@ public class LocationAvailability implements Parcelable {
   };
 
   /**
-   * Extracts the LocationAvailability from an Intent.
-   * @param intent
-   * @return
+   * Extracts the {@link LocationAvailability} from an {@link Intent}.
+   * @param intent an {@link Intent} that may or may not include {@link LocationAvailability}.
+   * @return a {@link LocationAvailability} object, or {@code null} if the given {@link Intent}
+   * does not contain this data.
    */
   public static LocationAvailability extractLocationAvailability(Intent intent) {
     return hasLocationAvailability(intent) ? (LocationAvailability) intent.getExtras()
@@ -50,9 +51,10 @@ public class LocationAvailability implements Parcelable {
   }
 
   /**
-   * Returns true if an Intent contains a LocationAvailability.
-   * @param intent
-   * @return
+   * Returns true if an {@link Intent} contains a {@link LocationAvailability} extra.
+   * @param intent an {@link Intent} that may or may not include {@link LocationAvailability}.
+   * @return whether or not the {@link Intent} has {@link LocationAvailability} extra
+   * {@link LocationAvailability.EXTRA_LOCATION_AVAILABILITY}
    */
   public static boolean hasLocationAvailability(Intent intent) {
     return intent.hasExtra(EXTRA_LOCATION_AVAILABILITY);
@@ -61,7 +63,7 @@ public class LocationAvailability implements Parcelable {
   /**
    * Returns true if the device location is known and reasonably up to date within the hints
    * requested by the active LocationRequests.
-   * @return
+   * @return Whether or not location is available.
    */
   public boolean isLocationAvailable() {
     return locationAvailable;

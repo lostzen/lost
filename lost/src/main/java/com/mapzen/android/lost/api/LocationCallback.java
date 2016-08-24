@@ -10,13 +10,13 @@ package com.mapzen.android.lost.api;
 public interface LocationCallback {
   /**
    * Called when there is a change in the availability of location data.
-   * @param locationAvailability
+   * @param locationAvailability the current {@link LocationAvailability}
    */
   void onLocationAvailability(LocationAvailability locationAvailability);
 
   /**
    * Called when device location information is available.
-   * @param result
+   * @param result the current {@link LocationResult}
    */
   void onLocationResult(LocationResult result);
 
