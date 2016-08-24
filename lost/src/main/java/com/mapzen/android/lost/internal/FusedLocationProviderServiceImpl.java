@@ -194,7 +194,12 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
         Context.LOCATION_SERVICE);
     boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     boolean networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-    return new LocationAvailability(gpsEnabled || networkEnabled);
+    boolean gpsLocationExists = locationManager.getLastKnownLocation(
+        LocationManager.GPS_PROVIDER) != null;
+    boolean networkLocationExists = locationManager.getLastKnownLocation(
+        LocationManager.NETWORK_PROVIDER) != null;
+    return new LocationAvailability((gpsEnabled && gpsLocationExists)
+        || (networkEnabled && networkLocationExists));
   }
 
   private void notifyLocationAvailabilityChanged() {

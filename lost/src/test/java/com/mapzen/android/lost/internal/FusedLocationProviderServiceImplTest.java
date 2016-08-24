@@ -535,6 +535,8 @@ public class FusedLocationProviderServiceImplTest {
   }
 
   @Test public void requestLocationUpdates_shouldReportAvailability() {
+    Location location = new Location("test");
+    shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, location);
     TestLocationCallback callback = new TestLocationCallback();
     Looper looper = Looper.myLooper();
     LocationRequest request = LocationRequest.create();
@@ -546,23 +548,51 @@ public class FusedLocationProviderServiceImplTest {
   @Test public void getLocationAvailability_gps_network_shouldBeAvailable() {
     shadowLocationManager.setProviderEnabled(GPS_PROVIDER, true);
     shadowLocationManager.setProviderEnabled(NETWORK_PROVIDER, true);
+    Location location = new Location("test");
+    shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, location);
 
     LocationAvailability availability = api.getLocationAvailability();
     assertThat(availability.isLocationAvailable()).isTrue();
+  }
+
+  @Test public void getLocationAvailability_gps_network_shouldBeUnavailable() {
+    shadowLocationManager.setProviderEnabled(GPS_PROVIDER, true);
+    shadowLocationManager.setProviderEnabled(NETWORK_PROVIDER, true);
+
+    LocationAvailability availability = api.getLocationAvailability();
+    assertThat(availability.isLocationAvailable()).isFalse();
   }
 
   @Test public void getLocationAvailability_gps_shouldBeAvailable() {
     shadowLocationManager.setProviderEnabled(GPS_PROVIDER, true);
+    Location location = new Location("test");
+    shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, location);
 
     LocationAvailability availability = api.getLocationAvailability();
     assertThat(availability.isLocationAvailable()).isTrue();
   }
 
+  @Test public void getLocationAvailability_gps_shouldBeUnavailable() {
+    shadowLocationManager.setProviderEnabled(GPS_PROVIDER, true);
+
+    LocationAvailability availability = api.getLocationAvailability();
+    assertThat(availability.isLocationAvailable()).isFalse();
+  }
+
   @Test public void getLocationAvailability_network_shouldBeAvailable() {
     shadowLocationManager.setProviderEnabled(NETWORK_PROVIDER, true);
+    Location location = new Location("test");
+    shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, location);
 
     LocationAvailability availability = api.getLocationAvailability();
     assertThat(availability.isLocationAvailable()).isTrue();
+  }
+
+  @Test public void getLocationAvailability_network_shouldBeUnavailable() {
+    shadowLocationManager.setProviderEnabled(NETWORK_PROVIDER, true);
+
+    LocationAvailability availability = api.getLocationAvailability();
+    assertThat(availability.isLocationAvailable()).isFalse();
   }
 
   @Test public void getLocationAvailability_shouldBeUnavailable() {
