@@ -14,7 +14,8 @@ import java.util.List;
  * A data class representing a geographic location result from the fused location provider.
  */
 public final class LocationResult implements Parcelable {
-  static final String EXTRA_LOCATION_RESULT = "com.mapzen.android.lost.EXTRA_LOCATION_RESULT";
+  public static final String EXTRA_LOCATION_RESULT =
+      "com.mapzen.android.lost.EXTRA_LOCATION_RESULT";
 
   private final List<Location> locations;
 
