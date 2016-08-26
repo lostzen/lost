@@ -11,6 +11,7 @@ import android.content.Context;
 public class LostApiClientImpl implements LostApiClient {
   private final Context context;
   private final ConnectionCallbacks connectionCallbacks;
+  private final ClientManager clientManager = ClientManager.shared();
 
   public LostApiClientImpl(Context context, ConnectionCallbacks callbacks) {
     this.context = context;
@@ -31,6 +32,7 @@ public class LostApiClientImpl implements LostApiClient {
     } else if (connectionCallbacks != null) {
       connectionCallbacks.onConnected();
     }
+    clientManager.addClient(this);
   }
 
   @Override public void disconnect() {
@@ -40,6 +42,12 @@ public class LostApiClientImpl implements LostApiClient {
           (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
       fusedProvider.disconnect();
     }
+
+    clientManager.removeClient(this);
+    if (clientManager.numberOfClients() > 0) {
+      return;
+    }
+
     LocationServices.FusedLocationApi = null;
     LocationServices.GeofencingApi = null;
     LocationServices.SettingsApi = null;
