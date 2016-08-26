@@ -277,7 +277,7 @@ public class FusedLocationProviderServiceImplTest {
     TestLocationListener listener2 = new TestLocationListener();
     LocationRequest request2 = LocationRequest.create();
     api.requestLocationUpdates(client, request2, listener2);
-    assertThat(api.getListeners()).hasSize(2);
+    assertThat(api.getListeners().get(client)).hasSize(2);
   }
 
   @Test public void requestLocationUpdates_shouldNotRegisterListenersWithMockModeOn()

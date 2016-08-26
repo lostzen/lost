@@ -40,7 +40,8 @@ public class LostApiClientImpl implements LostApiClient {
         && LocationServices.FusedLocationApi instanceof FusedLocationProviderApiImpl) {
       FusedLocationProviderApiImpl fusedProvider =
           (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
-      fusedProvider.disconnect();
+      boolean stopService = clientManager.numberOfClients() == 1;
+      fusedProvider.disconnect(this, stopService);
     }
 
     clientManager.removeClient(this);

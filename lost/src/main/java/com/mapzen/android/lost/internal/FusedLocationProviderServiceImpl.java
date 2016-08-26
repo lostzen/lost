@@ -31,10 +31,10 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
 
   private boolean mockMode;
   private LocationEngine locationEngine;
-  private Map<LocationListener, LocationRequest> listenerToRequest;
-  private Map<PendingIntent, LocationRequest> intentToRequest;
-  private Map<LocationCallback, LocationRequest> callbackToRequest;
-  private Map<LocationCallback, Looper> callbackToLooper;
+  private Map<LostApiClient, Map<LocationListener, LocationRequest>> listenerToRequest;
+  private Map<LostApiClient, Map<PendingIntent, LocationRequest>> intentToRequest;
+  private Map<LostApiClient, Map<LocationCallback, LocationRequest>> callbackToRequest;
+  private Map<LostApiClient, Map<LocationCallback, Looper>> callbackToLooper;
 
   public FusedLocationProviderServiceImpl(Context context) {
     this.context = context;
@@ -63,36 +63,82 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
 
   public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
       LocationListener listener) {
-    listenerToRequest.put(listener, request);
+    Map<LocationListener, LocationRequest> map = listenerToRequest.get(apiClient);
+    if (map == null) {
+      map = new HashMap<>();
+    }
+    map.put(listener, request);
+    listenerToRequest.put(apiClient, map);
     locationEngine.setRequest(request);
   }
 
   public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
       PendingIntent callbackIntent) {
-    intentToRequest.put(callbackIntent, request);
+    Map<PendingIntent, LocationRequest> map = intentToRequest.get(apiClient);
+    if (map == null) {
+      map = new HashMap<>();
+    }
+    map.put(callbackIntent, request);
+    intentToRequest.put(apiClient, map);
     locationEngine.setRequest(request);
   }
 
   public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
       LocationCallback callback, Looper looper) {
-    callbackToRequest.put(callback, request);
-    callbackToLooper.put(callback, looper);
+    Map<LocationCallback, LocationRequest> callbackMap = callbackToRequest.get(apiClient);
+    if (callbackMap == null) {
+      callbackMap = new HashMap<>();
+    }
+    callbackMap.put(callback, request);
+    callbackToRequest.put(apiClient, callbackMap);
+
+    Map<LocationCallback, Looper> looperMap = callbackToLooper.get(apiClient);
+    if (looperMap == null) {
+      looperMap = new HashMap<>();
+    }
+    looperMap.put(callback, looper);
+    callbackToLooper.put(apiClient, looperMap);
+
     locationEngine.setRequest(request);
   }
 
   public void removeLocationUpdates(LostApiClient apiClient, LocationListener listener) {
-    listenerToRequest.remove(listener);
+    Map<LocationListener, LocationRequest> map = listenerToRequest.get(apiClient);
+    if (map != null) {
+      map.remove(listener);
+    }
+    if (map.isEmpty()) {
+      listenerToRequest.remove(apiClient);
+    }
     checkAllListenersPendingIntentsAndCallbacks();
   }
 
   public void removeLocationUpdates(LostApiClient apiClient, PendingIntent callbackIntent) {
-    intentToRequest.remove(callbackIntent);
+    Map<PendingIntent, LocationRequest> map = intentToRequest.get(apiClient);
+    if (map != null) {
+      map.remove(callbackIntent);
+    }
+    if (map.isEmpty()) {
+      intentToRequest.remove(apiClient);
+    }
     checkAllListenersPendingIntentsAndCallbacks();
   }
 
   public void removeLocationUpdates(LostApiClient apiClient, LocationCallback callback) {
-    callbackToRequest.remove(callback);
-    callbackToLooper.remove(callback);
+    Map<LocationCallback, LocationRequest> callbackMap = callbackToRequest.get(apiClient);
+    if (callbackMap != null) {
+      callbackMap.remove(callback);
+    }
+    if (callbackMap.isEmpty()) {
+      callbackToRequest.remove(apiClient);
+    }
+    Map<LocationCallback, Looper> looperMap = callbackToLooper.get(apiClient);
+    if (looperMap != null) {
+      looperMap.remove(callback);
+    }
+    if (looperMap.isEmpty()) {
+      callbackToLooper.remove(apiClient);
+    }
     checkAllListenersPendingIntentsAndCallbacks();
   }
 
@@ -119,8 +165,12 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
   }
 
   public void reportLocation(Location location) {
-    for (LocationListener listener : listenerToRequest.keySet()) {
-      listener.onLocationChanged(location);
+    for (LostApiClient client : listenerToRequest.keySet()) {
+      if (listenerToRequest.get(client) != null) {
+        for (LocationListener listener : listenerToRequest.get(client).keySet()) {
+          listener.onLocationChanged(location);
+        }
+      }
     }
 
     LocationAvailability availability = createLocationAvailability();
@@ -128,47 +178,63 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     locations.add(location);
     final LocationResult result = LocationResult.create(locations);
 
-    for (PendingIntent intent : intentToRequest.keySet()) {
-      try {
-        Intent toSend = new Intent().putExtra(KEY_LOCATION_CHANGED, location);
-        toSend.putExtra(LocationAvailability.EXTRA_LOCATION_AVAILABILITY, availability);
-        toSend.putExtra(LocationResult.EXTRA_LOCATION_RESULT, result);
-        intent.send(context, 0, toSend);
-      } catch (PendingIntent.CanceledException e) {
-        Log.e(TAG, "Unable to send pending intent: " + intent);
+    for (LostApiClient client : intentToRequest.keySet()) {
+      if (intentToRequest.get(client) != null) {
+        for (PendingIntent intent : intentToRequest.get(client).keySet()) {
+          try {
+            Intent toSend = new Intent().putExtra(KEY_LOCATION_CHANGED, location);
+            toSend.putExtra(LocationAvailability.EXTRA_LOCATION_AVAILABILITY, availability);
+            toSend.putExtra(LocationResult.EXTRA_LOCATION_RESULT, result);
+            intent.send(context, 0, toSend);
+          } catch (PendingIntent.CanceledException e) {
+            Log.e(TAG, "Unable to send pending intent: " + intent);
+          }
+        }
       }
     }
 
-    for (final LocationCallback callback : callbackToRequest.keySet()) {
-      Looper looper = callbackToLooper.get(callback);
-      Handler handler = new Handler(looper);
-      handler.post(new Runnable() {
-        @Override public void run() {
-          callback.onLocationResult(result);
+    for (LostApiClient client : callbackToRequest.keySet()) {
+      if (callbackToRequest.get(client) != null) {
+        for (final LocationCallback callback : callbackToRequest.get(client).keySet()) {
+          Looper looper = callbackToLooper.get(client).get(callback);
+          Handler handler = new Handler(looper);
+          handler.post(new Runnable() {
+            @Override public void run() {
+              callback.onLocationResult(result);
+            }
+          });
         }
-      });
+      }
     }
   }
 
   public void reportProviderDisabled(String provider) {
-    for (LocationListener listener : listenerToRequest.keySet()) {
-      listener.onProviderDisabled(provider);
+    for (LostApiClient client : listenerToRequest.keySet()) {
+      if (listenerToRequest.get(client) != null) {
+        for (LocationListener listener : listenerToRequest.get(client).keySet()) {
+          listener.onProviderDisabled(provider);
+        }
+      }
     }
     notifyLocationAvailabilityChanged();
   }
 
   public void reportProviderEnabled(String provider) {
-    for (LocationListener listener : listenerToRequest.keySet()) {
-      listener.onProviderEnabled(provider);
+    for (LostApiClient client : listenerToRequest.keySet()) {
+      if (listenerToRequest.get(client) != null) {
+        for (LocationListener listener : listenerToRequest.get(client).keySet()) {
+          listener.onProviderEnabled(provider);
+        }
+      }
     }
     notifyLocationAvailabilityChanged();
   }
 
-  public Map<LocationListener, LocationRequest> getListeners() {
+  public Map<LostApiClient, Map<LocationListener, LocationRequest>> getListeners() {
     return listenerToRequest;
   }
 
-  public Map<PendingIntent, LocationRequest> getPendingIntents() {
+  public Map<LostApiClient, Map<PendingIntent, LocationRequest>> getPendingIntents() {
     return intentToRequest;
   }
 
@@ -207,14 +273,25 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
 
   private void notifyLocationAvailabilityChanged() {
     final LocationAvailability availability = createLocationAvailability();
-    for (final LocationCallback callback : callbackToRequest.keySet()) {
-      Looper looper = callbackToLooper.get(callback);
-      Handler handler = new Handler(looper);
-      handler.post(new Runnable() {
-        @Override public void run() {
-          callback.onLocationAvailability(availability);
+    for (LostApiClient client : callbackToRequest.keySet()) {
+      if (callbackToRequest.get(client) != null) {
+        for (final LocationCallback callback : callbackToRequest.get(client).keySet()) {
+          Looper looper = callbackToLooper.get(client).get(callback);
+          Handler handler = new Handler(looper);
+          handler.post(new Runnable() {
+            @Override public void run() {
+              callback.onLocationAvailability(availability);
+            }
+          });
         }
-      });
+      }
     }
+  }
+
+  public void disconnect(LostApiClient client) {
+    listenerToRequest.remove(client);
+    intentToRequest.remove(client);
+    callbackToRequest.remove(client);
+    callbackToLooper.remove(client);
   }
 }

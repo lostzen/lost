@@ -68,11 +68,17 @@ public class FusedLocationProviderApiImpl
     context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
   }
 
-  public void disconnect() {
-    context.unbindService(serviceConnection);
+  public void disconnect(LostApiClient client, boolean stopService) {
+    if (service != null) {
+      service.disconnect(client);
+    }
 
-    Intent intent = new Intent(context, FusedLocationProviderService.class);
-    context.stopService(intent);
+    if (stopService) {
+      context.unbindService(serviceConnection);
+
+      Intent intent = new Intent(context, FusedLocationProviderService.class);
+      context.stopService(intent);
+    }
   }
 
   @Override public Location getLastLocation(LostApiClient apiClient) {
@@ -132,7 +138,7 @@ public class FusedLocationProviderApiImpl
     return service.isProviderEnabled(apiClient, provider);
   }
 
-  public Map<LocationListener, LocationRequest> getListeners() {
+  public Map<LostApiClient, Map<LocationListener, LocationRequest>> getListeners() {
     return service.getListeners();
   }
 
