@@ -3,6 +3,7 @@ package com.mapzen.android.lost.internal;
 import com.mapzen.android.lost.api.Geofence;
 import com.mapzen.android.lost.api.GeofencingApi;
 import com.mapzen.android.lost.api.GeofencingRequest;
+import com.mapzen.android.lost.api.LostApiClient;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +38,7 @@ public class GeofencingApiTest {
   }
 
   @Test public void addGeofences_shouldAddProximityAlert() throws Exception {
+    LostApiClient client = new LostApiClient.Builder(context).build();
     Geofence geofence = new Geofence.Builder()
         .setRequestId("test_id")
         .setCircularRegion(1, 2, 3)
@@ -46,7 +48,7 @@ public class GeofencingApiTest {
         .addGeofence(geofence)
         .build();
     PendingIntent intent = Mockito.mock(PendingIntent.class);
-    geofencingApi.addGeofences(request, intent);
+    geofencingApi.addGeofences(client, request, intent);
     Mockito.verify(locationManager, times(1)).addProximityAlert(1, 2, 3, NEVER_EXPIRE, intent);
   }
 }

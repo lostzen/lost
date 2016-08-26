@@ -146,6 +146,6 @@ public class GeofencingApiActivity extends AppCompatActivity
     Intent serviceIntent = new Intent(getApplicationContext(), GeofenceIntentService.class);
     PendingIntent pendingIntent = PendingIntent.getService(this, 0, serviceIntent, 0);
 
-    LocationServices.GeofencingApi.addGeofences(request, pendingIntent);
+    LocationServices.GeofencingApi.addGeofences(client, request, pendingIntent);
   }
 }
