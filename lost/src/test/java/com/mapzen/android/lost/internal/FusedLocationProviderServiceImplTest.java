@@ -11,6 +11,7 @@ import com.mapzen.lost.BuildConfig;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -60,12 +61,20 @@ public class FusedLocationProviderServiceImplTest {
   private LocationManager locationManager;
   private ShadowLocationManager shadowLocationManager;
 
+  private LostApiClient otherClient;
+
   @Before public void setUp() throws Exception {
     mockService();
     client = new LostApiClient.Builder(mock(Context.class)).build();
+    otherClient = new LostApiClient.Builder(mock(Context.class)).build();
     api = new FusedLocationProviderServiceImpl(application);
     locationManager = (LocationManager) application.getSystemService(LOCATION_SERVICE);
     shadowLocationManager = shadowOf(locationManager);
+  }
+
+  @After public void tearDown() {
+    client.disconnect();
+    otherClient.disconnect();
   }
 
   private void mockService() {
@@ -667,6 +676,178 @@ public class FusedLocationProviderServiceImplTest {
     api.shutdown();
     assertThat(api.getPendingIntents()).isEmpty();
     client.disconnect();
+  }
+
+  @Test public void requestLocationUpdates_shouldModifyOnlyClientListeners() {
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        new TestLocationListener());
+
+    otherClient.connect();
+
+    assertThat(api.getListeners().get(client).size()).isEqualTo(1);
+    assertThat(api.getListeners().get(otherClient)).isNull();
+  }
+
+  @Test public void requestLocationUpdates_shouldModifyOnlyClientPendingIntents() {
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        mock(PendingIntent.class));
+
+    otherClient.connect();
+
+    assertThat(api.getPendingIntents().get(client).size()).isEqualTo(1);
+    assertThat(api.getPendingIntents().get(otherClient)).isNull();
+  }
+
+  @Test public void requestLocationUpdates_shouldModifyOnlyClientLocationListeners() {
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        new TestLocationCallback(), Looper.myLooper());
+
+    otherClient.connect();
+
+    assertThat(api.getLocationListeners().get(client).size()).isEqualTo(1);
+    assertThat(api.getLocationListeners().get(otherClient)).isNull();
+  }
+
+  @Test public void removeLocationUpdates_shouldModifyOnlyClientListeners() {
+    TestLocationListener listener = new TestLocationListener();
+
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        listener);
+
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        new TestLocationListener());
+
+    api.removeLocationUpdates(client, listener);
+
+    assertThat(api.getListeners().get(client)).isNull();
+    assertThat(api.getListeners().get(otherClient).size()).isEqualTo(1);
+  }
+
+  @Test public void removeLocationUpdates_shouldModifyOnlyClientPendingIntents() {
+    PendingIntent pendingIntent = mock(PendingIntent.class);
+
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        pendingIntent);
+
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        pendingIntent);
+
+    api.removeLocationUpdates(client, pendingIntent);
+
+    assertThat(api.getPendingIntents().get(client)).isNull();
+    assertThat(api.getPendingIntents().get(otherClient).size()).isEqualTo(1);
+  }
+
+  @Test public void removeLocationUpdates_shouldModifyOnlyClientLocationListeners() {
+    TestLocationCallback callback = new TestLocationCallback();
+
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        callback, Looper.myLooper());
+
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        callback, Looper.myLooper());
+
+    api.removeLocationUpdates(client, callback);
+
+    assertThat(api.getLocationListeners().get(client)).isNull();
+    assertThat(api.getLocationListeners().get(otherClient).size()).isEqualTo(1);
+  }
+
+  @Test public void reportLocation_shouldNotifiyClientListener() {
+    TestLocationListener listener = new TestLocationListener();
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        listener);
+
+    TestLocationListener otherListener = new TestLocationListener();
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        otherListener);
+    api.removeLocationUpdates(otherClient, otherListener);
+
+    Location location = new Location("test");
+    api.reportLocation(location);
+
+    assertThat(listener.getAllLocations()).contains(location);
+    assertThat(otherListener.getAllLocations()).isEmpty();
+  }
+
+  @Test public void reportLocation_shouldNotifiyPendingIntents() {
+    Intent intent = new Intent(application, TestService.class);
+    PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
+
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        pendingIntent);
+
+    PendingIntent otherPendingIntent = PendingIntent.getService(application, 0, intent, 0);
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        otherPendingIntent);
+    api.removeLocationUpdates(otherClient, otherPendingIntent);
+
+    Location location = new Location("test");
+    api.reportLocation(location);
+
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNull();
+  }
+
+  @Test public void reportLocation_shouldNotifiyLocationCallbacks() {
+    TestLocationCallback callback = new TestLocationCallback();
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        callback, Looper.myLooper());
+
+    TestLocationCallback otherCallback = new TestLocationCallback();
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        otherCallback, Looper.myLooper());
+    api.removeLocationUpdates(otherClient, otherCallback);
+
+    api.reportProviderEnabled(GPS_PROVIDER);
+
+    assertThat(callback.getAvailability()).isNotNull();
+    assertThat(otherCallback.getAvailability()).isNull();
+  }
+
+  @Test public void disconnect_otherClientShouldHavePendingIntents() {
+    client.connect();
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        mock(PendingIntent.class));
+    api.disconnect(client);
+
+    assertThat(api.getPendingIntents().get(otherClient)).isNotNull();
+  }
+
+  @Test public void disconnect_otherClientShouldHaveListeners() {
+    client.connect();
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        new TestLocationListener());
+    api.disconnect(client);
+
+    assertThat(api.getListeners().get(otherClient)).isNotNull();
+  }
+
+  @Test public void disconnect_otherClientShouldHaveLocationListeners() {
+    client.connect();
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        new TestLocationCallback(), Looper.myLooper());
+    api.disconnect(client);
+    
+    assertThat(api.getLocationListeners().get(otherClient)).isNotNull();
   }
 
   /**

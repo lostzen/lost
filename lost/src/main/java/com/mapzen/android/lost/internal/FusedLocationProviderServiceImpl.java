@@ -245,6 +245,17 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     return intentToRequest;
   }
 
+  public Map<LostApiClient, Map<LocationCallback, Looper>> getLocationListeners() {
+    return callbackToLooper;
+  }
+
+  public void disconnect(LostApiClient client) {
+    listenerToRequest.remove(client);
+    intentToRequest.remove(client);
+    callbackToRequest.remove(client);
+    callbackToLooper.remove(client);
+  }
+
   /**
    * Checks if any listeners or pending intents are still registered for location updates. If not,
    * then shutdown the location engine.
@@ -295,12 +306,5 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
         }
       }
     }
-  }
-
-  public void disconnect(LostApiClient client) {
-    listenerToRequest.remove(client);
-    intentToRequest.remove(client);
-    callbackToRequest.remove(client);
-    callbackToLooper.remove(client);
   }
 }
