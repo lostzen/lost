@@ -114,7 +114,8 @@ public class FusedLocationProviderApiImpl
     service.removeLocationUpdates(apiClient, listener);
   }
 
-  @Override public void removeLocationUpdates(LostApiClient apiClient, PendingIntent callbackIntent) {
+  @Override public void removeLocationUpdates(LostApiClient apiClient,
+      PendingIntent callbackIntent) {
     service.removeLocationUpdates(apiClient, callbackIntent);
   }
 

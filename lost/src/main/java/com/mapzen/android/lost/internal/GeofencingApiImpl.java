@@ -23,7 +23,8 @@ public class GeofencingApiImpl implements GeofencingApi {
   }
 
   @Override
-  public void addGeofences(LostApiClient client, GeofencingRequest geofencingRequest, PendingIntent pendingIntent)
+  public void addGeofences(LostApiClient client, GeofencingRequest geofencingRequest,
+      PendingIntent pendingIntent)
       throws SecurityException {
     ParcelableGeofence geofence = (ParcelableGeofence) geofencingRequest.getGeofences().get(0);
     locationManager.addProximityAlert(
@@ -34,7 +35,8 @@ public class GeofencingApiImpl implements GeofencingApi {
         pendingIntent);
   }
 
-  @Override public void addGeofences(LostApiClient client, List<Geofence> geofences, PendingIntent pendingIntent) {
+  @Override public void addGeofences(LostApiClient client, List<Geofence> geofences,
+      PendingIntent pendingIntent) {
     throw new RuntimeException("Sorry, not yet implemented");
   }
 
