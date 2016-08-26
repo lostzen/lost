@@ -5,6 +5,7 @@ import com.mapzen.android.lost.api.LocationCallback;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationResult;
+import com.mapzen.android.lost.api.LostApiClient;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -52,86 +53,68 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     locationEngine.setRequest(null);
   }
 
-  public Location getLastLocation() {
+  public Location getLastLocation(LostApiClient apiClient) {
     return locationEngine.getLastLocation();
   }
 
-  public LocationAvailability getLocationAvailability() {
+  public LocationAvailability getLocationAvailability(LostApiClient apiClient) {
     return createLocationAvailability();
   }
 
-  public void requestLocationUpdates(LocationRequest request, LocationListener listener) {
+  public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+      LocationListener listener) {
     listenerToRequest.put(listener, request);
     locationEngine.setRequest(request);
   }
 
-  public void requestLocationUpdates(LocationRequest request, PendingIntent callbackIntent) {
+  public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+      PendingIntent callbackIntent) {
     intentToRequest.put(callbackIntent, request);
     locationEngine.setRequest(request);
   }
 
-  public void requestLocationUpdates(LocationRequest request, LocationCallback callback,
-      Looper looper) {
+  public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+      LocationCallback callback, Looper looper) {
     callbackToRequest.put(callback, request);
     callbackToLooper.put(callback, looper);
     locationEngine.setRequest(request);
   }
 
-  public void removeLocationUpdates(LocationListener listener) {
+  public void removeLocationUpdates(LostApiClient apiClient, LocationListener listener) {
     listenerToRequest.remove(listener);
     checkAllListenersPendingIntentsAndCallbacks();
   }
 
-  public void removeLocationUpdates(PendingIntent callbackIntent) {
+  public void removeLocationUpdates(LostApiClient apiClient, PendingIntent callbackIntent) {
     intentToRequest.remove(callbackIntent);
     checkAllListenersPendingIntentsAndCallbacks();
   }
 
-  public void removeLocationUpdates(LocationCallback callback) {
+  public void removeLocationUpdates(LostApiClient apiClient, LocationCallback callback) {
     callbackToRequest.remove(callback);
     callbackToLooper.remove(callback);
     checkAllListenersPendingIntentsAndCallbacks();
   }
 
-  /**
-   * Checks if any listeners or pending intents are still registered for location updates. If not,
-   * then shutdown the location engine.
-   */
-  private void checkAllListenersPendingIntentsAndCallbacks() {
-    if (listenerToRequest.isEmpty() && intentToRequest.isEmpty() && callbackToRequest.isEmpty()) {
-      locationEngine.setRequest(null);
-    }
-  }
-
-  public void setMockMode(boolean isMockMode) {
+  public void setMockMode(LostApiClient apiClient, boolean isMockMode) {
     if (mockMode != isMockMode) {
       toggleMockMode();
     }
   }
 
-  private void toggleMockMode() {
-    mockMode = !mockMode;
-    locationEngine.setRequest(null);
-    if (mockMode) {
-      locationEngine = new MockEngine(context, this);
-    } else {
-      locationEngine = new FusionEngine(context, this);
-    }
-  }
-
-  public void setMockLocation(Location mockLocation) {
+  public void setMockLocation(LostApiClient apiClient, Location mockLocation) {
     if (mockMode) {
       ((MockEngine) locationEngine).setLocation(mockLocation);
     }
   }
 
-  public void setMockTrace(File file) {
+  public void setMockTrace(LostApiClient apiClient, File file) {
     if (mockMode) {
       ((MockEngine) locationEngine).setTrace(file);
     }
   }
 
-  public boolean isProviderEnabled(String provider) {
+  public boolean isProviderEnabled(LostApiClient apiClient, String provider) {
     return locationEngine.isProviderEnabled(provider);
   }
 
@@ -160,10 +143,10 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
       Looper looper = callbackToLooper.get(callback);
       Handler handler = new Handler(looper);
       handler.post(new Runnable() {
-          @Override public void run() {
-              callback.onLocationResult(result);
-            }
-        });
+        @Override public void run() {
+          callback.onLocationResult(result);
+        }
+      });
     }
   }
 
@@ -187,6 +170,26 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
 
   public Map<PendingIntent, LocationRequest> getPendingIntents() {
     return intentToRequest;
+  }
+
+  /**
+   * Checks if any listeners or pending intents are still registered for location updates. If not,
+   * then shutdown the location engine.
+   */
+  private void checkAllListenersPendingIntentsAndCallbacks() {
+    if (listenerToRequest.isEmpty() && intentToRequest.isEmpty() && callbackToRequest.isEmpty()) {
+      locationEngine.setRequest(null);
+    }
+  }
+
+  private void toggleMockMode() {
+    mockMode = !mockMode;
+    locationEngine.setRequest(null);
+    if (mockMode) {
+      locationEngine = new MockEngine(context, this);
+    } else {
+      locationEngine = new FusionEngine(context, this);
+    }
   }
 
   private LocationAvailability createLocationAvailability() {

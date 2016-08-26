@@ -19,38 +19,42 @@ public interface FusedLocationProviderApi {
   @Deprecated String KEY_LOCATION_CHANGED = "com.mapzen.android.lost.LOCATION";
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  Location getLastLocation();
+  Location getLastLocation(LostApiClient apiClient);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  LocationAvailability getLocationAvailability();
+  LocationAvailability getLocationAvailability(LostApiClient apiClient);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  void requestLocationUpdates(LocationRequest request, LocationListener listener);
+  void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+      LocationListener listener);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  void requestLocationUpdates(LocationRequest request, LocationListener listener, Looper looper);
+  void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+      LocationListener listener, Looper looper);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  void requestLocationUpdates(LocationRequest request, LocationCallback callback, Looper looper);
+  void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+      LocationCallback callback, Looper looper);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  void requestLocationUpdates(LocationRequest request, PendingIntent callbackIntent);
+  void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+      PendingIntent callbackIntent);
 
-  void removeLocationUpdates(LocationListener listener);
+  void removeLocationUpdates(LostApiClient apiClient, LocationListener listener);
 
-  void removeLocationUpdates(PendingIntent callbackIntent);
+  void removeLocationUpdates(LostApiClient apiClient, PendingIntent callbackIntent);
 
-  void removeLocationUpdates(LocationCallback callback);
+  void removeLocationUpdates(LostApiClient apiClient, LocationCallback callback);
 
-  void setMockMode(boolean isMockMode);
+  void setMockMode(LostApiClient apiClient, boolean isMockMode);
 
-  void setMockLocation(Location mockLocation);
+  void setMockLocation(LostApiClient apiClient, Location mockLocation);
 
-  void setMockTrace(final File file);
+  void setMockTrace(LostApiClient apiClient, final File file);
 
   /**
    * @deprecated Use {@link SettingsApi#checkLocationSettings(LostApiClient,
    * LocationSettingsRequest)}.
    */
-  @Deprecated boolean isProviderEnabled(String provider);
+  @Deprecated boolean isProviderEnabled(LostApiClient apiClient, String provider);
 }

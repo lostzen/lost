@@ -75,59 +75,61 @@ public class FusedLocationProviderApiImpl
     context.stopService(intent);
   }
 
-  @Override public Location getLastLocation() {
-    return service.getLastLocation();
+  @Override public Location getLastLocation(LostApiClient apiClient) {
+    return service.getLastLocation(apiClient);
   }
 
-  @Override public LocationAvailability getLocationAvailability() {
-    return service.getLocationAvailability();
+  @Override public LocationAvailability getLocationAvailability(LostApiClient apiClient) {
+    return service.getLocationAvailability(apiClient);
   }
 
-  @Override public void requestLocationUpdates(LocationRequest request, LocationListener listener) {
-    service.requestLocationUpdates(request, listener);
+  @Override public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+      LocationListener listener) {
+    service.requestLocationUpdates(apiClient, request, listener);
   }
 
-  @Override public void requestLocationUpdates(LocationRequest request, LocationListener listener,
-      Looper looper) {
+  @Override public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+      LocationListener listener, Looper looper) {
     throw new RuntimeException("Sorry, not yet implemented");
   }
 
-  @Override public void requestLocationUpdates(LocationRequest request, LocationCallback callback,
-      Looper looper) {
-    service.requestLocationUpdates(request, callback, looper);
+  @Override public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+      LocationCallback callback, Looper looper) {
+    service.requestLocationUpdates(apiClient, request, callback, looper);
   }
 
   @Override
-  public void requestLocationUpdates(LocationRequest request, PendingIntent callbackIntent) {
-    service.requestLocationUpdates(request, callbackIntent);
+  public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+      PendingIntent callbackIntent) {
+    service.requestLocationUpdates(apiClient, request, callbackIntent);
   }
 
-  @Override public void removeLocationUpdates(LocationListener listener) {
-    service.removeLocationUpdates(listener);
+  @Override public void removeLocationUpdates(LostApiClient apiClient, LocationListener listener) {
+    service.removeLocationUpdates(apiClient, listener);
   }
 
-  @Override public void removeLocationUpdates(PendingIntent callbackIntent) {
-    service.removeLocationUpdates(callbackIntent);
+  @Override public void removeLocationUpdates(LostApiClient apiClient, PendingIntent callbackIntent) {
+    service.removeLocationUpdates(apiClient, callbackIntent);
   }
 
-  @Override public void removeLocationUpdates(LocationCallback callback) {
-    service.removeLocationUpdates(callback);
+  @Override public void removeLocationUpdates(LostApiClient apiClient, LocationCallback callback) {
+    service.removeLocationUpdates(apiClient, callback);
   }
 
-  @Override public void setMockMode(boolean isMockMode) {
-    service.setMockMode(isMockMode);
+  @Override public void setMockMode(LostApiClient apiClient, boolean isMockMode) {
+    service.setMockMode(apiClient, isMockMode);
   }
 
-  @Override public void setMockLocation(Location mockLocation) {
-    service.setMockLocation(mockLocation);
+  @Override public void setMockLocation(LostApiClient apiClient, Location mockLocation) {
+    service.setMockLocation(apiClient, mockLocation);
   }
 
-  @Override public void setMockTrace(File file) {
-    service.setMockTrace(file);
+  @Override public void setMockTrace(LostApiClient apiClient, File file) {
+    service.setMockTrace(apiClient, file);
   }
 
-  @Override public boolean isProviderEnabled(String provider) {
-    return service.isProviderEnabled(provider);
+  @Override public boolean isProviderEnabled(LostApiClient apiClient, String provider) {
+    return service.isProviderEnabled(apiClient, provider);
   }
 
   public Map<LocationListener, LocationRequest> getListeners() {

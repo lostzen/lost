@@ -149,12 +149,12 @@ public class FusedLocationApiActivity extends AppCompatActivity implements
   }
 
   @Override public void onConnected() {
-    FusedLocationApi.setMockMode(isMockModePrefEnabled());
+    FusedLocationApi.setMockMode(client, isMockModePrefEnabled());
 
     if (prefs.getBoolean(getString(R.string.mock_mode_gpx_key), false)) {
       String filename = prefs.getString(getString(R.string.mock_gpx_file_key), null);
       File file = new File(Environment.getExternalStorageDirectory(), filename);
-      FusedLocationApi.setMockTrace(file);
+      FusedLocationApi.setMockTrace(client, file);
     }
 
     final String intervalKey = getString(R.string.interval_key);
@@ -170,14 +170,14 @@ public class FusedLocationApiActivity extends AppCompatActivity implements
         .setPriority(
             prefs.getInt(priorityKey, res.getInteger(R.integer.priority_default_value)));
 
-    FusedLocationApi.requestLocationUpdates(locationRequest, listener);
+    FusedLocationApi.requestLocationUpdates(client, locationRequest, listener);
 
     if (isMockModePrefEnabled()) {
       setMockLocation();
     }
 
     if (fragment.lastKnownLocation == null) {
-      fragment.setLastKnownLocation(FusedLocationApi.getLastLocation());
+      fragment.setLastKnownLocation(FusedLocationApi.getLastLocation(client));
     }
   }
 
@@ -226,7 +226,7 @@ public class FusedLocationApiActivity extends AppCompatActivity implements
     location.setAccuracy(accuracy);
     location.setTime(System.currentTimeMillis());
 
-    FusedLocationApi.setMockLocation(location);
+    FusedLocationApi.setMockLocation(client, location);
   }
 
   private void disconnect() {

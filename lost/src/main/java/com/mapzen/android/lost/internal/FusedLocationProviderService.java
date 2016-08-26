@@ -4,6 +4,7 @@ import com.mapzen.android.lost.api.LocationAvailability;
 import com.mapzen.android.lost.api.LocationCallback;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
+import com.mapzen.android.lost.api.LostApiClient;
 
 import android.app.PendingIntent;
 import android.app.Service;
@@ -52,53 +53,55 @@ public class FusedLocationProviderService extends Service {
     Log.d(TAG, "[onDestroy]");
   }
 
-  public Location getLastLocation() {
-    return serviceImpl.getLastLocation();
+  public Location getLastLocation(LostApiClient apiClient) {
+    return serviceImpl.getLastLocation(apiClient);
   }
 
-  public LocationAvailability getLocationAvailability() {
-    return serviceImpl.getLocationAvailability();
+  public LocationAvailability getLocationAvailability(LostApiClient apiClient) {
+    return serviceImpl.getLocationAvailability(apiClient);
   }
 
-  public void requestLocationUpdates(LocationRequest request, LocationListener listener) {
-    serviceImpl.requestLocationUpdates(request, listener);
+  public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+      LocationListener listener) {
+    serviceImpl.requestLocationUpdates(apiClient, request, listener);
   }
 
-  public void requestLocationUpdates(LocationRequest request, PendingIntent callbackIntent) {
-    serviceImpl.requestLocationUpdates(request, callbackIntent);
+  public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+      PendingIntent callbackIntent) {
+    serviceImpl.requestLocationUpdates(apiClient, request, callbackIntent);
   }
 
-  public void requestLocationUpdates(LocationRequest request, LocationCallback callback,
-      Looper looper) {
-    serviceImpl.requestLocationUpdates(request, callback, looper);
+  public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+      LocationCallback callback, Looper looper) {
+    serviceImpl.requestLocationUpdates(apiClient, request, callback, looper);
   }
 
-  public void removeLocationUpdates(LocationListener listener) {
-    serviceImpl.removeLocationUpdates(listener);
+  public void removeLocationUpdates(LostApiClient apiClient, LocationListener listener) {
+    serviceImpl.removeLocationUpdates(apiClient, listener);
   }
 
-  public void removeLocationUpdates(PendingIntent callbackIntent) {
-    serviceImpl.removeLocationUpdates(callbackIntent);
+  public void removeLocationUpdates(LostApiClient apiClient, PendingIntent callbackIntent) {
+    serviceImpl.removeLocationUpdates(apiClient, callbackIntent);
   }
 
-  public void removeLocationUpdates(LocationCallback callback) {
-    serviceImpl.removeLocationUpdates(callback);
+  public void removeLocationUpdates(LostApiClient apiClient, LocationCallback callback) {
+    serviceImpl.removeLocationUpdates(apiClient, callback);
   }
 
-  public void setMockMode(boolean isMockMode) {
-    serviceImpl.setMockMode(isMockMode);
+  public void setMockMode(LostApiClient apiClient, boolean isMockMode) {
+    serviceImpl.setMockMode(apiClient, isMockMode);
   }
 
-  public void setMockLocation(Location mockLocation) {
-    serviceImpl.setMockLocation(mockLocation);
+  public void setMockLocation(LostApiClient apiClient, Location mockLocation) {
+    serviceImpl.setMockLocation(apiClient, mockLocation);
   }
 
-  public void setMockTrace(File file) {
-    serviceImpl.setMockTrace(file);
+  public void setMockTrace(LostApiClient apiClient, File file) {
+    serviceImpl.setMockTrace(apiClient, file);
   }
 
-  public boolean isProviderEnabled(String provider) {
-    return serviceImpl.isProviderEnabled(provider);
+  public boolean isProviderEnabled(LostApiClient apiClient, String provider) {
+    return serviceImpl.isProviderEnabled(apiClient, provider);
   }
 
   public Map<LocationListener, LocationRequest> getListeners() {

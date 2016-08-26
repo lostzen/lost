@@ -79,7 +79,7 @@ public class LostApiClientImplTest {
 
   @Test public void disconnect_shouldUnregisterLocationUpdateListeners() throws Exception {
     client.connect();
-    LocationServices.FusedLocationApi.requestLocationUpdates(LocationRequest.create(),
+    LocationServices.FusedLocationApi.requestLocationUpdates(client, LocationRequest.create(),
         new LocationListener() {
           @Override public void onLocationChanged(Location location) {
           }
