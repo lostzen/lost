@@ -14,6 +14,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.RequiresPermission;
 import android.util.Log;
 
 import java.io.File;
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static com.mapzen.android.lost.api.FusedLocationProviderApi.KEY_LOCATION_CHANGED;
 
 public class FusedLocationProviderServiceImpl implements LocationEngine.Callback {
@@ -57,6 +60,7 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     return locationEngine.getLastLocation();
   }
 
+  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   public LocationAvailability getLocationAvailability(LostApiClient apiClient) {
     return createLocationAvailability();
   }
@@ -164,6 +168,7 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     return locationEngine.isProviderEnabled(provider);
   }
 
+  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   public void reportLocation(Location location) {
     for (LostApiClient client : listenerToRequest.keySet()) {
       if (listenerToRequest.get(client) != null) {
@@ -208,6 +213,7 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     }
   }
 
+  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   public void reportProviderDisabled(String provider) {
     for (LostApiClient client : listenerToRequest.keySet()) {
       if (listenerToRequest.get(client) != null) {
@@ -219,6 +225,7 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     notifyLocationAvailabilityChanged();
   }
 
+  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   public void reportProviderEnabled(String provider) {
     for (LostApiClient client : listenerToRequest.keySet()) {
       if (listenerToRequest.get(client) != null) {
@@ -258,6 +265,7 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     }
   }
 
+  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   private LocationAvailability createLocationAvailability() {
     LocationManager locationManager = (LocationManager) context.getSystemService(
         Context.LOCATION_SERVICE);
@@ -271,6 +279,7 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
         || (networkEnabled && networkLocationExists));
   }
 
+  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   private void notifyLocationAvailabilityChanged() {
     final LocationAvailability availability = createLocationAvailability();
     for (LostApiClient client : callbackToRequest.keySet()) {

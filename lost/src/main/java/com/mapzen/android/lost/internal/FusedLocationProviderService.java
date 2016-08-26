@@ -14,10 +14,14 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresPermission;
 import android.util.Log;
 
 import java.io.File;
 import java.util.Map;
+
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 /**
  * Service which runs the fused location provider in the background.
@@ -57,6 +61,7 @@ public class FusedLocationProviderService extends Service {
     return serviceImpl.getLastLocation(apiClient);
   }
 
+  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   public LocationAvailability getLocationAvailability(LostApiClient apiClient) {
     return serviceImpl.getLocationAvailability(apiClient);
   }

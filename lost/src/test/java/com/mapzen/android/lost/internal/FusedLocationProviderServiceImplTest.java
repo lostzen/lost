@@ -52,6 +52,7 @@ import static org.robolectric.RuntimeEnvironment.application;
 import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricGradleTestRunner.class)
+@SuppressWarnings("MissingPermission")
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
 public class FusedLocationProviderServiceImplTest {
   private LostApiClient client;
