@@ -31,5 +31,13 @@ public class GeofencingRequest {
       geofences.add(geofence);
       return this;
     }
+
+    public GeofencingRequest.Builder addGeofences(List<Geofence> geofences) {
+      if (geofences == null) {
+        throw new IllegalArgumentException("Geofence cannot be null");
+      }
+      geofences.addAll(geofences);
+      return this;
+    }
   }
 }
