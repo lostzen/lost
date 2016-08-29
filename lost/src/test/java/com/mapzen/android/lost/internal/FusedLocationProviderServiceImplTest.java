@@ -4,7 +4,6 @@ import com.mapzen.android.lost.api.LocationAvailability;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationResult;
-import com.mapzen.android.lost.api.LocationServices;
 import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.lost.BuildConfig;
 
@@ -839,7 +838,7 @@ public class FusedLocationProviderServiceImplTest {
     api.requestLocationUpdates(otherClient, LocationRequest.create(),
         new TestLocationCallback(), Looper.myLooper());
     api.disconnect(client);
-    
+
     assertThat(api.getLocationListeners().get(otherClient)).isNotNull();
   }
 
@@ -904,7 +903,8 @@ public class FusedLocationProviderServiceImplTest {
     api.setMockLocation(otherClient, otherLocation);
 
     assertThat(api.getLocationEngines().get(client).getLastLocation()).isEqualTo(location);
-    assertThat(api.getLocationEngines().get(otherClient).getLastLocation()).isEqualTo(otherLocation);
+    assertThat(api.getLocationEngines().get(otherClient).getLastLocation()).isEqualTo(
+        otherLocation);
   }
 
   @Test public void setMockTrace_shouldSetLocationForProperClient() {

@@ -11,7 +11,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.RequiresPermission;
@@ -55,8 +54,8 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     this.context = context;
     if (engineFactory instanceof FusionEngineFactory) {
       FusionEngineFactory fusionEngineFactory = (FusionEngineFactory) engineFactory;
-      fusionEngineFactory.context = context;
-      fusionEngineFactory.callback = this;
+      fusionEngineFactory.setContext(context);
+      fusionEngineFactory.setCallback(this);
     }
     locationEngineFactory = engineFactory;
     clientManager.setListener(clientManagerListener);
