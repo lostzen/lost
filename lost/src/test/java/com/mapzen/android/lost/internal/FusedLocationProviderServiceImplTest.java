@@ -70,6 +70,7 @@ public class FusedLocationProviderServiceImplTest {
     api = new FusedLocationProviderServiceImpl(application);
     locationManager = (LocationManager) application.getSystemService(LOCATION_SERVICE);
     shadowLocationManager = shadowOf(locationManager);
+    client.connect();
   }
 
   @After public void tearDown() {
@@ -647,35 +648,26 @@ public class FusedLocationProviderServiceImplTest {
   }
 
   @Test public void shutdown_shouldUnregisterLocationUpdateListeners() throws Exception {
-    LostApiClient client = new LostApiClient.Builder(application).build();
-    client.connect();
-    LocationServices.FusedLocationApi.requestLocationUpdates(client, LocationRequest.create(),
+    api.requestLocationUpdates(client, LocationRequest.create(),
         new TestLocationListener());
 
     api.shutdown();
     LocationManager lm = (LocationManager) application.getSystemService(LOCATION_SERVICE);
     assertThat(shadowOf(lm).getRequestLocationUpdateListeners()).isEmpty();
-    client.disconnect();
   }
 
   @Test public void shutdown_shouldClearListeners() {
-    LostApiClient client = new LostApiClient.Builder(application).build();
-    client.connect();
-    LocationServices.FusedLocationApi.requestLocationUpdates(client, LocationRequest.create(),
+    api.requestLocationUpdates(client, LocationRequest.create(),
         new TestLocationListener());
     api.shutdown();
     assertThat(api.getListeners()).isEmpty();
-    client.disconnect();
   }
 
   @Test public void shutdown_shouldClearPendingIntents() {
-    LostApiClient client = new LostApiClient.Builder(application).build();
-    client.connect();
-    LocationServices.FusedLocationApi.requestLocationUpdates(client, LocationRequest.create(),
+    api.requestLocationUpdates(client, LocationRequest.create(),
         mock(PendingIntent.class));
     api.shutdown();
     assertThat(api.getPendingIntents()).isEmpty();
-    client.disconnect();
   }
 
   @Test public void requestLocationUpdates_shouldModifyOnlyClientListeners() {

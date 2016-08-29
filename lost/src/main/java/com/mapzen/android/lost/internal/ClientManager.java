@@ -11,6 +11,7 @@ public class ClientManager {
 
   private static ClientManager instance;
   private HashSet<LostApiClient> clients;
+  private ClientManagerListener clientManagerListener;
 
   private ClientManager() {
     clients = new HashSet<>();
@@ -23,8 +24,15 @@ public class ClientManager {
     return instance;
   }
 
+  public void setListener(ClientManagerListener listener) {
+    clientManagerListener = listener;
+  }
+
   public void addClient(LostApiClient client) {
     clients.add(client);
+    if (clientManagerListener != null) {
+      clientManagerListener.onClientAdded(client);
+    }
   }
 
   public void removeClient(LostApiClient client) {
