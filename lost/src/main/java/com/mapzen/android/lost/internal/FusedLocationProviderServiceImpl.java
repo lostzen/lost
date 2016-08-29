@@ -41,17 +41,24 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
 
   private final ClientManager clientManager = ClientManager.shared();
 
+  private LocationEngineFactory locationEngineFactory;
+
   private final ClientManagerListener clientManagerListener = new ClientManagerListener() {
     @Override public void onClientAdded(LostApiClient client) {
-      LocationEngine locationEngine = new FusionEngine(context,
-          FusedLocationProviderServiceImpl.this);
+      LocationEngine locationEngine = locationEngineFactory.createDefaultLocationEngine();
       clientToLocationEngine.put(client, locationEngine);
       clientToMockMode.put(client, false);
     }
   };
 
-  public FusedLocationProviderServiceImpl(Context context) {
+  public FusedLocationProviderServiceImpl(Context context, LocationEngineFactory engineFactory) {
     this.context = context;
+    if (engineFactory instanceof FusionEngineFactory) {
+      FusionEngineFactory fusionEngineFactory = (FusionEngineFactory) engineFactory;
+      fusionEngineFactory.context = context;
+      fusionEngineFactory.callback = this;
+    }
+    locationEngineFactory = engineFactory;
     clientManager.setListener(clientManagerListener);
     listenerToRequest = new HashMap<>();
     intentToRequest = new HashMap<>();
@@ -278,6 +285,10 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     return callbackToLooper;
   }
 
+  public Map<LostApiClient, LocationEngine> getLocationEngines() {
+    return clientToLocationEngine;
+  }
+
   public void disconnect(LostApiClient client) {
     listenerToRequest.remove(client);
     intentToRequest.remove(client);
@@ -336,4 +347,5 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     }
     return clientToMockMode.get(apiClient);
   }
+
 }

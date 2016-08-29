@@ -47,7 +47,8 @@ public class FusedLocationProviderService extends Service {
 
   @Override public void onCreate() {
     super.onCreate();
-    serviceImpl = new FusedLocationProviderServiceImpl(this);
+    FusionEngineFactory factory = new FusionEngineFactory();
+    serviceImpl = new FusedLocationProviderServiceImpl(this, factory);
     Log.d(TAG, "[onCreate]");
   }
 
