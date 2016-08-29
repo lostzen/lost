@@ -1,9 +1,15 @@
 package com.mapzen.android.lost.internal;
 
+import com.mapzen.android.lost.api.LocationAvailability;
 import com.mapzen.android.lost.api.LocationRequest;
 
 import android.content.Context;
 import android.location.Location;
+import android.location.LocationManager;
+import android.support.annotation.RequiresPermission;
+
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 /**
  * Base class for {@link com.mapzen.android.lost.internal.FusionEngine} and
@@ -65,6 +71,20 @@ public abstract class LocationEngine {
 
   protected LocationRequestUnbundled getRequest() {
     return request;
+  }
+
+  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+  protected LocationAvailability createLocationAvailability() {
+    LocationManager locationManager = (LocationManager) context.getSystemService(
+        Context.LOCATION_SERVICE);
+    boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    boolean networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    boolean gpsLocationExists = locationManager.getLastKnownLocation(
+        LocationManager.GPS_PROVIDER) != null;
+    boolean networkLocationExists = locationManager.getLastKnownLocation(
+        LocationManager.NETWORK_PROVIDER) != null;
+    return new LocationAvailability((gpsEnabled && gpsLocationExists)
+        || (networkEnabled && networkLocationExists));
   }
 
   public interface Callback {

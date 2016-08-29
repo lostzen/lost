@@ -62,7 +62,7 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   public LocationAvailability getLocationAvailability(LostApiClient apiClient) {
-    return createLocationAvailability();
+    return locationEngine.createLocationAvailability();
   }
 
   public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
@@ -178,7 +178,7 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
       }
     }
 
-    LocationAvailability availability = createLocationAvailability();
+    LocationAvailability availability = locationEngine.createLocationAvailability();
     ArrayList<Location> locations = new ArrayList<>();
     locations.add(location);
     final LocationResult result = LocationResult.create(locations);
@@ -277,22 +277,8 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
   }
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  private LocationAvailability createLocationAvailability() {
-    LocationManager locationManager = (LocationManager) context.getSystemService(
-        Context.LOCATION_SERVICE);
-    boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-    boolean networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-    boolean gpsLocationExists = locationManager.getLastKnownLocation(
-        LocationManager.GPS_PROVIDER) != null;
-    boolean networkLocationExists = locationManager.getLastKnownLocation(
-        LocationManager.NETWORK_PROVIDER) != null;
-    return new LocationAvailability((gpsEnabled && gpsLocationExists)
-        || (networkEnabled && networkLocationExists));
-  }
-
-  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   private void notifyLocationAvailabilityChanged() {
-    final LocationAvailability availability = createLocationAvailability();
+    final LocationAvailability availability = locationEngine.createLocationAvailability();
     for (LostApiClient client : callbackToRequest.keySet()) {
       if (callbackToRequest.get(client) != null) {
         for (final LocationCallback callback : callbackToRequest.get(client).keySet()) {
