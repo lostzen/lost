@@ -32,7 +32,12 @@
         android:label="@string/settings"
         android:name=".SettingsActivity"/>
 
+    <activity android:name=".GeofencingApiActivity"/>
     <activity android:name=".SettingsApiActivity"/>
 
+    <service
+        android:name=".GeofenceIntentService"
+        android:exported="false">
+    </service>
   </application>
 </manifest>

@@ -42,6 +42,8 @@
 
   <string name="sample_fused_location_api_title">FusedLocationApi</string>
   <string name="sample_fused_location_api_description">Demonstrates how to request location updates using the FusedLocationApi</string>
+  <string name="sample_geofencing_api_title">GeofencingApi</string>
+  <string name="sample_geofencing_api_description">Demonstrates how use proximity alerts with the GeofencingApi</string>
   <string name="sample_settings_api_title">SettingsApi</string>
   <string name="sample_settings_api_description">Demonstrates how to use the SettingsApi to request network status and resolve issues with the current status when it isn\'t enabled</string>
   <string name="gps_present">Gps present:</string>
@@ -55,5 +57,12 @@
   <string name="check_location_settings">Check location settings</string>
   <string name="resolve_location_settings">Resolve location settings</string>
   <string name="cancel">Cancel</string>
+  <string name="connect">Connect</string>
+  <string name="disconnect">Disconnect</string>
+  <string name="request_id">requestId</string>
+  <string name="latitude">latitude</string>
+  <string name="longitude">longitude</string>
+  <string name="radius">radius</string>
+  <string name="create">Create</string>
 
 </resources>

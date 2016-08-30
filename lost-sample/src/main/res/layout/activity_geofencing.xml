@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp"
+    >
+
+  <Button
+      android:id="@+id/button_connect"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/connect"
+      />
+
+  <Button
+      android:id="@+id/button_disconnect"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/disconnect"
+      />
+
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/request_id"
+      />
+
+  <EditText
+      android:id="@+id/input_request_id"
+      android:layout_width="100dp"
+      android:layout_height="wrap_content"
+      android:text="101"
+      />
+
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/latitude"
+      />
+
+  <EditText
+      android:id="@+id/input_latitude"
+      android:layout_width="100dp"
+      android:layout_height="wrap_content"
+      android:text="38.930626"
+      />
+
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/longitude"
+      />
+
+  <EditText
+      android:id="@+id/input_longitude"
+      android:layout_width="100dp"
+      android:layout_height="wrap_content"
+      android:text="-74.931164"
+      />
+
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/radius"
+      />
+
+  <EditText
+      android:id="@+id/input_radius"
+      android:layout_width="100dp"
+      android:layout_height="wrap_content"
+      android:text="50"
+      />
+
+  <Button
+      android:id="@+id/button_create"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/create"
+      />
+
+</LinearLayout>
