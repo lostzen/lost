@@ -47,6 +47,7 @@ public class MockEngineTest {
     assertThat(callback.lastLocation).isEqualTo(mockLocation);
   }
 
+  @Ignore("Intermittently failing. Find a better way to test without Thread.sleep(100)")
   @Test public void setTrace_shouldReportEachLocation() throws Exception {
     mockEngine.setTrace(getTestGpxTrace());
     mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
@@ -61,6 +62,7 @@ public class MockEngineTest {
     assertThat(callback.locations.get(2).getLongitude()).isEqualTo(2.1);
   }
 
+  @Ignore("Intermittently failing. Find a better way to test without Thread.sleep(100)")
   @Test public void setTrace_shouldReportSpeed() throws Exception {
     mockEngine.setTrace(getTestGpxTrace());
     mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
