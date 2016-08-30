@@ -16,7 +16,7 @@ public interface Geofence {
     private double latitude;
     private double longitude;
     private float radius;
-    private long durationMillis;
+    private long durationMillis = NEVER_EXPIRE;
 
     public Geofence build() {
       return new ParcelableGeofence(requestId, latitude, longitude, radius, durationMillis);

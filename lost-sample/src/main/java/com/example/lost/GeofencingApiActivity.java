@@ -21,6 +21,7 @@ import android.widget.Toast;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.widget.Toast.LENGTH_SHORT;
+import static com.mapzen.android.lost.api.Geofence.NEVER_EXPIRE;
 
 /**
  * Geofencing demo
@@ -137,6 +138,7 @@ public class GeofencingApiActivity extends AppCompatActivity
     Geofence geofence = new Geofence.Builder()
         .setRequestId(requestId)
         .setCircularRegion(latitude, longitude, radius)
+        .setExpirationDuration(NEVER_EXPIRE)
         .build();
     GeofencingRequest request = new GeofencingRequest.Builder()
         .addGeofence(geofence)
