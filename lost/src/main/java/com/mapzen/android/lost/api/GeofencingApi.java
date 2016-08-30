@@ -11,7 +11,8 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 public interface GeofencingApi {
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  void addGeofences(LostApiClient client, GeofencingRequest geofencingRequest, PendingIntent pendingIntent);
+  void addGeofences(LostApiClient client, GeofencingRequest geofencingRequest,
+      PendingIntent pendingIntent);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   void addGeofences(LostApiClient client, List<Geofence> geofences, PendingIntent pendingIntent);
