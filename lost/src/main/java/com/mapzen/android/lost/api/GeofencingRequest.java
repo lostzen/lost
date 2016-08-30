@@ -36,7 +36,7 @@ public class GeofencingRequest {
       if (geofences == null) {
         throw new IllegalArgumentException("Geofence cannot be null");
       }
-      geofences.addAll(geofences);
+      this.geofences.addAll(geofences);
       return this;
     }
   }
