@@ -11,7 +11,7 @@ public class ParcelableGeofence implements Geofence, Parcelable {
   private double latitude;
   private double longitude;
   private float radius;
-  private long durationMillis;
+  private long durationMillis = NEVER_EXPIRE;
 
   public ParcelableGeofence(String requestId, double latitude, double longitude, float radius,
       long durationMillis) {
