@@ -5,9 +5,11 @@ import com.mapzen.android.lost.api.GeofencingApi;
 import com.mapzen.android.lost.api.GeofencingRequest;
 import com.mapzen.android.lost.api.LostApiClient;
 
+import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.location.LocationManager;
+import android.support.annotation.RequiresPermission;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +27,7 @@ public class GeofencingApiImpl implements GeofencingApi {
     pendingIntentMap = new HashMap<>();
   }
 
+  @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
   @Override
   public void addGeofences(LostApiClient client, GeofencingRequest geofencingRequest,
       PendingIntent pendingIntent)
@@ -33,6 +36,7 @@ public class GeofencingApiImpl implements GeofencingApi {
     addGeofences(client, geofences, pendingIntent);
   }
 
+  @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
   @Override public void addGeofences(LostApiClient client, List<Geofence> geofences,
       PendingIntent pendingIntent)
       throws SecurityException {
@@ -41,6 +45,7 @@ public class GeofencingApiImpl implements GeofencingApi {
     }
   }
 
+  @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
   private void addGeofence(LostApiClient client, Geofence geofence, PendingIntent pendingIntent)
           throws SecurityException {
     ParcelableGeofence pGeofence = (ParcelableGeofence) geofence;
@@ -57,18 +62,21 @@ public class GeofencingApiImpl implements GeofencingApi {
     pendingIntentMap.put(requestId, pendingIntent);
   }
 
+  @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
   @Override public void removeGeofences(LostApiClient client, List<String> geofenceRequestIds) {
     for (String geofenceRequestId : geofenceRequestIds) {
       removeGeofences(client, geofenceRequestId);
     }
   }
 
+  @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
   private void removeGeofences(LostApiClient client, String geofenceRequestId)
       throws SecurityException {
     PendingIntent pendingIntent = pendingIntentMap.get(geofenceRequestId);
     removeGeofences(client, pendingIntent);
   }
 
+  @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
   @Override public void removeGeofences(LostApiClient client, PendingIntent pendingIntent)
     throws SecurityException {
       locationManager.removeProximityAlert(pendingIntent);
