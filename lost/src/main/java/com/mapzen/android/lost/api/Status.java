@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.IntentSender;
 
-public class Status {
+public class Status implements Result {
 
   public static final int SUCCESS = 0;
   public static final int RESOLUTION_REQUIRED = 6;
@@ -89,5 +89,9 @@ public class Status {
 
   public PendingIntent getResolution() {
     return this.mPendingIntent;
+  }
+
+  @Override public Status getStatus() {
+    return this;
   }
 }

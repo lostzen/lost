@@ -6,6 +6,8 @@ import com.mapzen.android.lost.api.LocationCallback;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LostApiClient;
+import com.mapzen.android.lost.api.PendingResult;
+import com.mapzen.android.lost.api.Status;
 
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -107,50 +109,53 @@ public class FusedLocationProviderApiImpl
     return service.getLocationAvailability(client);
   }
 
-  @Override public void requestLocationUpdates(LostApiClient client, LocationRequest request,
-      LocationListener listener) {
-    service.requestLocationUpdates(client, request, listener);
+  @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
+      LocationRequest request, LocationListener listener) {
+    return service.requestLocationUpdates(client, request, listener);
   }
 
-  @Override public void requestLocationUpdates(LostApiClient client, LocationRequest request,
-      LocationListener listener, Looper looper) {
+  @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
+      LocationRequest request, LocationListener listener, Looper looper) {
     throw new RuntimeException("Sorry, not yet implemented");
   }
 
-  @Override public void requestLocationUpdates(LostApiClient client, LocationRequest request,
-      LocationCallback callback, Looper looper) {
-    service.requestLocationUpdates(client, request, callback, looper);
+  @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
+      LocationRequest request, LocationCallback callback, Looper looper) {
+    return service.requestLocationUpdates(client, request, callback, looper);
   }
 
   @Override
-  public void requestLocationUpdates(LostApiClient client, LocationRequest request,
+  public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
       PendingIntent callbackIntent) {
-    service.requestLocationUpdates(client, request, callbackIntent);
+    return service.requestLocationUpdates(client, request, callbackIntent);
   }
 
-  @Override public void removeLocationUpdates(LostApiClient client, LocationListener listener) {
-    service.removeLocationUpdates(client, listener);
+  @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
+      LocationListener listener) {
+    return service.removeLocationUpdates(client, listener);
   }
 
-  @Override public void removeLocationUpdates(LostApiClient client,
+  @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       PendingIntent callbackIntent) {
-    service.removeLocationUpdates(client, callbackIntent);
+    return service.removeLocationUpdates(client, callbackIntent);
   }
 
-  @Override public void removeLocationUpdates(LostApiClient client, LocationCallback callback) {
-    service.removeLocationUpdates(client, callback);
+  @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
+      LocationCallback callback) {
+    return service.removeLocationUpdates(client, callback);
   }
 
-  @Override public void setMockMode(LostApiClient client, boolean isMockMode) {
-    service.setMockMode(client, isMockMode);
+  @Override public PendingResult<Status> setMockMode(LostApiClient client, boolean isMockMode) {
+    return service.setMockMode(client, isMockMode);
   }
 
-  @Override public void setMockLocation(LostApiClient client, Location mockLocation) {
-    service.setMockLocation(client, mockLocation);
+  @Override public PendingResult<Status> setMockLocation(LostApiClient client,
+      Location mockLocation) {
+    return service.setMockLocation(client, mockLocation);
   }
 
-  @Override public void setMockTrace(LostApiClient client, File file) {
-    service.setMockTrace(client, file);
+  @Override public PendingResult<Status> setMockTrace(LostApiClient client, File file) {
+    return service.setMockTrace(client, file);
   }
 
   @Override public boolean isProviderEnabled(LostApiClient client, String provider) {
