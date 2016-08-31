@@ -25,13 +25,20 @@ public class LostApiClientImpl implements LostApiClient {
     if (LocationServices.SettingsApi == null) {
       LocationServices.SettingsApi = new SettingsApiImpl(context);
     }
-    if (LocationServices.FusedLocationApi == null) {
-      FusedLocationProviderApiImpl fusedApi = new FusedLocationProviderApiImpl(context);
+    FusedLocationProviderApiImpl fusedApi
+        = (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
+    if (fusedApi == null) {
+      fusedApi = new FusedLocationProviderApiImpl(context);
       fusedApi.connect(connectionCallbacks);
       LocationServices.FusedLocationApi = fusedApi;
     } else if (connectionCallbacks != null) {
-      connectionCallbacks.onConnected();
+      if (fusedApi.isConnecting()) {
+        fusedApi.connectionCallbacks.add(connectionCallbacks);
+      } else {
+        connectionCallbacks.onConnected();
+      }
     }
+
     clientManager.addClient(this);
   }
 

@@ -18,7 +18,9 @@ import android.os.Looper;
 import android.util.Log;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Implementation of the {@link FusedLocationProviderApi}.
@@ -30,6 +32,7 @@ public class FusedLocationProviderApiImpl
 
   private final Context context;
   private FusedLocationProviderService service;
+  private boolean connecting;
 
   private final ServiceConnection serviceConnection = new ServiceConnection() {
     @Override public void onServiceConnected(ComponentName name, IBinder binder) {
@@ -39,31 +42,46 @@ public class FusedLocationProviderApiImpl
         service = fusedBinder.getService();
       }
 
-      if (connectionCallbacks != null) {
-        connectionCallbacks.onConnected();
+      if (!connectionCallbacks.isEmpty()) {
+        for (LostApiClient.ConnectionCallbacks callbacks : connectionCallbacks) {
+          callbacks.onConnected();
+        }
       }
+      connecting = false;
       Log.d(TAG, "[onServiceConnected]");
     }
 
     @Override public void onServiceDisconnected(ComponentName name) {
-      if (connectionCallbacks != null) {
-        connectionCallbacks.onConnectionSuspended();
+      if (!connectionCallbacks.isEmpty()) {
+        for (LostApiClient.ConnectionCallbacks callbacks : connectionCallbacks) {
+          callbacks.onConnectionSuspended();
+        }
       }
+      connecting = false;
       Log.d(TAG, "[onServiceDisconnected]");
     }
   };
 
-  LostApiClient.ConnectionCallbacks connectionCallbacks;
+  Set<LostApiClient.ConnectionCallbacks> connectionCallbacks;
 
   public FusedLocationProviderApiImpl(Context context) {
     this.context = context;
+    connectionCallbacks = new HashSet<>();
+  }
+
+  public boolean isConnecting() {
+    return connecting;
   }
 
   public void connect(LostApiClient.ConnectionCallbacks callbacks) {
+    connecting = true;
+
     Intent intent = new Intent(context, FusedLocationProviderService.class);
     context.startService(intent);
 
-    connectionCallbacks = callbacks;
+    if (callbacks != null) {
+      connectionCallbacks.add(callbacks);
+    }
     intent = new Intent(context, FusedLocationProviderService.class);
     context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
   }
