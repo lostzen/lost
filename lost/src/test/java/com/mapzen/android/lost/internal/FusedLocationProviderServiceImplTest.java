@@ -66,8 +66,7 @@ public class FusedLocationProviderServiceImplTest {
     mockService();
     client = new LostApiClient.Builder(mock(Context.class)).build();
     otherClient = new LostApiClient.Builder(mock(Context.class)).build();
-    FusionEngineFactory factory = new FusionEngineFactory();
-    api = new FusedLocationProviderServiceImpl(application, factory);
+    api = new FusedLocationProviderServiceImpl(application);
     locationManager = (LocationManager) application.getSystemService(LOCATION_SERVICE);
     shadowLocationManager = shadowOf(locationManager);
     client.connect();
@@ -842,105 +841,6 @@ public class FusedLocationProviderServiceImplTest {
     assertThat(api.getLocationListeners().get(otherClient)).isNotNull();
   }
 
-  @Test public void getLastLocation_shouldReturnProperEngineLocation() {
-    TestFusionEngineFactory factory = new TestFusionEngineFactory();
-    api = new FusedLocationProviderServiceImpl(application, factory);
-    client.connect();
-
-    Location location = new Location("test");
-    LocationEngine engine = api.getLocationEngines().get(client);
-    when(engine.getLastLocation()).thenReturn(location);
-
-    otherClient.connect();
-    Location otherLocation = new Location("test");
-    LocationEngine otherEngine = api.getLocationEngines().get(otherClient);
-    when(otherEngine.getLastLocation()).thenReturn(otherLocation);
-
-    assertThat(api.getLastLocation(client)).isEqualTo(location);
-    assertThat(api.getLastLocation(otherClient)).isEqualTo(otherLocation);
-  }
-
-  @Test public void getLocationAvailability_shouldReturnProperAvailability() {
-    TestFusionEngineFactory factory = new TestFusionEngineFactory();
-    api = new FusedLocationProviderServiceImpl(application, factory);
-    client.connect();
-
-    LocationAvailability availability = new LocationAvailability(true);
-    LocationEngine engine = api.getLocationEngines().get(client);
-    when(engine.createLocationAvailability()).thenReturn(availability);
-
-    otherClient.connect();
-    LocationAvailability otherAvailability = new LocationAvailability(false);
-    LocationEngine otherEngine = api.getLocationEngines().get(otherClient);
-    when(otherEngine.createLocationAvailability()).thenReturn(otherAvailability);
-
-    assertThat(api.getLocationAvailability(client)).isEqualTo(availability);
-    assertThat(api.getLocationAvailability(otherClient)).isEqualTo(otherAvailability);
-  }
-
-  @Test public void setMockMode_shouldSetModeForProperClient() {
-    otherClient.connect();
-
-    api.setMockMode(client, true);
-    api.setMockMode(otherClient, true);
-    assertThat(api.getLocationEngines().get(client)).isInstanceOf(MockEngine.class);
-    assertThat(api.getLocationEngines().get(otherClient)).isInstanceOf(MockEngine.class);
-
-    api.setMockMode(client, false);
-    assertThat(api.getLocationEngines().get(client)).isInstanceOf(FusionEngine.class);
-    assertThat(api.getLocationEngines().get(otherClient)).isInstanceOf(MockEngine.class);
-  }
-
-  @Test public void setMockLocation_shouldSetLocationForProperClient() {
-    otherClient.connect();
-
-    api.setMockMode(client, true);
-    api.setMockMode(otherClient, true);
-
-    Location location = new Location("test");
-    Location otherLocation = new Location("test");
-    api.setMockLocation(client, location);
-    api.setMockLocation(otherClient, otherLocation);
-
-    assertThat(api.getLocationEngines().get(client).getLastLocation()).isEqualTo(location);
-    assertThat(api.getLocationEngines().get(otherClient).getLastLocation()).isEqualTo(
-        otherLocation);
-  }
-
-  @Test public void setMockTrace_shouldSetLocationForProperClient() {
-    otherClient.connect();
-
-    api.setMockMode(client, true);
-    api.setMockMode(otherClient, true);
-
-    File file = new File("test");
-    File otherFile = new File("test");
-    api.setMockTrace(client, file);
-    api.setMockTrace(otherClient, otherFile);
-
-    MockEngine engine = (MockEngine) api.getLocationEngines().get(client);
-    assertThat(engine.getTrace()).isEqualTo(file);
-
-    MockEngine otherEngine = (MockEngine) api.getLocationEngines().get(otherClient);
-    assertThat(otherEngine.getTrace()).isEqualTo(otherFile);
-  }
-
-  @Test public void isProviderEnabled_shouldReturnProperStatusForClient() {
-    TestFusionEngineFactory factory = new TestFusionEngineFactory();
-    api = new FusedLocationProviderServiceImpl(application, factory);
-    client.connect();
-
-    LocationEngine engine = api.getLocationEngines().get(client);
-    when(engine.isProviderEnabled(GPS_PROVIDER)).thenReturn(true);
-
-    otherClient.connect();
-    LocationEngine otherEngine = api.getLocationEngines().get(otherClient);
-    when(otherEngine.isProviderEnabled(GPS_PROVIDER)).thenReturn(false);
-
-    assertThat(api.isProviderEnabled(client, GPS_PROVIDER)).isTrue();
-    assertThat(api.isProviderEnabled(otherClient, GPS_PROVIDER)).isFalse();
-  }
-
   /**
    * Due to a bug in Robolectric that allows the same location listener to be registered twice,
    * we need to manually clear the `ShadowLocationManager` to prevent duplicate listeners.
@@ -959,13 +859,6 @@ public class FusedLocationProviderServiceImplTest {
     }
 
     @Override protected void onHandleIntent(Intent intent) {
-    }
-  }
-
-  public class TestFusionEngineFactory implements LocationEngineFactory {
-
-    @Override public LocationEngine createDefaultLocationEngine() {
-      return mock(LocationEngine.class);
     }
   }
 

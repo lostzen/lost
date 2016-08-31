@@ -31,62 +31,36 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
 
   private Context context;
 
+  private boolean mockMode;
+  private LocationEngine locationEngine;
   private Map<LostApiClient, Map<LocationListener, LocationRequest>> listenerToRequest;
   private Map<LostApiClient, Map<PendingIntent, LocationRequest>> intentToRequest;
   private Map<LostApiClient, Map<LocationCallback, LocationRequest>> callbackToRequest;
   private Map<LostApiClient, Map<LocationCallback, Looper>> callbackToLooper;
-  private Map<LostApiClient, LocationEngine> clientToLocationEngine;
-  private Map<LostApiClient, Boolean> clientToMockMode;
 
-  private final ClientManager clientManager = ClientManager.shared();
-
-  private LocationEngineFactory locationEngineFactory;
-
-  private final ClientManagerListener clientManagerListener = new ClientManagerListener() {
-    @Override public void onClientAdded(LostApiClient client) {
-      LocationEngine locationEngine = locationEngineFactory.createDefaultLocationEngine();
-      clientToLocationEngine.put(client, locationEngine);
-      clientToMockMode.put(client, false);
-    }
-  };
-
-  public FusedLocationProviderServiceImpl(Context context, LocationEngineFactory engineFactory) {
+  public FusedLocationProviderServiceImpl(Context context) {
     this.context = context;
-    if (engineFactory instanceof FusionEngineFactory) {
-      FusionEngineFactory fusionEngineFactory = (FusionEngineFactory) engineFactory;
-      fusionEngineFactory.setContext(context);
-      fusionEngineFactory.setCallback(this);
-    }
-    locationEngineFactory = engineFactory;
-    clientManager.setListener(clientManagerListener);
+    locationEngine = new FusionEngine(context, this);
     listenerToRequest = new HashMap<>();
     intentToRequest = new HashMap<>();
     callbackToRequest = new HashMap<>();
     callbackToLooper = new HashMap<>();
-    clientToLocationEngine = new HashMap<>();
-    clientToMockMode = new HashMap<>();
   }
 
   public void shutdown() {
-    for (LocationEngine engine : clientToLocationEngine.values()) {
-      engine.setRequest(null);
-    }
+    locationEngine.setRequest(null);
     listenerToRequest.clear();
     intentToRequest.clear();
     callbackToRequest.clear();
     callbackToLooper.clear();
-    clientToLocationEngine.clear();
-    clientToMockMode.clear();
   }
 
   public Location getLastLocation(LostApiClient apiClient) {
-    LocationEngine locationEngine = clientToLocationEngine.get(apiClient);
     return locationEngine.getLastLocation();
   }
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   public LocationAvailability getLocationAvailability(LostApiClient apiClient) {
-    LocationEngine locationEngine = clientToLocationEngine.get(apiClient);
     return locationEngine.createLocationAvailability();
   }
 
@@ -99,7 +73,6 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     map.put(listener, request);
     listenerToRequest.put(apiClient, map);
 
-    LocationEngine locationEngine = clientToLocationEngine.get(apiClient);
     locationEngine.setRequest(request);
   }
 
@@ -112,7 +85,6 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     map.put(callbackIntent, request);
     intentToRequest.put(apiClient, map);
 
-    LocationEngine locationEngine = clientToLocationEngine.get(apiClient);
     locationEngine.setRequest(request);
   }
 
@@ -132,7 +104,6 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     looperMap.put(callback, looper);
     callbackToLooper.put(apiClient, looperMap);
 
-    LocationEngine locationEngine = clientToLocationEngine.get(apiClient);
     locationEngine.setRequest(request);
   }
 
@@ -177,28 +148,24 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
   }
 
   public void setMockMode(LostApiClient apiClient, boolean isMockMode) {
-    boolean mockMode = isMockMode(apiClient);
     if (mockMode != isMockMode) {
-      toggleMockMode(apiClient, isMockMode);
+      toggleMockMode();
     }
   }
 
   public void setMockLocation(LostApiClient apiClient, Location mockLocation) {
-    if (isMockMode(apiClient)) {
-      LocationEngine locationEngine = clientToLocationEngine.get(apiClient);
+    if (mockMode) {
       ((MockEngine) locationEngine).setLocation(mockLocation);
     }
   }
 
   public void setMockTrace(LostApiClient apiClient, File file) {
-    if (isMockMode(apiClient)) {
-      LocationEngine locationEngine = clientToLocationEngine.get(apiClient);
+    if (mockMode) {
       ((MockEngine) locationEngine).setTrace(file);
     }
   }
 
   public boolean isProviderEnabled(LostApiClient apiClient, String provider) {
-    LocationEngine locationEngine = clientToLocationEngine.get(apiClient);
     return locationEngine.isProviderEnabled(provider);
   }
 
@@ -212,7 +179,6 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
       }
     }
 
-    LocationEngine locationEngine = clientToLocationEngine.values().iterator().next();
     LocationAvailability availability = locationEngine.createLocationAvailability();
     ArrayList<Location> locations = new ArrayList<>();
     locations.add(location);
@@ -284,10 +250,6 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     return callbackToLooper;
   }
 
-  public Map<LostApiClient, LocationEngine> getLocationEngines() {
-    return clientToLocationEngine;
-  }
-
   public void disconnect(LostApiClient client) {
     listenerToRequest.remove(client);
     intentToRequest.remove(client);
@@ -301,29 +263,22 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
    */
   private void checkAllListenersPendingIntentsAndCallbacks() {
     if (listenerToRequest.isEmpty() && intentToRequest.isEmpty() && callbackToRequest.isEmpty()) {
-      for (LocationEngine locationEngine : clientToLocationEngine.values()) {
-        locationEngine.setRequest(null);
-      }
+      locationEngine.setRequest(null);
     }
   }
 
-  private void toggleMockMode(LostApiClient apiClient, boolean isMockMode) {
-    clientToMockMode.put(apiClient, isMockMode);
-
-    LocationEngine locationEngine = clientToLocationEngine.get(apiClient);
+  private void toggleMockMode() {
+    mockMode = !mockMode;
     locationEngine.setRequest(null);
-
-    if (isMockMode) {
+    if (mockMode) {
       locationEngine = new MockEngine(context, this);
     } else {
       locationEngine = new FusionEngine(context, this);
     }
-    clientToLocationEngine.put(apiClient, locationEngine);
   }
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   private void notifyLocationAvailabilityChanged() {
-    LocationEngine locationEngine = clientToLocationEngine.values().iterator().next();
     final LocationAvailability availability = locationEngine.createLocationAvailability();
     for (LostApiClient client : callbackToRequest.keySet()) {
       if (callbackToRequest.get(client) != null) {
@@ -338,13 +293,6 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
         }
       }
     }
-  }
-
-  private boolean isMockMode(LostApiClient apiClient) {
-    if (!clientToMockMode.containsKey(apiClient)) {
-      return false;
-    }
-    return clientToMockMode.get(apiClient);
   }
 
 }

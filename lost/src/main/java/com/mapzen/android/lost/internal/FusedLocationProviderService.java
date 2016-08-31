@@ -28,8 +28,6 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
  */
 public class FusedLocationProviderService extends Service {
 
-  private static final String TAG = FusedLocationProviderService.class.getSimpleName();
-
   private FusedLocationProviderServiceImpl serviceImpl;
 
   private final IBinder binder = new FusedLocationProviderBinder();
@@ -47,15 +45,12 @@ public class FusedLocationProviderService extends Service {
 
   @Override public void onCreate() {
     super.onCreate();
-    FusionEngineFactory factory = new FusionEngineFactory();
-    serviceImpl = new FusedLocationProviderServiceImpl(this, factory);
-    Log.d(TAG, "[onCreate]");
+    serviceImpl = new FusedLocationProviderServiceImpl(this);
   }
 
   @Override public void onDestroy() {
     super.onDestroy();
     serviceImpl.shutdown();
-    Log.d(TAG, "[onDestroy]");
   }
 
   public Location getLastLocation(LostApiClient apiClient) {
