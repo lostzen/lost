@@ -104,7 +104,11 @@ public class LostClientManager implements ClientManager {
     clientCallbackToLoopers.put(client, looperMap);
   }
 
-  public void removeListener(LostApiClient client, LocationListener listener) {
+  public boolean removeListener(LostApiClient client, LocationListener listener) {
+    boolean removedListener = false;
+    if (clientToListeners.get(client) != null) {
+      removedListener = clientToListeners.get(client).contains(listener);
+    }
     Set<LocationListener> listeners = clientToListeners.get(client);
     if (listeners != null) {
       listeners.remove(listener);
@@ -112,9 +116,14 @@ public class LostClientManager implements ClientManager {
     if (listeners.isEmpty()) {
       clientToListeners.remove(client);
     }
+    return removedListener;
   }
 
-  public void removePendingIntent(LostApiClient client, PendingIntent callbackIntent) {
+  public boolean removePendingIntent(LostApiClient client, PendingIntent callbackIntent) {
+    boolean removedPendingIntent = false;
+    if (clientToPendingIntents.get(client) != null) {
+      removedPendingIntent = clientToPendingIntents.get(client).contains(callbackIntent);
+    }
     Set<PendingIntent> intents = clientToPendingIntents.get(client);
     if (intents != null) {
       intents.remove(callbackIntent);
@@ -122,9 +131,14 @@ public class LostClientManager implements ClientManager {
     if (intents.isEmpty()) {
       clientToPendingIntents.remove(client);
     }
+    return removedPendingIntent;
   }
 
-  public void removeLocationCallback(LostApiClient client, LocationCallback callback) {
+  public boolean removeLocationCallback(LostApiClient client, LocationCallback callback) {
+    boolean removedCallback = false;
+    if (clientToLocationCallbacks.get(client) != null) {
+      removedCallback = clientToLocationCallbacks.get(client).contains(callback);
+    }
     Set<LocationCallback> callbacks = clientToLocationCallbacks.get(client);
     if (callbacks != null) {
       callbacks.remove(callback);
@@ -139,6 +153,7 @@ public class LostClientManager implements ClientManager {
     if (looperMap.isEmpty()) {
       clientCallbackToLoopers.remove(client);
     }
+    return removedCallback;
   }
 
   public void reportLocationChanged(Location location) {

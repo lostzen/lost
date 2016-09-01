@@ -30,9 +30,9 @@ public interface ClientManager {
       PendingIntent callbackIntent);
   void addLocationCallback(LostApiClient client, LocationRequest request,
       LocationCallback callback, Looper looper);
-  void removeListener(LostApiClient client, LocationListener listener);
-  void removePendingIntent(LostApiClient client, PendingIntent callbackIntent);
-  void removeLocationCallback(LostApiClient client, LocationCallback callback);
+  boolean removeListener(LostApiClient client, LocationListener listener);
+  boolean removePendingIntent(LostApiClient client, PendingIntent callbackIntent);
+  boolean removeLocationCallback(LostApiClient client, LocationCallback callback);
   void reportLocationChanged(Location location);
   void sendPendingIntent(Context context, Location location, LocationAvailability availability,
       LocationResult result);
