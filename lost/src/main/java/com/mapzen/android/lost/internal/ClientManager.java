@@ -24,14 +24,14 @@ public interface ClientManager {
   void addClient(LostApiClient client);
   void removeClient(LostApiClient client);
   int numberOfClients();
-  void addListener(LostApiClient apiClient, LocationRequest request, LocationListener listener);
-  void addPendingIntent(LostApiClient apiClient, LocationRequest request,
+  void addListener(LostApiClient client, LocationRequest request, LocationListener listener);
+  void addPendingIntent(LostApiClient client, LocationRequest request,
       PendingIntent callbackIntent);
-  void addLocationCallback(LostApiClient apiClient, LocationRequest request,
+  void addLocationCallback(LostApiClient client, LocationRequest request,
       LocationCallback callback, Looper looper);
-  void removeListener(LostApiClient apiClient, LocationListener listener);
-  void removePendingIntent(LostApiClient apiClient, PendingIntent callbackIntent);
-  void removeLocationCallback(LostApiClient apiClient, LocationCallback callback);
+  void removeListener(LostApiClient client, LocationListener listener);
+  void removePendingIntent(LostApiClient client, PendingIntent callbackIntent);
+  void removeLocationCallback(LostApiClient client, LocationCallback callback);
   void reportLocationChanged(Location location);
   void sendPendingIntent(Context context, Location location, LocationAvailability availability,
       LocationResult result);

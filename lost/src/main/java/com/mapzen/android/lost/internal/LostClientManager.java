@@ -66,77 +66,77 @@ public class LostClientManager implements ClientManager {
     return clients.size();
   }
 
-  public void addListener(LostApiClient apiClient, LocationRequest request,
+  public void addListener(LostApiClient client, LocationRequest request,
       LocationListener listener) {
-    Map<LocationListener, LocationRequest> map = listenerToRequest.get(apiClient);
+    Map<LocationListener, LocationRequest> map = listenerToRequest.get(client);
     if (map == null) {
       map = new HashMap<>();
     }
     map.put(listener, request);
-    listenerToRequest.put(apiClient, map);
+    listenerToRequest.put(client, map);
   }
 
-  public void addPendingIntent(LostApiClient apiClient, LocationRequest request,
+  public void addPendingIntent(LostApiClient client, LocationRequest request,
       PendingIntent callbackIntent) {
-    Map<PendingIntent, LocationRequest> map = intentToRequest.get(apiClient);
+    Map<PendingIntent, LocationRequest> map = intentToRequest.get(client);
     if (map == null) {
       map = new HashMap<>();
     }
     map.put(callbackIntent, request);
-    intentToRequest.put(apiClient, map);
+    intentToRequest.put(client, map);
   }
 
-  public void addLocationCallback(LostApiClient apiClient, LocationRequest request,
+  public void addLocationCallback(LostApiClient client, LocationRequest request,
       LocationCallback callback, Looper looper) {
-    Map<LocationCallback, LocationRequest> callbackMap = callbackToRequest.get(apiClient);
+    Map<LocationCallback, LocationRequest> callbackMap = callbackToRequest.get(client);
     if (callbackMap == null) {
       callbackMap = new HashMap<>();
     }
     callbackMap.put(callback, request);
-    callbackToRequest.put(apiClient, callbackMap);
+    callbackToRequest.put(client, callbackMap);
 
-    Map<LocationCallback, Looper> looperMap = callbackToLooper.get(apiClient);
+    Map<LocationCallback, Looper> looperMap = callbackToLooper.get(client);
     if (looperMap == null) {
       looperMap = new HashMap<>();
     }
     looperMap.put(callback, looper);
-    callbackToLooper.put(apiClient, looperMap);
+    callbackToLooper.put(client, looperMap);
   }
 
-  public void removeListener(LostApiClient apiClient, LocationListener listener) {
-    Map<LocationListener, LocationRequest> map = listenerToRequest.get(apiClient);
+  public void removeListener(LostApiClient client, LocationListener listener) {
+    Map<LocationListener, LocationRequest> map = listenerToRequest.get(client);
     if (map != null) {
       map.remove(listener);
     }
     if (map.isEmpty()) {
-      listenerToRequest.remove(apiClient);
+      listenerToRequest.remove(client);
     }
   }
 
-  public void removePendingIntent(LostApiClient apiClient, PendingIntent callbackIntent) {
-    Map<PendingIntent, LocationRequest> map = intentToRequest.get(apiClient);
+  public void removePendingIntent(LostApiClient client, PendingIntent callbackIntent) {
+    Map<PendingIntent, LocationRequest> map = intentToRequest.get(client);
     if (map != null) {
       map.remove(callbackIntent);
     }
     if (map.isEmpty()) {
-      intentToRequest.remove(apiClient);
+      intentToRequest.remove(client);
     }
   }
 
-  public void removeLocationCallback(LostApiClient apiClient, LocationCallback callback) {
-    Map<LocationCallback, LocationRequest> callbackMap = callbackToRequest.get(apiClient);
+  public void removeLocationCallback(LostApiClient client, LocationCallback callback) {
+    Map<LocationCallback, LocationRequest> callbackMap = callbackToRequest.get(client);
     if (callbackMap != null) {
       callbackMap.remove(callback);
     }
     if (callbackMap.isEmpty()) {
-      callbackToRequest.remove(apiClient);
+      callbackToRequest.remove(client);
     }
-    Map<LocationCallback, Looper> looperMap = callbackToLooper.get(apiClient);
+    Map<LocationCallback, Looper> looperMap = callbackToLooper.get(client);
     if (looperMap != null) {
       looperMap.remove(callback);
     }
     if (looperMap.isEmpty()) {
-      callbackToLooper.remove(apiClient);
+      callbackToLooper.remove(client);
     }
   }
 

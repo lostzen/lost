@@ -99,62 +99,62 @@ public class FusedLocationProviderApiImpl
     }
   }
 
-  @Override public Location getLastLocation(LostApiClient apiClient) {
-    return service.getLastLocation(apiClient);
+  @Override public Location getLastLocation(LostApiClient client) {
+    return service.getLastLocation(client);
   }
 
-  @Override public LocationAvailability getLocationAvailability(LostApiClient apiClient) {
-    return service.getLocationAvailability(apiClient);
+  @Override public LocationAvailability getLocationAvailability(LostApiClient client) {
+    return service.getLocationAvailability(client);
   }
 
-  @Override public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+  @Override public void requestLocationUpdates(LostApiClient client, LocationRequest request,
       LocationListener listener) {
-    service.requestLocationUpdates(apiClient, request, listener);
+    service.requestLocationUpdates(client, request, listener);
   }
 
-  @Override public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+  @Override public void requestLocationUpdates(LostApiClient client, LocationRequest request,
       LocationListener listener, Looper looper) {
     throw new RuntimeException("Sorry, not yet implemented");
   }
 
-  @Override public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+  @Override public void requestLocationUpdates(LostApiClient client, LocationRequest request,
       LocationCallback callback, Looper looper) {
-    service.requestLocationUpdates(apiClient, request, callback, looper);
+    service.requestLocationUpdates(client, request, callback, looper);
   }
 
   @Override
-  public void requestLocationUpdates(LostApiClient apiClient, LocationRequest request,
+  public void requestLocationUpdates(LostApiClient client, LocationRequest request,
       PendingIntent callbackIntent) {
-    service.requestLocationUpdates(apiClient, request, callbackIntent);
+    service.requestLocationUpdates(client, request, callbackIntent);
   }
 
-  @Override public void removeLocationUpdates(LostApiClient apiClient, LocationListener listener) {
-    service.removeLocationUpdates(apiClient, listener);
+  @Override public void removeLocationUpdates(LostApiClient client, LocationListener listener) {
+    service.removeLocationUpdates(client, listener);
   }
 
-  @Override public void removeLocationUpdates(LostApiClient apiClient,
+  @Override public void removeLocationUpdates(LostApiClient client,
       PendingIntent callbackIntent) {
-    service.removeLocationUpdates(apiClient, callbackIntent);
+    service.removeLocationUpdates(client, callbackIntent);
   }
 
-  @Override public void removeLocationUpdates(LostApiClient apiClient, LocationCallback callback) {
-    service.removeLocationUpdates(apiClient, callback);
+  @Override public void removeLocationUpdates(LostApiClient client, LocationCallback callback) {
+    service.removeLocationUpdates(client, callback);
   }
 
-  @Override public void setMockMode(LostApiClient apiClient, boolean isMockMode) {
-    service.setMockMode(apiClient, isMockMode);
+  @Override public void setMockMode(LostApiClient client, boolean isMockMode) {
+    service.setMockMode(client, isMockMode);
   }
 
-  @Override public void setMockLocation(LostApiClient apiClient, Location mockLocation) {
-    service.setMockLocation(apiClient, mockLocation);
+  @Override public void setMockLocation(LostApiClient client, Location mockLocation) {
+    service.setMockLocation(client, mockLocation);
   }
 
-  @Override public void setMockTrace(LostApiClient apiClient, File file) {
-    service.setMockTrace(apiClient, file);
+  @Override public void setMockTrace(LostApiClient client, File file) {
+    service.setMockTrace(client, file);
   }
 
-  @Override public boolean isProviderEnabled(LostApiClient apiClient, String provider) {
-    return service.isProviderEnabled(apiClient, provider);
+  @Override public boolean isProviderEnabled(LostApiClient client, String provider) {
+    return service.isProviderEnabled(client, provider);
   }
 
   public Map<LostApiClient, Map<LocationListener, LocationRequest>> getListeners() {
