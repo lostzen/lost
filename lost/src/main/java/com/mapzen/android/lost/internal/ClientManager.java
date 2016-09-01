@@ -1,37 +1,48 @@
 package com.mapzen.android.lost.internal;
 
+import com.mapzen.android.lost.api.LocationAvailability;
+import com.mapzen.android.lost.api.LocationCallback;
+import com.mapzen.android.lost.api.LocationListener;
+import com.mapzen.android.lost.api.LocationRequest;
+import com.mapzen.android.lost.api.LocationResult;
 import com.mapzen.android.lost.api.LostApiClient;
 
-import java.util.HashSet;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.location.Location;
+import android.os.Looper;
+
+import java.util.Map;
 
 /**
- * Used by {@link LostApiClientImpl} to manage connected clients.
+ * Used by {@link LostApiClientImpl} to manage connected clients and by
+ * {@link FusedLocationProviderServiceImpl} to manage client's {@link LocationListener}s,
+ * {@link PendingIntent}s, and {@link LocationCallback}s.
  */
-public class ClientManager {
+public interface ClientManager {
 
-  private static ClientManager instance;
-  private HashSet<LostApiClient> clients;
-
-  private ClientManager() {
-    clients = new HashSet<>();
-  }
-
-  public static ClientManager shared() {
-    if (instance == null) {
-      instance = new ClientManager();
-    }
-    return instance;
-  }
-
-  public void addClient(LostApiClient client) {
-    clients.add(client);
-  }
-
-  public void removeClient(LostApiClient client) {
-    clients.remove(client);
-  }
-
-  public int numberOfClients() {
-    return clients.size();
-  }
+  void addClient(LostApiClient client);
+  void removeClient(LostApiClient client);
+  int numberOfClients();
+  void addListener(LostApiClient apiClient, LocationRequest request, LocationListener listener);
+  void addPendingIntent(LostApiClient apiClient, LocationRequest request,
+      PendingIntent callbackIntent);
+  void addLocationCallback(LostApiClient apiClient, LocationRequest request,
+      LocationCallback callback, Looper looper);
+  void removeListener(LostApiClient apiClient, LocationListener listener);
+  void removePendingIntent(LostApiClient apiClient, PendingIntent callbackIntent);
+  void removeLocationCallback(LostApiClient apiClient, LocationCallback callback);
+  void reportLocationChanged(Location location);
+  void sendPendingIntent(Context context, Location location, LocationAvailability availability,
+      LocationResult result);
+  void reportLocationResult(final LocationResult result);
+  void reportProviderEnabled(String provider);
+  void reportProviderDisabled(String provider);
+  void notifyLocationAvailability(final LocationAvailability availability);
+  boolean hasNoListeners();
+  void disconnect(LostApiClient client);
+  void shutdown();
+  Map<LostApiClient, Map<LocationListener, LocationRequest>> getListeners();
+  Map<LostApiClient, Map<PendingIntent, LocationRequest>> getPendingIntents();
+  Map<LostApiClient, Map<LocationCallback, Looper>> getLocationListeners();
 }

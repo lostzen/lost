@@ -59,14 +59,15 @@ public class FusedLocationProviderServiceImplTest {
   private FusedLocationProviderServiceImpl api;
   private LocationManager locationManager;
   private ShadowLocationManager shadowLocationManager;
-
   private LostApiClient otherClient;
+  private ClientManager clientManager;
 
   @Before public void setUp() throws Exception {
     mockService();
     client = new LostApiClient.Builder(mock(Context.class)).build();
     otherClient = new LostApiClient.Builder(mock(Context.class)).build();
-    api = new FusedLocationProviderServiceImpl(application);
+    clientManager = LostClientManager.shared();
+    api = new FusedLocationProviderServiceImpl(application, clientManager);
     locationManager = (LocationManager) application.getSystemService(LOCATION_SERVICE);
     shadowLocationManager = shadowOf(locationManager);
     client.connect();
@@ -75,6 +76,7 @@ public class FusedLocationProviderServiceImplTest {
   @After public void tearDown() {
     client.disconnect();
     otherClient.disconnect();
+    clientManager.shutdown();
   }
 
   private void mockService() {

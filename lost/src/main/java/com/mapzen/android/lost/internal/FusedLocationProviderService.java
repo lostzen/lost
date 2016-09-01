@@ -15,7 +15,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
-import android.util.Log;
 
 import java.io.File;
 import java.util.Map;
@@ -45,7 +44,7 @@ public class FusedLocationProviderService extends Service {
 
   @Override public void onCreate() {
     super.onCreate();
-    serviceImpl = new FusedLocationProviderServiceImpl(this);
+    serviceImpl = new FusedLocationProviderServiceImpl(this, LostClientManager.shared());
   }
 
   @Override public void onDestroy() {

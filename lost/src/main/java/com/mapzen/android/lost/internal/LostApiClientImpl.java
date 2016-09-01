@@ -11,7 +11,7 @@ import android.content.Context;
 public class LostApiClientImpl implements LostApiClient {
   private final Context context;
   private final ConnectionCallbacks connectionCallbacks;
-  private final ClientManager clientManager = ClientManager.shared();
+  private final ClientManager clientManager = LostClientManager.shared();
 
   public LostApiClientImpl(Context context, ConnectionCallbacks callbacks) {
     this.context = context;
