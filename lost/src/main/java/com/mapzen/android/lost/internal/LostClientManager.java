@@ -112,10 +112,11 @@ public class LostClientManager implements ClientManager {
     Set<LocationListener> listeners = clientToListeners.get(client);
     if (listeners != null) {
       listeners.remove(listener);
+      if (listeners.isEmpty()) {
+        clientToListeners.remove(client);
+      }
     }
-    if (listeners.isEmpty()) {
-      clientToListeners.remove(client);
-    }
+
     return removedListener;
   }
 
@@ -127,9 +128,9 @@ public class LostClientManager implements ClientManager {
     Set<PendingIntent> intents = clientToPendingIntents.get(client);
     if (intents != null) {
       intents.remove(callbackIntent);
-    }
-    if (intents.isEmpty()) {
-      clientToPendingIntents.remove(client);
+      if (intents.isEmpty()) {
+        clientToPendingIntents.remove(client);
+      }
     }
     return removedPendingIntent;
   }
@@ -142,16 +143,17 @@ public class LostClientManager implements ClientManager {
     Set<LocationCallback> callbacks = clientToLocationCallbacks.get(client);
     if (callbacks != null) {
       callbacks.remove(callback);
+      if (callbacks.isEmpty()) {
+        clientToLocationCallbacks.remove(client);
+      }
     }
-    if (callbacks.isEmpty()) {
-      clientToLocationCallbacks.remove(client);
-    }
+
     Map<LocationCallback, Looper> looperMap = clientCallbackToLoopers.get(client);
     if (looperMap != null) {
       looperMap.remove(callback);
-    }
-    if (looperMap.isEmpty()) {
-      clientCallbackToLoopers.remove(client);
+      if (looperMap.isEmpty()) {
+        clientCallbackToLoopers.remove(client);
+      }
     }
     return removedCallback;
   }

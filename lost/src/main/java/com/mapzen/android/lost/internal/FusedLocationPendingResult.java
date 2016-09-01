@@ -9,7 +9,7 @@ import android.support.annotation.NonNull;
 
 import java.util.concurrent.TimeUnit;
 
-public class FusedLocationPendingResult extends PendingResult {
+public class FusedLocationPendingResult extends PendingResult<Status> {
 
   private boolean hasResult = false;
 
@@ -17,12 +17,12 @@ public class FusedLocationPendingResult extends PendingResult {
     this.hasResult = hasResult;
   }
 
-  @NonNull @Override public Result await() {
-    return generateResult();
+  @NonNull @Override public Status await() {
+    return generateStatus();
   }
 
-  @NonNull @Override public Result await(long time, @NonNull TimeUnit timeUnit) {
-    return generateResult();
+  @NonNull @Override public Status await(long time, @NonNull TimeUnit timeUnit) {
+    return generateStatus();
   }
 
   @Override public void cancel() {
@@ -46,10 +46,14 @@ public class FusedLocationPendingResult extends PendingResult {
     }
   }
 
+  private Status generateStatus() {
+    return new Status(Status.SUCCESS);
+  }
+
   private Result generateResult() {
     return new Result() {
       @Override public Status getStatus() {
-        return new Status(Status.SUCCESS);
+        return generateStatus();
       }
     };
   }
