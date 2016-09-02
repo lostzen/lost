@@ -289,7 +289,7 @@ public class FusedLocationProviderServiceImplTest {
     TestLocationListener listener2 = new TestLocationListener();
     LocationRequest request2 = LocationRequest.create();
     api.requestLocationUpdates(client, request2, listener2);
-    assertThat(api.getListeners().get(client)).hasSize(2);
+    assertThat(api.getLocationListeners().get(client)).hasSize(2);
   }
 
   @Test public void requestLocationUpdates_shouldNotRegisterListenersWithMockModeOn()
@@ -661,7 +661,7 @@ public class FusedLocationProviderServiceImplTest {
     api.requestLocationUpdates(client, LocationRequest.create(),
         new TestLocationListener());
     api.shutdown();
-    assertThat(api.getListeners()).isEmpty();
+    assertThat(api.getLocationListeners()).isEmpty();
   }
 
   @Test public void shutdown_shouldClearPendingIntents() {
@@ -678,8 +678,8 @@ public class FusedLocationProviderServiceImplTest {
 
     otherClient.connect();
 
-    assertThat(api.getListeners().get(client).size()).isEqualTo(1);
-    assertThat(api.getListeners().get(otherClient)).isNull();
+    assertThat(api.getLocationListeners().get(client).size()).isEqualTo(1);
+    assertThat(api.getLocationListeners().get(otherClient)).isNull();
   }
 
   @Test public void requestLocationUpdates_shouldModifyOnlyClientPendingIntents() {
@@ -700,8 +700,8 @@ public class FusedLocationProviderServiceImplTest {
 
     otherClient.connect();
 
-    assertThat(api.getLocationListeners().get(client).size()).isEqualTo(1);
-    assertThat(api.getLocationListeners().get(otherClient)).isNull();
+    assertThat(api.getLocationCallbacks().get(client).size()).isEqualTo(1);
+    assertThat(api.getLocationCallbacks().get(otherClient)).isNull();
   }
 
   @Test public void removeLocationUpdates_shouldModifyOnlyClientListeners() {
@@ -717,8 +717,8 @@ public class FusedLocationProviderServiceImplTest {
 
     api.removeLocationUpdates(client, listener);
 
-    assertThat(api.getListeners().get(client)).isNull();
-    assertThat(api.getListeners().get(otherClient).size()).isEqualTo(1);
+    assertThat(api.getLocationListeners().get(client)).isNull();
+    assertThat(api.getLocationListeners().get(otherClient).size()).isEqualTo(1);
   }
 
   @Test public void removeLocationUpdates_shouldModifyOnlyClientPendingIntents() {
@@ -751,8 +751,8 @@ public class FusedLocationProviderServiceImplTest {
 
     api.removeLocationUpdates(client, callback);
 
-    assertThat(api.getLocationListeners().get(client)).isNull();
-    assertThat(api.getLocationListeners().get(otherClient).size()).isEqualTo(1);
+    assertThat(api.getLocationCallbacks().get(client)).isNull();
+    assertThat(api.getLocationCallbacks().get(otherClient).size()).isEqualTo(1);
   }
 
   @Test public void reportLocation_shouldNotifiyClientListener() {
@@ -830,7 +830,7 @@ public class FusedLocationProviderServiceImplTest {
         new TestLocationListener());
     api.disconnect(client);
 
-    assertThat(api.getListeners().get(otherClient)).isNotNull();
+    assertThat(api.getLocationListeners().get(otherClient)).isNotNull();
   }
 
   @Test public void disconnect_otherClientShouldHaveLocationListeners() {
@@ -840,7 +840,7 @@ public class FusedLocationProviderServiceImplTest {
         new TestLocationCallback(), Looper.myLooper());
     api.disconnect(client);
 
-    assertThat(api.getLocationListeners().get(otherClient)).isNotNull();
+    assertThat(api.getLocationCallbacks().get(otherClient)).isNotNull();
   }
 
   /**

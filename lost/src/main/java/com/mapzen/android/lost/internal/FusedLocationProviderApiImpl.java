@@ -157,8 +157,8 @@ public class FusedLocationProviderApiImpl
     return service.isProviderEnabled(client, provider);
   }
 
-  public Map<LostApiClient, Map<LocationListener, LocationRequest>> getListeners() {
-    return service.getListeners();
+  public Map<LostApiClient, Set<LocationListener>> getLocationListeners() {
+    return service.getLocationListeners();
   }
 
   public FusedLocationProviderService getService() {

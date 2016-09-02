@@ -16,6 +16,7 @@ import android.support.annotation.RequiresPermission;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -130,16 +131,16 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     notifyLocationAvailabilityChanged();
   }
 
-  public Map<LostApiClient, Map<LocationListener, LocationRequest>> getListeners() {
-    return clientManager.getListeners();
+  public Map<LostApiClient, Set<LocationListener>> getLocationListeners() {
+    return clientManager.getLocationListeners();
   }
 
-  public Map<LostApiClient, Map<PendingIntent, LocationRequest>> getPendingIntents() {
+  public Map<LostApiClient, Set<PendingIntent>> getPendingIntents() {
     return clientManager.getPendingIntents();
   }
 
-  public Map<LostApiClient, Map<LocationCallback, Looper>> getLocationListeners() {
-    return clientManager.getLocationListeners();
+  public Map<LostApiClient, Set<LocationCallback>> getLocationCallbacks() {
+    return clientManager.getLocationCallbacks();
   }
 
   public void disconnect(LostApiClient client) {

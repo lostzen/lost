@@ -124,8 +124,8 @@ public class FusedLocationProviderApiImplTest {
   }
 
   @Test public void getListeners() {
-    api.getListeners();
-    verify(service).getListeners();
+    api.getLocationListeners();
+    verify(service).getLocationListeners();
   }
 
 }

@@ -13,6 +13,7 @@ import android.location.Location;
 import android.os.Looper;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Used by {@link LostApiClientImpl} to manage connected clients and by
@@ -42,7 +43,7 @@ public interface ClientManager {
   boolean hasNoListeners();
   void disconnect(LostApiClient client);
   void shutdown();
-  Map<LostApiClient, Map<LocationListener, LocationRequest>> getListeners();
-  Map<LostApiClient, Map<PendingIntent, LocationRequest>> getPendingIntents();
-  Map<LostApiClient, Map<LocationCallback, Looper>> getLocationListeners();
+  Map<LostApiClient, Set<LocationListener>> getLocationListeners();
+  Map<LostApiClient, Set<PendingIntent>> getPendingIntents();
+  Map<LostApiClient, Set<LocationCallback>> getLocationCallbacks();
 }

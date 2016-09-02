@@ -18,6 +18,7 @@ import android.support.annotation.RequiresPermission;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Set;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -104,8 +105,8 @@ public class FusedLocationProviderService extends Service {
     return serviceImpl.isProviderEnabled(client, provider);
   }
 
-  public Map<LostApiClient, Map<LocationListener, LocationRequest>> getListeners() {
-    return serviceImpl.getListeners();
+  public Map<LostApiClient, Set<LocationListener>> getLocationListeners() {
+    return serviceImpl.getLocationListeners();
   }
 
   public void disconnect(LostApiClient client) {

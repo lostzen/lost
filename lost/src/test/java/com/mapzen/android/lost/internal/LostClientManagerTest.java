@@ -62,14 +62,14 @@ public class LostClientManagerTest {
     LocationRequest request = LocationRequest.create();
     TestLocationListener listener = new TestLocationListener();
     manager.addListener(client, request, listener);
-    assertThat(manager.getListeners().get(client).get(listener)).isEqualTo(request);
+    assertThat(manager.getLocationListeners().get(client)).contains(listener);
   }
 
   @Test public void addPendingIntent_shouldAddPendingIntentForClient() {
     LocationRequest request = LocationRequest.create();
     PendingIntent pendingIntent = mock(PendingIntent.class);
     manager.addPendingIntent(client, request, pendingIntent);
-    assertThat(manager.getPendingIntents().get(client).get(pendingIntent)).isEqualTo(request);
+    assertThat(manager.getPendingIntents().get(client)).contains(pendingIntent);
   }
 
   @Test public void addLocationCallback_shouldAddLocationCallbackForClient() {
@@ -77,7 +77,7 @@ public class LostClientManagerTest {
     TestLocationCallback callback = new TestLocationCallback();
     Looper looper = mock(Looper.class);
     manager.addLocationCallback(client, request, callback, looper);
-    assertThat(manager.getLocationListeners().get(client).get(callback)).isEqualTo(looper);
+    assertThat(manager.getLocationCallbacks().get(client)).contains(callback);
   }
 
   @Test public void removeListener_shouldRemoveListenerForClient() {
@@ -85,7 +85,7 @@ public class LostClientManagerTest {
     TestLocationListener listener = new TestLocationListener();
     manager.addListener(client, request, listener);
     manager.removeListener(client, listener);
-    assertThat(manager.getListeners().get(client)).isNull();
+    assertThat(manager.getLocationListeners().get(client)).isNull();
   }
 
   @Test public void removePendingIntent_shouldRemovePendingIntentForClient() {
@@ -102,7 +102,7 @@ public class LostClientManagerTest {
     Looper looper = mock(Looper.class);
     manager.addLocationCallback(client, request, callback, looper);
     manager.removeLocationCallback(client, callback);
-    assertThat(manager.getLocationListeners().get(client)).isNull();
+    assertThat(manager.getLocationCallbacks().get(client)).isNull();
   }
 
   @Test public void reportLocationChanged_shouldNotifyListener() {
@@ -203,7 +203,7 @@ public class LostClientManagerTest {
     TestLocationListener listener = new TestLocationListener();
     manager.addListener(client, request, listener);
     manager.disconnect(client);
-    assertThat(manager.getListeners().get(client)).isNull();
+    assertThat(manager.getLocationListeners().get(client)).isNull();
   }
 
   @Test public void disconnect_shouldRemovePendingIntentsForClient() {
@@ -220,7 +220,7 @@ public class LostClientManagerTest {
     Looper looper = mock(Looper.class);
     manager.addLocationCallback(client, request, callback, looper);
     manager.disconnect(client);
-    assertThat(manager.getLocationListeners().get(client)).isNull();
+    assertThat(manager.getLocationCallbacks().get(client)).isNull();
   }
 
   @Test public void shutdown_shouldClearAllMaps() {
@@ -236,9 +236,9 @@ public class LostClientManagerTest {
     manager.addLocationCallback(client, request, callback, looper);
 
     manager.shutdown();
-    assertThat(manager.getListeners()).isEmpty();
-    assertThat(manager.getPendingIntents()).isEmpty();
     assertThat(manager.getLocationListeners()).isEmpty();
+    assertThat(manager.getPendingIntents()).isEmpty();
+    assertThat(manager.getLocationCallbacks()).isEmpty();
   }
 
 }
