@@ -1,6 +1,5 @@
 package com.mapzen.android.lost.internal;
 
-import com.mapzen.android.lost.api.FusedLocationProviderApi;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationServices;

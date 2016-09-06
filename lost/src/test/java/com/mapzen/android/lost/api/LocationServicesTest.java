@@ -5,12 +5,9 @@ import com.mapzen.android.lost.internal.GeofencingApiImpl;
 import com.mapzen.android.lost.internal.SettingsApiImpl;
 import com.mapzen.lost.BuildConfig;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import static org.fest.assertions.api.Assertions.assertThat;

@@ -1,7 +1,6 @@
 package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.api.Geofence;
-import com.mapzen.android.lost.api.GeofencingApi;
 import com.mapzen.android.lost.api.GeofencingRequest;
 import com.mapzen.android.lost.api.LostApiClient;
 
