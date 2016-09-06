@@ -36,9 +36,8 @@ public class FusedLocationProviderApiImplTest {
 
   @Before public void setUp() throws Exception {
     mockService();
-    client = new LostApiClient.Builder(mock(Context.class)).build();
-    api = new FusedLocationProviderApiImpl(application);
-    api.connect(null);
+    api = new FusedLocationProviderApiImpl();
+    api.connect(application, null);
     service = api.getService();
   }
 

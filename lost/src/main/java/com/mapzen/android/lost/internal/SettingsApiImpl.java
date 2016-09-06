@@ -16,9 +16,20 @@ public class SettingsApiImpl implements SettingsApi {
   private Context context;
   private BluetoothAdapter bluetoothAdapter;
 
-  public SettingsApiImpl(Context context) {
-    this.context = context;
+  public SettingsApiImpl() {
     bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+  }
+
+  public void connect(Context context) {
+    this.context = context;
+  }
+
+  public boolean isConnected() {
+    return context != null;
+  }
+
+  public void disconnect() {
+    context = null;
   }
 
   public SettingsApiImpl(Context context, BluetoothAdapter adapter) {

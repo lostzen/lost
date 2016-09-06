@@ -1,5 +1,6 @@
 package com.mapzen.android.lost.internal;
 
+import com.mapzen.android.lost.api.FusedLocationProviderApi;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationServices;
@@ -29,7 +30,7 @@ import static org.robolectric.Shadows.shadowOf;
 public class LostApiClientImplTest {
   private LostApiClient client;
 
-  @Before public void setUp() throws Exception {
+  @Before public void setUp() {
     client = new LostApiClient.Builder(application).build();
 
     FusedLocationProviderService.FusedLocationProviderBinder stubBinder = mock(
@@ -40,44 +41,70 @@ public class LostApiClientImplTest {
 
   }
 
-  @After public void tearDown() throws Exception {
+  @After public void tearDown() {
     client.disconnect();
   }
 
-  @Test public void connect_shouldCreateFusedLocationProviderApiImpl() throws Exception {
+  @Test public void connect_shouldConnectFusedLocationProviderApiImpl() {
     client.connect();
-    assertThat(LocationServices.FusedLocationApi).isInstanceOf(FusedLocationProviderApiImpl.class);
+    FusedLocationProviderApiImpl fusedApi =
+        (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
+    assertThat(fusedApi.isConnected()).isTrue();
   }
 
-  @Test public void connect_shouldCreateGeofencingApiImpl() throws Exception {
+  @Test public void connect_shouldConnectGeofencingApiImpl() {
     client.connect();
-    assertThat(LocationServices.GeofencingApi).isInstanceOf(GeofencingApiImpl.class);
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    assertThat(geofencingApi.isConnected()).isTrue();
   }
 
-  @Test public void connect_shouldCreateSettingsApiImpl() throws Exception {
+  @Test public void connect_shouldConnectSettingsApiImpl() {
     client.connect();
-    assertThat(LocationServices.SettingsApi).isInstanceOf(SettingsApiImpl.class);
+    SettingsApiImpl settingsApi = (SettingsApiImpl) LocationServices.SettingsApi;
+    assertThat(settingsApi.isConnected()).isTrue();
   }
 
-  @Test public void disconnect_shouldRemoveFusedLocationProviderApiImpl() throws Exception {
-    client.connect();
-    client.disconnect();
-    assertThat(LocationServices.FusedLocationApi).isNull();
-  }
-
-  @Test public void disconnect_shouldRemoveGeofencingApiImpl() throws Exception {
+  @Test public void disconnect_shouldNotRemoveFusedLocationProviderApiImpl() {
     client.connect();
     client.disconnect();
-    assertThat(LocationServices.GeofencingApi).isNull();
+    assertThat(LocationServices.FusedLocationApi).isNotNull();
   }
 
-  @Test public void disconnect_shouldRemoveSettingsApiImpl() throws Exception {
+  @Test public void disconnect_shouldNotRemoveGeofencingApiImpl() {
     client.connect();
     client.disconnect();
-    assertThat(LocationServices.SettingsApi).isNull();
+    assertThat(LocationServices.GeofencingApi).isNotNull();
   }
 
-  @Test public void disconnect_shouldUnregisterLocationUpdateListeners() throws Exception {
+  @Test public void disconnect_shouldNotRemoveSettingsApiImpl() {
+    client.connect();
+    client.disconnect();
+    assertThat(LocationServices.SettingsApi).isNotNull();
+  }
+
+  @Test public void disconnect_shouldDisconnectFusedLocationProviderApiImpl() {
+    client.connect();
+    client.disconnect();
+    FusedLocationProviderApiImpl fusedApi =
+        (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
+    assertThat(fusedApi.isConnected()).isFalse();
+  }
+
+  @Test public void disconnect_shouldDisconnectGeofencingApiImpl() {
+    client.connect();
+    client.disconnect();
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    assertThat(geofencingApi.isConnected()).isFalse();
+  }
+
+  @Test public void disconnect_shouldDisconnectSettingsApiImpl() {
+    client.connect();
+    client.disconnect();
+    SettingsApiImpl settingsApi = (SettingsApiImpl) LocationServices.SettingsApi;
+    assertThat(settingsApi.isConnected()).isFalse();
+  }
+
+  @Test public void disconnect_shouldUnregisterLocationUpdateListeners() {
     client.connect();
     LocationServices.FusedLocationApi.requestLocationUpdates(client, LocationRequest.create(),
         new LocationListener() {
@@ -96,7 +123,7 @@ public class LostApiClientImplTest {
     assertThat(shadowOf(lm).getRequestLocationUpdateListeners()).isEmpty();
   }
 
-  @Test public void disconnect_shouldNotRemoveFusedLocationProviderApiImpl() throws Exception {
+  @Test public void disconnect_multipleClients_shouldNotRemoveFusedLocationProviderApiImpl() {
     LostApiClient anotherClient = new LostApiClient.Builder(application).build();
     anotherClient.connect();
     client.connect();
@@ -105,7 +132,7 @@ public class LostApiClientImplTest {
     anotherClient.disconnect();
   }
 
-  @Test public void disconnect_shouldNotRemoveGeofencingApiImpl() throws Exception {
+  @Test public void disconnect_multipleClients_shouldNotRemoveGeofencingApiImpl() {
     LostApiClient anotherClient = new LostApiClient.Builder(application).build();
     anotherClient.connect();
     client.connect();
@@ -114,7 +141,7 @@ public class LostApiClientImplTest {
     anotherClient.disconnect();
   }
 
-  @Test public void disconnect_shouldNotRemoveSettingsApiImpl() throws Exception {
+  @Test public void disconnect_multipleClients_shouldNotRemoveSettingsApiImpl() {
     LostApiClient anotherClient = new LostApiClient.Builder(application).build();
     anotherClient.connect();
     client.connect();
@@ -125,16 +152,16 @@ public class LostApiClientImplTest {
 
 
   @Test
-  public void isConnected_shouldReturnFalseBeforeConnected() throws Exception {
+  public void isConnected_shouldReturnFalseBeforeConnected() {
     assertThat(client.isConnected()).isFalse();
   }
 
-  @Test public void isConnected_shouldReturnTrueAfterConnected() throws Exception {
+  @Test public void isConnected_shouldReturnTrueAfterConnected() {
     client.connect();
     assertThat(client.isConnected()).isTrue();
   }
 
-  @Test public void isConnected_shouldReturnFalseAfterDisconnected() throws Exception {
+  @Test public void isConnected_shouldReturnFalseAfterDisconnected() {
     client.connect();
     client.disconnect();
     assertThat(client.isConnected()).isFalse();
