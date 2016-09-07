@@ -64,5 +64,7 @@
   <string name="longitude">longitude</string>
   <string name="radius">radius</string>
   <string name="create">Create</string>
+  <string name="sample_location_listener_title">LocationListener</string>
+  <string name="sample_location_listener_description">Demonstrates how to use a LocationListener to receive location updates</string>
 
 </resources>

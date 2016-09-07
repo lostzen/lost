@@ -34,6 +34,7 @@
 
     <activity android:name=".GeofencingApiActivity"/>
     <activity android:name=".SettingsApiActivity"/>
+    <activity android:name=".LocationListenerActivity"/>
 
     <service
         android:name=".GeofenceIntentService"
