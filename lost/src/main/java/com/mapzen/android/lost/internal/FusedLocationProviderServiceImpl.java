@@ -6,6 +6,8 @@ import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationResult;
 import com.mapzen.android.lost.api.LostApiClient;
+import com.mapzen.android.lost.api.PendingResult;
+import com.mapzen.android.lost.api.Status;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -50,55 +52,67 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     return locationEngine.createLocationAvailability();
   }
 
-  public void requestLocationUpdates(LostApiClient client, LocationRequest request,
+  public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
       LocationListener listener) {
     clientManager.addListener(client, request, listener);
     locationEngine.setRequest(request);
+    return new FusedLocationPendingResult(true);
   }
 
-  public void requestLocationUpdates(LostApiClient client, LocationRequest request,
+  public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
       PendingIntent callbackIntent) {
     clientManager.addPendingIntent(client, request, callbackIntent);
     locationEngine.setRequest(request);
+    return new FusedLocationPendingResult(true);
   }
 
-  public void requestLocationUpdates(LostApiClient client, LocationRequest request,
+  public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
       LocationCallback callback, Looper looper) {
     clientManager.addLocationCallback(client, request, callback, looper);
     locationEngine.setRequest(request);
+    return new FusedLocationPendingResult(true);
   }
 
-  public void removeLocationUpdates(LostApiClient client, LocationListener listener) {
-    clientManager.removeListener(client, listener);
+  public PendingResult<Status> removeLocationUpdates(LostApiClient client,
+      LocationListener listener) {
+    boolean hasResult = clientManager.removeListener(client, listener);
     checkAllListenersPendingIntentsAndCallbacks();
+    return new FusedLocationPendingResult(hasResult);
   }
 
-  public void removeLocationUpdates(LostApiClient client, PendingIntent callbackIntent) {
-    clientManager.removePendingIntent(client, callbackIntent);
+  public PendingResult<Status> removeLocationUpdates(LostApiClient client,
+      PendingIntent callbackIntent) {
+    boolean hasResult = clientManager.removePendingIntent(client, callbackIntent);
     checkAllListenersPendingIntentsAndCallbacks();
+    return new FusedLocationPendingResult(hasResult);
   }
 
-  public void removeLocationUpdates(LostApiClient client, LocationCallback callback) {
-    clientManager.removeLocationCallback(client, callback);
+  public PendingResult<Status> removeLocationUpdates(LostApiClient client,
+      LocationCallback callback) {
+    boolean hasResult = clientManager.removeLocationCallback(client, callback);
     checkAllListenersPendingIntentsAndCallbacks();
+    return new FusedLocationPendingResult(hasResult);
   }
 
-  public void setMockMode(LostApiClient client, boolean isMockMode) {
+  public PendingResult<Status> setMockMode(LostApiClient client, boolean isMockMode) {
     if (mockMode != isMockMode) {
       toggleMockMode();
     }
+    return new FusedLocationPendingResult(true);
   }
 
-  public void setMockLocation(LostApiClient client, Location mockLocation) {
+  public PendingResult<Status> setMockLocation(LostApiClient client, Location mockLocation) {
     if (mockMode) {
       ((MockEngine) locationEngine).setLocation(mockLocation);
     }
+    return new FusedLocationPendingResult(true);
   }
 
-  public void setMockTrace(LostApiClient client, File file) {
+  public PendingResult<Status> setMockTrace(LostApiClient client, File file) {
     if (mockMode) {
       ((MockEngine) locationEngine).setTrace(file);
     }
+    return new FusedLocationPendingResult(true);
   }
 
   public boolean isProviderEnabled(LostApiClient client, String provider) {

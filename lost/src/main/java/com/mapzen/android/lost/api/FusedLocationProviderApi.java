@@ -25,32 +25,32 @@ public interface FusedLocationProviderApi {
   LocationAvailability getLocationAvailability(LostApiClient client);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  void requestLocationUpdates(LostApiClient client, LocationRequest request,
+  PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
       LocationListener listener);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  void requestLocationUpdates(LostApiClient client, LocationRequest request,
+  PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
       LocationListener listener, Looper looper);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  void requestLocationUpdates(LostApiClient client, LocationRequest request,
+  PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
       LocationCallback callback, Looper looper);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  void requestLocationUpdates(LostApiClient client, LocationRequest request,
+  PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
       PendingIntent callbackIntent);
 
-  void removeLocationUpdates(LostApiClient client, LocationListener listener);
+  PendingResult<Status> removeLocationUpdates(LostApiClient client, LocationListener listener);
 
-  void removeLocationUpdates(LostApiClient client, PendingIntent callbackIntent);
+  PendingResult<Status> removeLocationUpdates(LostApiClient client, PendingIntent callbackIntent);
 
-  void removeLocationUpdates(LostApiClient client, LocationCallback callback);
+  PendingResult<Status> removeLocationUpdates(LostApiClient client, LocationCallback callback);
 
-  void setMockMode(LostApiClient client, boolean isMockMode);
+  PendingResult<Status> setMockMode(LostApiClient client, boolean isMockMode);
 
-  void setMockLocation(LostApiClient client, Location mockLocation);
+  PendingResult<Status> setMockLocation(LostApiClient client, Location mockLocation);
 
-  void setMockTrace(LostApiClient client, final File file);
+  PendingResult<Status> setMockTrace(LostApiClient client, final File file);
 
   /**
    * @deprecated Use {@link SettingsApi#checkLocationSettings(LostApiClient,
