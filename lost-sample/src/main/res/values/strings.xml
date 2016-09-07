@@ -70,8 +70,6 @@
   <string name="pending_intent">Pending Intent</string>
   <string name="sample_pending_intent_title">PendingIntent</string>
   <string name="sample_pending_intent_description">Demonstrates how to use a PendingIntent to receive location updates</string>
-  <string name="connected">Connected</string>
   <string name="requested">Requested</string>
-  <string name="disconnected">Disconnected</string>
 
 </resources>
