@@ -35,10 +35,17 @@
     <activity android:name=".GeofencingApiActivity"/>
     <activity android:name=".SettingsApiActivity"/>
     <activity android:name=".LocationListenerActivity"/>
-
+    <activity android:name=".PendingIntentActivity"/>
+    
     <service
         android:name=".GeofenceIntentService"
         android:exported="false">
     </service>
+    <service android:name=".PendingIntentService">
+      <intent-filter>
+        <action android:name="com.mapzen.lost.intent.action.PENDING_INTENT_SERVICE"/>
+      </intent-filter>
+    </service>
+
   </application>
 </manifest>

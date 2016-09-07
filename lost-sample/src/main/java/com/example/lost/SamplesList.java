@@ -16,6 +16,8 @@ public class SamplesList {
 
   public static final Sample[] FUSED_API_SAMPLES = {
       new Sample(R.string.sample_location_listener_title,
-          R.string.sample_location_listener_description, LocationListenerActivity.class)
+          R.string.sample_location_listener_description, LocationListenerActivity.class),
+      new Sample(R.string.sample_pending_intent_title,
+          R.string.sample_pending_intent_description, PendingIntentActivity.class)
   };
 }
