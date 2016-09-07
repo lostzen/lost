@@ -11,6 +11,7 @@ import android.content.Context;
 public class LostApiClientImpl implements LostApiClient {
   private final Context context;
   private final ConnectionCallbacks connectionCallbacks;
+  private final ClientManager clientManager = LostClientManager.shared();
 
   public LostApiClientImpl(Context context, ConnectionCallbacks callbacks) {
     this.context = context;
@@ -24,13 +25,21 @@ public class LostApiClientImpl implements LostApiClient {
     if (LocationServices.SettingsApi == null) {
       LocationServices.SettingsApi = new SettingsApiImpl(context);
     }
-    if (LocationServices.FusedLocationApi == null) {
-      FusedLocationProviderApiImpl fusedApi = new FusedLocationProviderApiImpl(context);
+    FusedLocationProviderApiImpl fusedApi
+        = (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
+    if (fusedApi == null) {
+      fusedApi = new FusedLocationProviderApiImpl(context);
       fusedApi.connect(connectionCallbacks);
       LocationServices.FusedLocationApi = fusedApi;
     } else if (connectionCallbacks != null) {
-      connectionCallbacks.onConnected();
+      if (fusedApi.isConnecting()) {
+        fusedApi.connectionCallbacks.add(connectionCallbacks);
+      } else {
+        connectionCallbacks.onConnected();
+      }
     }
+
+    clientManager.addClient(this);
   }
 
   @Override public void disconnect() {
@@ -38,8 +47,15 @@ public class LostApiClientImpl implements LostApiClient {
         && LocationServices.FusedLocationApi instanceof FusedLocationProviderApiImpl) {
       FusedLocationProviderApiImpl fusedProvider =
           (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
-      fusedProvider.disconnect();
+      boolean stopService = clientManager.numberOfClients() == 1;
+      fusedProvider.disconnect(this, stopService);
     }
+
+    clientManager.removeClient(this);
+    if (clientManager.numberOfClients() > 0) {
+      return;
+    }
+
     LocationServices.FusedLocationApi = null;
     LocationServices.GeofencingApi = null;
     LocationServices.SettingsApi = null;

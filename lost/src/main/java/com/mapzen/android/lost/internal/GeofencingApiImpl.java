@@ -3,6 +3,7 @@ package com.mapzen.android.lost.internal;
 import com.mapzen.android.lost.api.Geofence;
 import com.mapzen.android.lost.api.GeofencingApi;
 import com.mapzen.android.lost.api.GeofencingRequest;
+import com.mapzen.android.lost.api.LostApiClient;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -22,7 +23,8 @@ public class GeofencingApiImpl implements GeofencingApi {
   }
 
   @Override
-  public void addGeofences(GeofencingRequest geofencingRequest, PendingIntent pendingIntent)
+  public void addGeofences(LostApiClient client, GeofencingRequest geofencingRequest,
+      PendingIntent pendingIntent)
       throws SecurityException {
     ParcelableGeofence geofence = (ParcelableGeofence) geofencingRequest.getGeofences().get(0);
     locationManager.addProximityAlert(
@@ -33,15 +35,16 @@ public class GeofencingApiImpl implements GeofencingApi {
         pendingIntent);
   }
 
-  @Override public void addGeofences(List<Geofence> geofences, PendingIntent pendingIntent) {
+  @Override public void addGeofences(LostApiClient client, List<Geofence> geofences,
+      PendingIntent pendingIntent) {
     throw new RuntimeException("Sorry, not yet implemented");
   }
 
-  @Override public void removeGeofences(List<String> geofenceRequestIds) {
+  @Override public void removeGeofences(LostApiClient client, List<String> geofenceRequestIds) {
     throw new RuntimeException("Sorry, not yet implemented");
   }
 
-  @Override public void removeGeofences(PendingIntent pendingIntent) {
+  @Override public void removeGeofences(LostApiClient client, PendingIntent pendingIntent) {
     throw new RuntimeException("Sorry, not yet implemented");
   }
 }

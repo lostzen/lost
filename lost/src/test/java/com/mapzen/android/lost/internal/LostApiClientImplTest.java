@@ -79,7 +79,7 @@ public class LostApiClientImplTest {
 
   @Test public void disconnect_shouldUnregisterLocationUpdateListeners() throws Exception {
     client.connect();
-    LocationServices.FusedLocationApi.requestLocationUpdates(LocationRequest.create(),
+    LocationServices.FusedLocationApi.requestLocationUpdates(client, LocationRequest.create(),
         new LocationListener() {
           @Override public void onLocationChanged(Location location) {
           }
@@ -95,6 +95,34 @@ public class LostApiClientImplTest {
     LocationManager lm = (LocationManager) application.getSystemService(LOCATION_SERVICE);
     assertThat(shadowOf(lm).getRequestLocationUpdateListeners()).isEmpty();
   }
+
+  @Test public void disconnect_shouldNotRemoveFusedLocationProviderApiImpl() throws Exception {
+    LostApiClient anotherClient = new LostApiClient.Builder(application).build();
+    anotherClient.connect();
+    client.connect();
+    client.disconnect();
+    assertThat(LocationServices.FusedLocationApi).isNotNull();
+    anotherClient.disconnect();
+  }
+
+  @Test public void disconnect_shouldNotRemoveGeofencingApiImpl() throws Exception {
+    LostApiClient anotherClient = new LostApiClient.Builder(application).build();
+    anotherClient.connect();
+    client.connect();
+    client.disconnect();
+    assertThat(LocationServices.GeofencingApi).isNotNull();
+    anotherClient.disconnect();
+  }
+
+  @Test public void disconnect_shouldNotRemoveSettingsApiImpl() throws Exception {
+    LostApiClient anotherClient = new LostApiClient.Builder(application).build();
+    anotherClient.connect();
+    client.connect();
+    client.disconnect();
+    assertThat(LocationServices.SettingsApi).isNotNull();
+    anotherClient.disconnect();
+  }
+
 
   @Test
   public void isConnected_shouldReturnFalseBeforeConnected() throws Exception {

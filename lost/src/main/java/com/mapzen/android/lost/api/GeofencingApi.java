@@ -11,14 +11,15 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 public interface GeofencingApi {
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  void addGeofences(GeofencingRequest geofencingRequest, PendingIntent pendingIntent);
+  void addGeofences(LostApiClient client, GeofencingRequest geofencingRequest,
+      PendingIntent pendingIntent);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  void addGeofences(List<Geofence> geofences, PendingIntent pendingIntent);
+  void addGeofences(LostApiClient client, List<Geofence> geofences, PendingIntent pendingIntent);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  void removeGeofences(List<String> geofenceRequestIds);
+  void removeGeofences(LostApiClient client, List<String> geofenceRequestIds);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  void removeGeofences(PendingIntent pendingIntent);
+  void removeGeofences(LostApiClient client, PendingIntent pendingIntent);
 }

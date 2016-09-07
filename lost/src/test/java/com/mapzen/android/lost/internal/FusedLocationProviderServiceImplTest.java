@@ -4,13 +4,13 @@ import com.mapzen.android.lost.api.LocationAvailability;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationResult;
-import com.mapzen.android.lost.api.LocationServices;
 import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.lost.BuildConfig;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -26,6 +26,7 @@ import org.robolectric.util.ReflectionHelpers;
 import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
@@ -51,17 +52,31 @@ import static org.robolectric.RuntimeEnvironment.application;
 import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricGradleTestRunner.class)
+@SuppressWarnings("MissingPermission")
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
 public class FusedLocationProviderServiceImplTest {
+  private LostApiClient client;
   private FusedLocationProviderServiceImpl api;
   private LocationManager locationManager;
   private ShadowLocationManager shadowLocationManager;
+  private LostApiClient otherClient;
+  private ClientManager clientManager;
 
   @Before public void setUp() throws Exception {
     mockService();
-    api = new FusedLocationProviderServiceImpl(application);
+    client = new LostApiClient.Builder(mock(Context.class)).build();
+    otherClient = new LostApiClient.Builder(mock(Context.class)).build();
+    clientManager = LostClientManager.shared();
+    api = new FusedLocationProviderServiceImpl(application, clientManager);
     locationManager = (LocationManager) application.getSystemService(LOCATION_SERVICE);
     shadowLocationManager = shadowOf(locationManager);
+    client.connect();
+  }
+
+  @After public void tearDown() {
+    client.disconnect();
+    otherClient.disconnect();
+    clientManager.shutdown();
   }
 
   private void mockService() {
@@ -79,19 +94,19 @@ public class FusedLocationProviderServiceImplTest {
   @Test public void getLastLocation_shouldReturnMostRecentLocation() throws Exception {
     Location location = new Location(GPS_PROVIDER);
     shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, location);
-    assertThat(api.getLastLocation()).isNotNull();
+    assertThat(api.getLastLocation(client)).isNotNull();
   }
 
   @Test public void requestLocationUpdates_shouldRegisterGpsAndNetworkListener() throws Exception {
     LocationListener listener = new TestLocationListener();
-    api.requestLocationUpdates(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY),
+    api.requestLocationUpdates(client, LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY),
         listener);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(2);
   }
 
   @Test public void requestLocationUpdates_shouldNotifyOnLocationChangedGps() throws Exception {
     TestLocationListener listener = new TestLocationListener();
-    api.requestLocationUpdates(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY),
+    api.requestLocationUpdates(client, LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY),
         listener);
     Location location = new Location(GPS_PROVIDER);
     shadowLocationManager.simulateLocation(location);
@@ -100,7 +115,7 @@ public class FusedLocationProviderServiceImplTest {
 
   @Test public void requestLocationUpdates_shouldNotifyOnLocationChangedNetwork() throws Exception {
     TestLocationListener listener = new TestLocationListener();
-    api.requestLocationUpdates(LocationRequest.create(), listener);
+    api.requestLocationUpdates(client, LocationRequest.create(), listener);
     Location location = new Location(NETWORK_PROVIDER);
     shadowLocationManager.simulateLocation(location);
     assertThat(listener.getMostRecentLocation()).isEqualTo(location);
@@ -111,7 +126,7 @@ public class FusedLocationProviderServiceImplTest {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
     request.setFastestInterval(5000);
-    api.requestLocationUpdates(request, listener);
+    api.requestLocationUpdates(client, request, listener);
 
     final long time = System.currentTimeMillis();
     Location location1 = getTestLocation(GPS_PROVIDER, 0, 0, time);
@@ -127,7 +142,7 @@ public class FusedLocationProviderServiceImplTest {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     request.setFastestInterval(5000);
-    api.requestLocationUpdates(request, listener);
+    api.requestLocationUpdates(client, request, listener);
 
     final long time = System.currentTimeMillis();
     Location location1 = getTestLocation(NETWORK_PROVIDER, 0, 0, time);
@@ -143,7 +158,7 @@ public class FusedLocationProviderServiceImplTest {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
     request.setSmallestDisplacement(200000);
-    api.requestLocationUpdates(request, listener);
+    api.requestLocationUpdates(client, request, listener);
 
     final long time = System.currentTimeMillis();
     Location location1 = getTestLocation(GPS_PROVIDER, 0, 0, time);
@@ -159,7 +174,7 @@ public class FusedLocationProviderServiceImplTest {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     request.setSmallestDisplacement(200000);
-    api.requestLocationUpdates(request, listener);
+    api.requestLocationUpdates(client, request, listener);
 
     final long time = System.currentTimeMillis();
     Location location1 = getTestLocation(NETWORK_PROVIDER, 0, 0, time);
@@ -176,7 +191,7 @@ public class FusedLocationProviderServiceImplTest {
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
     request.setFastestInterval(0);
     request.setSmallestDisplacement(0);
-    api.requestLocationUpdates(request, listener);
+    api.requestLocationUpdates(client, request, listener);
 
     final long time = System.currentTimeMillis();
     Location gpsLocation = getTestLocation(GPS_PROVIDER, 0, 0, time);
@@ -195,7 +210,7 @@ public class FusedLocationProviderServiceImplTest {
     LocationRequest request = LocationRequest.create();
     request.setFastestInterval(0);
     request.setSmallestDisplacement(0);
-    api.requestLocationUpdates(request, listener);
+    api.requestLocationUpdates(client, request, listener);
 
     final long time = System.currentTimeMillis();
     Location networkLocation = getTestLocation(NETWORK_PROVIDER, 0, 0, time);
@@ -214,7 +229,7 @@ public class FusedLocationProviderServiceImplTest {
     PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
     LocationRequest locationRequest =
         LocationRequest.create().setPriority(PRIORITY_BALANCED_POWER_ACCURACY);
-    api.requestLocationUpdates(locationRequest, pendingIntent);
+    api.requestLocationUpdates(client, locationRequest, pendingIntent);
     Location location = new Location(NETWORK_PROVIDER);
     shadowLocationManager.simulateLocation(location);
     Intent nextStartedService = ShadowApplication.getInstance().getNextStartedService();
@@ -230,7 +245,7 @@ public class FusedLocationProviderServiceImplTest {
     LocationRequest locationRequest =
         LocationRequest.create().setPriority(PRIORITY_BALANCED_POWER_ACCURACY);
 
-    api.requestLocationUpdates(locationRequest, pendingIntent);
+    api.requestLocationUpdates(client, locationRequest, pendingIntent);
     Location location = new Location(NETWORK_PROVIDER);
     shadowLocationManager.simulateLocation(location);
 
@@ -243,75 +258,75 @@ public class FusedLocationProviderServiceImplTest {
   @Test public void removeLocationUpdates_shouldUnregisterAllListeners() throws Exception {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(request, listener);
-    api.removeLocationUpdates(listener);
+    api.requestLocationUpdates(client, request, listener);
+    api.removeLocationUpdates(client, listener);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 
   @Test public void setMockMode_shouldUnregisterAllListenersWhenTrue() throws Exception {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(request, listener);
-    api.setMockMode(true);
+    api.requestLocationUpdates(client, request, listener);
+    api.setMockMode(client, true);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 
   @Test public void setMockMode_shouldNotRegisterDuplicateListeners() throws Exception {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
-    api.setMockMode(true);
-    api.requestLocationUpdates(request, listener);
-    api.setMockMode(false);
-    api.requestLocationUpdates(request, listener);
+    api.setMockMode(client, true);
+    api.requestLocationUpdates(client, request, listener);
+    api.setMockMode(client, false);
+    api.requestLocationUpdates(client, request, listener);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(2);
   }
 
   @Test public void setMockMode_shouldToggleEngines() {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(request, listener);
-    api.setMockMode(true);
+    api.requestLocationUpdates(client, request, listener);
+    api.setMockMode(client, true);
     TestLocationListener listener2 = new TestLocationListener();
     LocationRequest request2 = LocationRequest.create();
-    api.requestLocationUpdates(request2, listener2);
-    assertThat(api.getListeners()).hasSize(2);
+    api.requestLocationUpdates(client, request2, listener2);
+    assertThat(api.getLocationListeners().get(client)).hasSize(2);
   }
 
   @Test public void requestLocationUpdates_shouldNotRegisterListenersWithMockModeOn()
       throws Exception {
-    api.setMockMode(true);
+    api.setMockMode(client, true);
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(request, listener);
+    api.requestLocationUpdates(client, request, listener);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 
   @Test public void setMockLocation_shouldReturnMockLastLocation() throws Exception {
     Location mockLocation = new Location("mock");
-    api.setMockMode(true);
-    api.setMockLocation(mockLocation);
-    assertThat(api.getLastLocation()).isEqualTo(mockLocation);
+    api.setMockMode(client, true);
+    api.setMockLocation(client, mockLocation);
+    assertThat(api.getLastLocation(client)).isEqualTo(mockLocation);
   }
 
   @Test public void setMockLocation_shouldInvokeListenerOnce() throws Exception {
     Location mockLocation = new Location("mock");
-    api.setMockMode(true);
+    api.setMockMode(client, true);
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(request, listener);
-    api.setMockLocation(mockLocation);
+    api.requestLocationUpdates(client, request, listener);
+    api.setMockLocation(client, mockLocation);
     assertThat(listener.getAllLocations()).hasSize(1);
     assertThat(listener.getMostRecentLocation()).isEqualTo(mockLocation);
   }
 
   @Test @Ignore("Intermittently failing. Find a better way to test without Thread.sleep(100)")
   public void setMockTrace_shouldInvokeListenerForEachLocation() throws Exception {
-    api.setMockMode(true);
-    api.setMockTrace(getTestGpxTrace());
+    api.setMockMode(client, true);
+    api.setMockTrace(client, getTestGpxTrace());
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     request.setFastestInterval(0);
-    api.requestLocationUpdates(request, listener);
+    api.requestLocationUpdates(client, request, listener);
     Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(listener.getAllLocations()).hasSize(3);
@@ -325,12 +340,12 @@ public class FusedLocationProviderServiceImplTest {
 
   @Test @Ignore("Intermittently failing. Find a better way to test without Thread.sleep(100)")
   public void setMockTrace_shouldBroadcastSpeedWithLocation() throws Exception {
-    api.setMockMode(true);
-    api.setMockTrace(getTestGpxTrace());
+    api.setMockMode(client, true);
+    api.setMockTrace(client, getTestGpxTrace());
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     request.setFastestInterval(0);
-    api.requestLocationUpdates(request, listener);
+    api.requestLocationUpdates(client, request, listener);
     Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(listener.getAllLocations().get(0).getSpeed()).isEqualTo(10f);
@@ -340,12 +355,12 @@ public class FusedLocationProviderServiceImplTest {
 
   @Test @Ignore("Intermittently failing. Find a better way to test without Thread.sleep(100)")
   public void setMockTrace_shouldRespectFastestInterval() throws Exception {
-    api.setMockMode(true);
-    api.setMockTrace(getTestGpxTrace());
+    api.setMockMode(client, true);
+    api.setMockTrace(client, getTestGpxTrace());
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     request.setInterval(100);
-    api.requestLocationUpdates(request, listener);
+    api.requestLocationUpdates(client, request, listener);
     Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(listener.getAllLocations()).hasSize(1);
@@ -360,19 +375,19 @@ public class FusedLocationProviderServiceImplTest {
   @Test public void isProviderEnabled_shouldReturnProviderStatus() throws Exception {
     shadowLocationManager.setProviderEnabled(LocationManager.GPS_PROVIDER, true);
     shadowLocationManager.setProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
-    assertThat(api.isProviderEnabled(LocationManager.GPS_PROVIDER)).isTrue();
-    assertThat(api.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).isTrue();
+    assertThat(api.isProviderEnabled(client, LocationManager.GPS_PROVIDER)).isTrue();
+    assertThat(api.isProviderEnabled(client, LocationManager.NETWORK_PROVIDER)).isTrue();
 
     shadowLocationManager.setProviderEnabled(LocationManager.GPS_PROVIDER, false);
     shadowLocationManager.setProviderEnabled(LocationManager.NETWORK_PROVIDER, false);
-    assertThat(api.isProviderEnabled(LocationManager.GPS_PROVIDER)).isFalse();
-    assertThat(api.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).isFalse();
+    assertThat(api.isProviderEnabled(client, LocationManager.GPS_PROVIDER)).isFalse();
+    assertThat(api.isProviderEnabled(client, LocationManager.NETWORK_PROVIDER)).isFalse();
   }
 
   @Test public void onProviderDisabled_shouldReportWhenGpsIsDisabled() throws Exception {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
-    api.requestLocationUpdates(request, listener);
+    api.requestLocationUpdates(client, request, listener);
     listener.setIsGpsEnabled(true);
     shadowLocationManager.setProviderEnabled(GPS_PROVIDER, false);
     assertThat(listener.getIsGpsEnabled()).isFalse();
@@ -381,7 +396,7 @@ public class FusedLocationProviderServiceImplTest {
   @Test public void onProviderDisabled_shouldReportWhenNetworkIsDisabled() throws Exception {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(request, listener);
+    api.requestLocationUpdates(client, request, listener);
     listener.setIsNetworkEnabled(true);
     shadowLocationManager.setProviderEnabled(NETWORK_PROVIDER, false);
     assertThat(listener.getIsNetworkEnabled()).isFalse();
@@ -390,7 +405,7 @@ public class FusedLocationProviderServiceImplTest {
   @Test public void onProviderEnabled_shouldReportWhenGpsIsEnabled() throws Exception {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
-    api.requestLocationUpdates(request, listener);
+    api.requestLocationUpdates(client, request, listener);
     listener.setIsGpsEnabled(false);
     shadowLocationManager.setProviderEnabled(GPS_PROVIDER, true);
     assertThat(listener.getIsGpsEnabled()).isTrue();
@@ -399,7 +414,7 @@ public class FusedLocationProviderServiceImplTest {
   @Test public void onProviderEnabled_shouldReportWhenNetworkIsEnabled() throws Exception {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(request, listener);
+    api.requestLocationUpdates(client, request, listener);
     listener.setIsNetworkEnabled(false);
     shadowLocationManager.setProviderEnabled(NETWORK_PROVIDER, true);
     assertThat(listener.getIsNetworkEnabled()).isTrue();
@@ -428,8 +443,8 @@ public class FusedLocationProviderServiceImplTest {
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
     TestLocationListener listener1 = new TestLocationListener();
     TestLocationListener listener2 = new TestLocationListener();
-    api.requestLocationUpdates(request, listener1);
-    api.requestLocationUpdates(request, listener2);
+    api.requestLocationUpdates(client, request, listener1);
+    api.requestLocationUpdates(client, request, listener2);
     Location location = new Location(GPS_PROVIDER);
     location.setLatitude(40.0);
     location.setLongitude(70.0);
@@ -442,9 +457,9 @@ public class FusedLocationProviderServiceImplTest {
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
     TestLocationListener listener1 = new TestLocationListener();
     TestLocationListener listener2 = new TestLocationListener();
-    api.requestLocationUpdates(request, listener1);
-    api.requestLocationUpdates(request, listener2);
-    api.removeLocationUpdates(listener2);
+    api.requestLocationUpdates(client, request, listener1);
+    api.requestLocationUpdates(client, request, listener2);
+    api.removeLocationUpdates(client, listener2);
     Location location = new Location(GPS_PROVIDER);
     location.setLatitude(40.0);
     location.setLongitude(70.0);
@@ -456,7 +471,7 @@ public class FusedLocationProviderServiceImplTest {
   @Test public void requestLocationUpdates_shouldRegisterGpsAndNetworkListenerViaPendingIntent()
       throws Exception {
     PendingIntent pendingIntent = PendingIntent.getService(application, 0, new Intent(), 0);
-    api.requestLocationUpdates(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY),
+    api.requestLocationUpdates(client, LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY),
         pendingIntent);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(2);
   }
@@ -467,7 +482,7 @@ public class FusedLocationProviderServiceImplTest {
     PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
     LocationRequest locationRequest = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
 
-    api.requestLocationUpdates(locationRequest, pendingIntent);
+    api.requestLocationUpdates(client, locationRequest, pendingIntent);
     Location location = new Location(GPS_PROVIDER);
     shadowLocationManager.simulateLocation(location);
 
@@ -483,7 +498,7 @@ public class FusedLocationProviderServiceImplTest {
     LocationRequest locationRequest =
         LocationRequest.create().setPriority(PRIORITY_BALANCED_POWER_ACCURACY);
 
-    api.requestLocationUpdates(locationRequest, pendingIntent);
+    api.requestLocationUpdates(client, locationRequest, pendingIntent);
     Location location = new Location(NETWORK_PROVIDER);
     shadowLocationManager.simulateLocation(location);
 
@@ -498,9 +513,9 @@ public class FusedLocationProviderServiceImplTest {
     PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
     LocationRequest locationRequest =
         LocationRequest.create().setPriority(PRIORITY_BALANCED_POWER_ACCURACY);
-    api.requestLocationUpdates(locationRequest, pendingIntent);
+    api.requestLocationUpdates(client, locationRequest, pendingIntent);
 
-    api.removeLocationUpdates(pendingIntent);
+    api.removeLocationUpdates(client, pendingIntent);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 
@@ -509,11 +524,11 @@ public class FusedLocationProviderServiceImplTest {
     Intent intent = new Intent(application, TestService.class);
     PendingIntent pendingIntent1 = PendingIntent.getService(application, 0, intent, 0);
     PendingIntent pendingIntent2 = PendingIntent.getService(application, 0, intent, 0);
-    api.requestLocationUpdates(request, pendingIntent1);
+    api.requestLocationUpdates(client, request, pendingIntent1);
     clearShadowLocationListeners();
-    api.requestLocationUpdates(request, pendingIntent2);
+    api.requestLocationUpdates(client, request, pendingIntent2);
 
-    api.removeLocationUpdates(pendingIntent2);
+    api.removeLocationUpdates(client, pendingIntent2);
     Location location = new Location(GPS_PROVIDER);
     location.setLatitude(40.0);
     location.setLongitude(70.0);
@@ -528,7 +543,7 @@ public class FusedLocationProviderServiceImplTest {
     TestLocationCallback callback = new TestLocationCallback();
     Looper looper = Looper.myLooper();
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(request, callback, looper);
+    api.requestLocationUpdates(client, request, callback, looper);
     Location location = getTestLocation(NETWORK_PROVIDER, 0, 0, 0);
     shadowLocationManager.simulateLocation(location);
     assertThat(callback.getResult().getLastLocation()).isEqualTo(location);
@@ -540,7 +555,7 @@ public class FusedLocationProviderServiceImplTest {
     TestLocationCallback callback = new TestLocationCallback();
     Looper looper = Looper.myLooper();
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(request, callback, looper);
+    api.requestLocationUpdates(client, request, callback, looper);
     shadowLocationManager.setProviderEnabled(NETWORK_PROVIDER, true);
     assertThat(callback.getAvailability().isLocationAvailable()).isEqualTo(true);
   }
@@ -551,7 +566,7 @@ public class FusedLocationProviderServiceImplTest {
     Location location = new Location("test");
     shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, location);
 
-    LocationAvailability availability = api.getLocationAvailability();
+    LocationAvailability availability = api.getLocationAvailability(client);
     assertThat(availability.isLocationAvailable()).isTrue();
   }
 
@@ -559,7 +574,7 @@ public class FusedLocationProviderServiceImplTest {
     shadowLocationManager.setProviderEnabled(GPS_PROVIDER, true);
     shadowLocationManager.setProviderEnabled(NETWORK_PROVIDER, true);
 
-    LocationAvailability availability = api.getLocationAvailability();
+    LocationAvailability availability = api.getLocationAvailability(client);
     assertThat(availability.isLocationAvailable()).isFalse();
   }
 
@@ -568,14 +583,14 @@ public class FusedLocationProviderServiceImplTest {
     Location location = new Location("test");
     shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, location);
 
-    LocationAvailability availability = api.getLocationAvailability();
+    LocationAvailability availability = api.getLocationAvailability(client);
     assertThat(availability.isLocationAvailable()).isTrue();
   }
 
   @Test public void getLocationAvailability_gps_shouldBeUnavailable() {
     shadowLocationManager.setProviderEnabled(GPS_PROVIDER, true);
 
-    LocationAvailability availability = api.getLocationAvailability();
+    LocationAvailability availability = api.getLocationAvailability(client);
     assertThat(availability.isLocationAvailable()).isFalse();
   }
 
@@ -584,43 +599,43 @@ public class FusedLocationProviderServiceImplTest {
     Location location = new Location("test");
     shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, location);
 
-    LocationAvailability availability = api.getLocationAvailability();
+    LocationAvailability availability = api.getLocationAvailability(client);
     assertThat(availability.isLocationAvailable()).isTrue();
   }
 
   @Test public void getLocationAvailability_network_shouldBeUnavailable() {
     shadowLocationManager.setProviderEnabled(NETWORK_PROVIDER, true);
 
-    LocationAvailability availability = api.getLocationAvailability();
+    LocationAvailability availability = api.getLocationAvailability(client);
     assertThat(availability.isLocationAvailable()).isFalse();
   }
 
   @Test public void getLocationAvailability_shouldBeUnavailable() {
-    LocationAvailability availability = api.getLocationAvailability();
+    LocationAvailability availability = api.getLocationAvailability(client);
     assertThat(availability.isLocationAvailable()).isFalse();
   }
 
   @Test public void removeLocationUpdates_shouldNotKillEngineIfListenerStillActive()
       throws Exception {
     TestLocationListener listener = new TestLocationListener();
-    api.requestLocationUpdates(LocationRequest.create(), listener);
+    api.requestLocationUpdates(client, LocationRequest.create(), listener);
 
     PendingIntent pendingIntent = PendingIntent.getService(application, 0, new Intent(), 0);
-    api.requestLocationUpdates(LocationRequest.create(), pendingIntent);
+    api.requestLocationUpdates(client, LocationRequest.create(), pendingIntent);
 
-    api.removeLocationUpdates(pendingIntent);
+    api.removeLocationUpdates(client, pendingIntent);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isNotEmpty();
   }
 
   @Test public void removeLocationUpdates_shouldNotKillEngineIfIntentStillActive()
       throws Exception {
     TestLocationListener listener = new TestLocationListener();
-    api.requestLocationUpdates(LocationRequest.create(), listener);
+    api.requestLocationUpdates(client, LocationRequest.create(), listener);
 
     PendingIntent pendingIntent = PendingIntent.getService(application, 0, new Intent(), 0);
-    api.requestLocationUpdates(LocationRequest.create(), pendingIntent);
+    api.requestLocationUpdates(client, LocationRequest.create(), pendingIntent);
 
-    api.removeLocationUpdates(listener);
+    api.removeLocationUpdates(client, listener);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isNotEmpty();
   }
 
@@ -628,41 +643,204 @@ public class FusedLocationProviderServiceImplTest {
     TestLocationCallback callback = new TestLocationCallback();
     Looper looper = mock(Looper.class);
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(request, callback, looper);
-    api.removeLocationUpdates(callback);
+    api.requestLocationUpdates(client, request, callback, looper);
+    api.removeLocationUpdates(client, callback);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 
   @Test public void shutdown_shouldUnregisterLocationUpdateListeners() throws Exception {
-    LostApiClient client = new LostApiClient.Builder(application).build();
-    client.connect();
-    LocationServices.FusedLocationApi.requestLocationUpdates(LocationRequest.create(),
+    api.requestLocationUpdates(client, LocationRequest.create(),
         new TestLocationListener());
 
     api.shutdown();
     LocationManager lm = (LocationManager) application.getSystemService(LOCATION_SERVICE);
     assertThat(shadowOf(lm).getRequestLocationUpdateListeners()).isEmpty();
-    client.disconnect();
   }
 
   @Test public void shutdown_shouldClearListeners() {
-    LostApiClient client = new LostApiClient.Builder(application).build();
-    client.connect();
-    LocationServices.FusedLocationApi.requestLocationUpdates(LocationRequest.create(),
+    api.requestLocationUpdates(client, LocationRequest.create(),
         new TestLocationListener());
     api.shutdown();
-    assertThat(api.getListeners()).isEmpty();
-    client.disconnect();
+    assertThat(api.getLocationListeners()).isEmpty();
   }
 
   @Test public void shutdown_shouldClearPendingIntents() {
-    LostApiClient client = new LostApiClient.Builder(application).build();
-    client.connect();
-    LocationServices.FusedLocationApi.requestLocationUpdates(LocationRequest.create(),
+    api.requestLocationUpdates(client, LocationRequest.create(),
         mock(PendingIntent.class));
     api.shutdown();
     assertThat(api.getPendingIntents()).isEmpty();
-    client.disconnect();
+  }
+
+  @Test public void requestLocationUpdates_shouldModifyOnlyClientListeners() {
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        new TestLocationListener());
+
+    otherClient.connect();
+
+    assertThat(api.getLocationListeners().get(client).size()).isEqualTo(1);
+    assertThat(api.getLocationListeners().get(otherClient)).isNull();
+  }
+
+  @Test public void requestLocationUpdates_shouldModifyOnlyClientPendingIntents() {
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        mock(PendingIntent.class));
+
+    otherClient.connect();
+
+    assertThat(api.getPendingIntents().get(client).size()).isEqualTo(1);
+    assertThat(api.getPendingIntents().get(otherClient)).isNull();
+  }
+
+  @Test public void requestLocationUpdates_shouldModifyOnlyClientLocationListeners() {
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        new TestLocationCallback(), Looper.myLooper());
+
+    otherClient.connect();
+
+    assertThat(api.getLocationCallbacks().get(client).size()).isEqualTo(1);
+    assertThat(api.getLocationCallbacks().get(otherClient)).isNull();
+  }
+
+  @Test public void removeLocationUpdates_shouldModifyOnlyClientListeners() {
+    TestLocationListener listener = new TestLocationListener();
+
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        listener);
+
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        new TestLocationListener());
+
+    api.removeLocationUpdates(client, listener);
+
+    assertThat(api.getLocationListeners().get(client)).isNull();
+    assertThat(api.getLocationListeners().get(otherClient).size()).isEqualTo(1);
+  }
+
+  @Test public void removeLocationUpdates_shouldModifyOnlyClientPendingIntents() {
+    PendingIntent pendingIntent = mock(PendingIntent.class);
+
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        pendingIntent);
+
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        pendingIntent);
+
+    api.removeLocationUpdates(client, pendingIntent);
+
+    assertThat(api.getPendingIntents().get(client)).isNull();
+    assertThat(api.getPendingIntents().get(otherClient).size()).isEqualTo(1);
+  }
+
+  @Test public void removeLocationUpdates_shouldModifyOnlyClientLocationListeners() {
+    TestLocationCallback callback = new TestLocationCallback();
+
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        callback, Looper.myLooper());
+
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        callback, Looper.myLooper());
+
+    api.removeLocationUpdates(client, callback);
+
+    assertThat(api.getLocationCallbacks().get(client)).isNull();
+    assertThat(api.getLocationCallbacks().get(otherClient).size()).isEqualTo(1);
+  }
+
+  @Test public void reportLocation_shouldNotifiyClientListener() {
+    TestLocationListener listener = new TestLocationListener();
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        listener);
+
+    TestLocationListener otherListener = new TestLocationListener();
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        otherListener);
+    api.removeLocationUpdates(otherClient, otherListener);
+
+    Location location = new Location("test");
+    api.reportLocation(location);
+
+    assertThat(listener.getAllLocations()).contains(location);
+    assertThat(otherListener.getAllLocations()).isEmpty();
+  }
+
+  @Test public void reportLocation_shouldNotifiyPendingIntents() {
+    Intent intent = new Intent(application, TestService.class);
+    PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
+
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        pendingIntent);
+
+    PendingIntent otherPendingIntent = PendingIntent.getService(application, 0, intent, 0);
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        otherPendingIntent);
+    api.removeLocationUpdates(otherClient, otherPendingIntent);
+
+    Location location = new Location("test");
+    api.reportLocation(location);
+
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNull();
+  }
+
+  @Test public void reportLocation_shouldNotifiyLocationCallbacks() {
+    TestLocationCallback callback = new TestLocationCallback();
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(),
+        callback, Looper.myLooper());
+
+    TestLocationCallback otherCallback = new TestLocationCallback();
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        otherCallback, Looper.myLooper());
+    api.removeLocationUpdates(otherClient, otherCallback);
+
+    api.reportProviderEnabled(GPS_PROVIDER);
+
+    assertThat(callback.getAvailability()).isNotNull();
+    assertThat(otherCallback.getAvailability()).isNull();
+  }
+
+  @Test public void disconnect_otherClientShouldHavePendingIntents() {
+    client.connect();
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        mock(PendingIntent.class));
+    api.disconnect(client);
+
+    assertThat(api.getPendingIntents().get(otherClient)).isNotNull();
+  }
+
+  @Test public void disconnect_otherClientShouldHaveListeners() {
+    client.connect();
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        new TestLocationListener());
+    api.disconnect(client);
+
+    assertThat(api.getLocationListeners().get(otherClient)).isNotNull();
+  }
+
+  @Test public void disconnect_otherClientShouldHaveLocationListeners() {
+    client.connect();
+    otherClient.connect();
+    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+        new TestLocationCallback(), Looper.myLooper());
+    api.disconnect(client);
+
+    assertThat(api.getLocationCallbacks().get(otherClient)).isNotNull();
   }
 
   /**

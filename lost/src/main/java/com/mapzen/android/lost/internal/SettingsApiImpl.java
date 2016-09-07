@@ -27,7 +27,7 @@ public class SettingsApiImpl implements SettingsApi {
   }
 
   @Override
-  public PendingResult<LocationSettingsResult> checkLocationSettings(LostApiClient apiClient,
+  public PendingResult<LocationSettingsResult> checkLocationSettings(LostApiClient client,
       LocationSettingsRequest request) {
     PackageManager pm = context.getPackageManager();
     LocationManager locationManager =

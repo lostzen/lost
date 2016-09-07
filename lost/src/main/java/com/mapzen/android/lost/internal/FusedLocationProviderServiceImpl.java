@@ -5,107 +5,155 @@ import com.mapzen.android.lost.api.LocationCallback;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationResult;
+import com.mapzen.android.lost.api.LostApiClient;
 
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.location.Location;
-import android.location.LocationManager;
-import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
+import android.support.annotation.RequiresPermission;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
-import static com.mapzen.android.lost.api.FusedLocationProviderApi.KEY_LOCATION_CHANGED;
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 public class FusedLocationProviderServiceImpl implements LocationEngine.Callback {
-
-  private static final String TAG = FusedLocationProviderServiceImpl.class.getSimpleName();
 
   private Context context;
 
   private boolean mockMode;
   private LocationEngine locationEngine;
-  private Map<LocationListener, LocationRequest> listenerToRequest;
-  private Map<PendingIntent, LocationRequest> intentToRequest;
-  private Map<LocationCallback, LocationRequest> callbackToRequest;
-  private Map<LocationCallback, Looper> callbackToLooper;
 
-  public FusedLocationProviderServiceImpl(Context context) {
+  private ClientManager clientManager;
+
+  public FusedLocationProviderServiceImpl(Context context, ClientManager manager) {
     this.context = context;
+    this.clientManager = manager;
     locationEngine = new FusionEngine(context, this);
-    listenerToRequest = new HashMap<>();
-    intentToRequest = new HashMap<>();
-    callbackToRequest = new HashMap<>();
-    callbackToLooper = new HashMap<>();
   }
 
   public void shutdown() {
-    listenerToRequest.clear();
-    intentToRequest.clear();
-    callbackToRequest.clear();
-    callbackToLooper.clear();
     locationEngine.setRequest(null);
+    clientManager.shutdown();
   }
 
-  public Location getLastLocation() {
+  public Location getLastLocation(LostApiClient client) {
     return locationEngine.getLastLocation();
   }
 
-  public LocationAvailability getLocationAvailability() {
-    return createLocationAvailability();
+  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+  public LocationAvailability getLocationAvailability(LostApiClient client) {
+    return locationEngine.createLocationAvailability();
   }
 
-  public void requestLocationUpdates(LocationRequest request, LocationListener listener) {
-    listenerToRequest.put(listener, request);
+  public void requestLocationUpdates(LostApiClient client, LocationRequest request,
+      LocationListener listener) {
+    clientManager.addListener(client, request, listener);
     locationEngine.setRequest(request);
   }
 
-  public void requestLocationUpdates(LocationRequest request, PendingIntent callbackIntent) {
-    intentToRequest.put(callbackIntent, request);
+  public void requestLocationUpdates(LostApiClient client, LocationRequest request,
+      PendingIntent callbackIntent) {
+    clientManager.addPendingIntent(client, request, callbackIntent);
     locationEngine.setRequest(request);
   }
 
-  public void requestLocationUpdates(LocationRequest request, LocationCallback callback,
-      Looper looper) {
-    callbackToRequest.put(callback, request);
-    callbackToLooper.put(callback, looper);
+  public void requestLocationUpdates(LostApiClient client, LocationRequest request,
+      LocationCallback callback, Looper looper) {
+    clientManager.addLocationCallback(client, request, callback, looper);
     locationEngine.setRequest(request);
   }
 
-  public void removeLocationUpdates(LocationListener listener) {
-    listenerToRequest.remove(listener);
+  public void removeLocationUpdates(LostApiClient client, LocationListener listener) {
+    clientManager.removeListener(client, listener);
     checkAllListenersPendingIntentsAndCallbacks();
   }
 
-  public void removeLocationUpdates(PendingIntent callbackIntent) {
-    intentToRequest.remove(callbackIntent);
+  public void removeLocationUpdates(LostApiClient client, PendingIntent callbackIntent) {
+    clientManager.removePendingIntent(client, callbackIntent);
     checkAllListenersPendingIntentsAndCallbacks();
   }
 
-  public void removeLocationUpdates(LocationCallback callback) {
-    callbackToRequest.remove(callback);
-    callbackToLooper.remove(callback);
+  public void removeLocationUpdates(LostApiClient client, LocationCallback callback) {
+    clientManager.removeLocationCallback(client, callback);
     checkAllListenersPendingIntentsAndCallbacks();
+  }
+
+  public void setMockMode(LostApiClient client, boolean isMockMode) {
+    if (mockMode != isMockMode) {
+      toggleMockMode();
+    }
+  }
+
+  public void setMockLocation(LostApiClient client, Location mockLocation) {
+    if (mockMode) {
+      ((MockEngine) locationEngine).setLocation(mockLocation);
+    }
+  }
+
+  public void setMockTrace(LostApiClient client, File file) {
+    if (mockMode) {
+      ((MockEngine) locationEngine).setTrace(file);
+    }
+  }
+
+  public boolean isProviderEnabled(LostApiClient client, String provider) {
+    return locationEngine.isProviderEnabled(provider);
+  }
+
+  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+  public void reportLocation(Location location) {
+    clientManager.reportLocationChanged(location);
+
+    LocationAvailability availability = locationEngine.createLocationAvailability();
+    ArrayList<Location> locations = new ArrayList<>();
+    locations.add(location);
+    final LocationResult result = LocationResult.create(locations);
+    clientManager.sendPendingIntent(context, location, availability, result);
+
+
+    clientManager.reportLocationResult(result);
+  }
+
+  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+  public void reportProviderDisabled(String provider) {
+    clientManager.reportProviderDisabled(provider);
+    notifyLocationAvailabilityChanged();
+  }
+
+  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+  public void reportProviderEnabled(String provider) {
+    clientManager.reportProviderEnabled(provider);
+    notifyLocationAvailabilityChanged();
+  }
+
+  public Map<LostApiClient, Set<LocationListener>> getLocationListeners() {
+    return clientManager.getLocationListeners();
+  }
+
+  public Map<LostApiClient, Set<PendingIntent>> getPendingIntents() {
+    return clientManager.getPendingIntents();
+  }
+
+  public Map<LostApiClient, Set<LocationCallback>> getLocationCallbacks() {
+    return clientManager.getLocationCallbacks();
+  }
+
+  public void disconnect(LostApiClient client) {
+    clientManager.disconnect(client);
   }
 
   /**
    * Checks if any listeners or pending intents are still registered for location updates. If not,
-   * then shutdown the location engine.
+   * then shutdown the location engines.
    */
   private void checkAllListenersPendingIntentsAndCallbacks() {
-    if (listenerToRequest.isEmpty() && intentToRequest.isEmpty() && callbackToRequest.isEmpty()) {
+    if (clientManager.hasNoListeners()) {
       locationEngine.setRequest(null);
-    }
-  }
-
-  public void setMockMode(boolean isMockMode) {
-    if (mockMode != isMockMode) {
-      toggleMockMode();
     }
   }
 
@@ -119,99 +167,10 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     }
   }
 
-  public void setMockLocation(Location mockLocation) {
-    if (mockMode) {
-      ((MockEngine) locationEngine).setLocation(mockLocation);
-    }
-  }
-
-  public void setMockTrace(File file) {
-    if (mockMode) {
-      ((MockEngine) locationEngine).setTrace(file);
-    }
-  }
-
-  public boolean isProviderEnabled(String provider) {
-    return locationEngine.isProviderEnabled(provider);
-  }
-
-  public void reportLocation(Location location) {
-    for (LocationListener listener : listenerToRequest.keySet()) {
-      listener.onLocationChanged(location);
-    }
-
-    LocationAvailability availability = createLocationAvailability();
-    ArrayList<Location> locations = new ArrayList<>();
-    locations.add(location);
-    final LocationResult result = LocationResult.create(locations);
-
-    for (PendingIntent intent : intentToRequest.keySet()) {
-      try {
-        Intent toSend = new Intent().putExtra(KEY_LOCATION_CHANGED, location);
-        toSend.putExtra(LocationAvailability.EXTRA_LOCATION_AVAILABILITY, availability);
-        toSend.putExtra(LocationResult.EXTRA_LOCATION_RESULT, result);
-        intent.send(context, 0, toSend);
-      } catch (PendingIntent.CanceledException e) {
-        Log.e(TAG, "Unable to send pending intent: " + intent);
-      }
-    }
-
-    for (final LocationCallback callback : callbackToRequest.keySet()) {
-      Looper looper = callbackToLooper.get(callback);
-      Handler handler = new Handler(looper);
-      handler.post(new Runnable() {
-          @Override public void run() {
-              callback.onLocationResult(result);
-            }
-        });
-    }
-  }
-
-  public void reportProviderDisabled(String provider) {
-    for (LocationListener listener : listenerToRequest.keySet()) {
-      listener.onProviderDisabled(provider);
-    }
-    notifyLocationAvailabilityChanged();
-  }
-
-  public void reportProviderEnabled(String provider) {
-    for (LocationListener listener : listenerToRequest.keySet()) {
-      listener.onProviderEnabled(provider);
-    }
-    notifyLocationAvailabilityChanged();
-  }
-
-  public Map<LocationListener, LocationRequest> getListeners() {
-    return listenerToRequest;
-  }
-
-  public Map<PendingIntent, LocationRequest> getPendingIntents() {
-    return intentToRequest;
-  }
-
-  private LocationAvailability createLocationAvailability() {
-    LocationManager locationManager = (LocationManager) context.getSystemService(
-        Context.LOCATION_SERVICE);
-    boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-    boolean networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-    boolean gpsLocationExists = locationManager.getLastKnownLocation(
-        LocationManager.GPS_PROVIDER) != null;
-    boolean networkLocationExists = locationManager.getLastKnownLocation(
-        LocationManager.NETWORK_PROVIDER) != null;
-    return new LocationAvailability((gpsEnabled && gpsLocationExists)
-        || (networkEnabled && networkLocationExists));
-  }
-
+  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   private void notifyLocationAvailabilityChanged() {
-    final LocationAvailability availability = createLocationAvailability();
-    for (final LocationCallback callback : callbackToRequest.keySet()) {
-      Looper looper = callbackToLooper.get(callback);
-      Handler handler = new Handler(looper);
-      handler.post(new Runnable() {
-        @Override public void run() {
-          callback.onLocationAvailability(availability);
-        }
-      });
-    }
+    final LocationAvailability availability = locationEngine.createLocationAvailability();
+    clientManager.notifyLocationAvailability(availability);
   }
+
 }

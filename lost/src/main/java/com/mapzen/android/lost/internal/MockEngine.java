@@ -75,6 +75,14 @@ public class MockEngine extends LocationEngine {
     traceFile = file;
   }
 
+  /**
+   * Returns the current file used to replay mock locations.
+   * @return the current file used to replay mock locations.
+   */
+  public File getTrace() {
+    return traceFile;
+  }
+
   protected class TraceThread extends Thread {
     private boolean canceled;
     private Location previous;
