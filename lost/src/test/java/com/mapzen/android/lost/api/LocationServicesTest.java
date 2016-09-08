@@ -16,15 +16,15 @@ import static org.fest.assertions.api.Assertions.assertThat;
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
 public class LocationServicesTest {
 
-  @Test public void shouldCreateFusedLocationProviderApiImpl() {
+  @Test public void shouldCreateFusedLocationProviderApiImpl() throws Exception {
     assertThat(LocationServices.FusedLocationApi).isInstanceOf(FusedLocationProviderApiImpl.class);
   }
 
-  @Test public void shouldCreateGeofencingApiImpl() {
+  @Test public void shouldCreateGeofencingApiImpl() throws Exception {
     assertThat(LocationServices.GeofencingApi).isInstanceOf(GeofencingApiImpl.class);
   }
 
-  @Test public void shouldCreateSettingApiImpl() {
+  @Test public void shouldCreateSettingApiImpl() throws Exception {
     assertThat(LocationServices.SettingsApi).isInstanceOf(SettingsApiImpl.class);
   }
 }
