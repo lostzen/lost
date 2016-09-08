@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.IntentSender;
 
+/**
+ * Represents the result of a {@link LocationServices} API call.
+ */
 public class Status implements Result {
 
   public static final int SUCCESS = 0;
@@ -55,6 +58,15 @@ public class Status implements Result {
     this.mPendingIntent = pendingIntent;
   }
 
+  /**
+   * If the status code is {@link Status#RESOLUTION_REQUIRED}, then this method can be called to
+   * start the resolution. For example, it will launch the Settings {@link Activity} so that the
+   * user can update location settings when used with {@link SettingsApi#checkLocationSettings(
+   * LostApiClient, LocationSettingsRequest)}
+   * @param activity to launch for resolution.
+   * @param requestCode associated with activity.
+   * @throws IntentSender.SendIntentException
+   */
   public void startResolutionForResult(Activity activity, int requestCode)
       throws IntentSender.SendIntentException {
     if (this.hasResolution()) {
@@ -63,30 +75,58 @@ public class Status implements Result {
     }
   }
 
+  /**
+   * Get the detailed status message for this {@link Status}.
+   * @return status message.
+   */
   public String getStatusMessage() {
     return this.statusMessage;
   }
 
+  /**
+   * Is there a resolution for this {@link Status}.
+   * @return whether or not there is a resolution.
+   */
   public boolean hasResolution() {
     return this.mPendingIntent != null;
   }
 
+  /**
+   * Is the status code for this object {@link Status#SUCCESS}.
+   * @return whether or not the status code is {@link Status#SUCCESS}.
+   */
   public boolean isSuccess() {
     return this.statusCode == SUCCESS;
   }
 
+  /**
+   * Is the status code for this object {@link Status#CANCELLED}.
+   * @return whether or not the status code is {@link Status#CANCELLED}.
+   */
   public boolean isCanceled() {
     return this.statusCode == CANCELLED;
   }
 
+  /**
+   * Is the status code for this object {@link Status#INTERRUPTED}.
+   * @return whether or not the status code is {@link Status#INTERRUPTED}.
+   */
   public boolean isInterrupted() {
     return this.statusCode == INTERRUPTED;
   }
 
+  /**
+   * Get the status code.
+   * @return the status code.
+   */
   public int getStatusCode() {
     return this.statusCode;
   }
 
+  /**
+   * Get the {@link PendingIntent} if there is one. This method can return null.
+   * @return the {@link PendingIntent}.
+   */
   public PendingIntent getResolution() {
     return this.mPendingIntent;
   }
