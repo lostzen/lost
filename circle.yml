@@ -1,3 +1,7 @@
+machine:
+  java:
+    version: oraclejdk8
+
 dependencies:
   pre:
     - echo y | android update sdk --all --no-ui --force --filter "build-tools-24.0.1,android-24,extra-android-m2repository"
