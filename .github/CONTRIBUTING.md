@@ -5,8 +5,9 @@ Contributor guidelines for the Location Open Source Tracker project.
 First off, thanks for taking the time to contribute!
 
 ## Aim
-This project seeks to provide an open source alternative to Google's [Fused Location Provider](https://developer.android.com/training/location/index.html), only depending on the Android SDK.
-Therefore, contributions should implement the [FusedLocationProviderAPI](https://developers.google.com/android/reference/com/google/android/gms/location/FusedLocationProviderApi) or fix bugs/improve the current implementation, rather than implementing completely new features.
+This project seeks to provide an open source alternative to basically anything in Google's [com.google.android.gms.location](https://developers.google.com/android/reference/com/google/android/gms/location/package-summary) package, only depending on the Android SDK.
+Therefore, contributions should implement the [FusedLocationProviderAPI](https://developers.google.com/android/reference/com/google/android/gms/location/FusedLocationProviderApi), [GeoencingApi](https://developers.google.com/android/reference/com/google/android/gms/location/GeofencingApi) or [SettingsApi](https://developers.google.com/android/reference/com/google/android/gms/location/SettingsApi) or fix bugs/improve the current implementation, rather than implementing completely new features.
+
 But a working subset is always fine. That's kind of what this project is all about ;).
 
 ## Prerequisites
@@ -107,5 +108,5 @@ Please do not merge them into your branch, but instead [rebase your changes](htt
 Personally we prefer rebase to merge commits since it makes changes easier to review and history a bit more tidy. 
 You can do the rebase from the command line or, in Android Studio, while you are on your branch, select "Rebase onto" from the context menu of the upstream master in the "Log" of the "Version Control" tab.
 You will probably (depending on how big the master changes and your's are) have to "Resolve conflicts" in the files separately (select from the context menu from the individual files shown in red under "Log", always finish by "Merge"), and afterwards select "Skip Commit in Rebasing" from the "VCS->Git" menu.
-More information on this is available at [IntelliJ](https://www.jetbrains.com/help/idea/2016.2/interactive-rebase.html) or [Youtube](https://www.youtube.com/watch?v=lILdMGa-r38).
+More information on this is available at [IntelliJ](https://www.jetbrains.com/help/idea/2016.2/interactive-rebase.html).
 
