@@ -290,12 +290,14 @@ public class FusionEngineTest {
   @Test public void isBetterThan_shouldReturnFalseIfLocationAIsNull() throws Exception {
     Location locationA = null;
     Location locationB = new Location("test");
+    //noinspection ConstantConditions
     assertThat(FusionEngine.isBetterThan(locationA, locationB)).isFalse();
   }
 
   @Test public void isBetterThan_shouldReturnTrueIfLocationBIsNull() throws Exception {
     Location locationA = new Location("test");
     Location locationB = null;
+    //noinspection ConstantConditions
     assertThat(FusionEngine.isBetterThan(locationA, locationB)).isTrue();
   }
 

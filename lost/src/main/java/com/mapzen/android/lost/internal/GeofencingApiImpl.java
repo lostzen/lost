@@ -20,14 +20,15 @@ import java.util.List;
 public class GeofencingApiImpl implements GeofencingApi {
 
   private final LocationManager locationManager;
-  private HashMap<String, PendingIntent> pendingIntentMap;
+  private final HashMap<String, PendingIntent> pendingIntentMap;
 
   GeofencingApiImpl(Context context) {
     locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     pendingIntentMap = new HashMap<>();
   }
 
-  @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
+  @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION,
+          Manifest.permission.ACCESS_FINE_LOCATION})
   @Override
   public void addGeofences(LostApiClient client, GeofencingRequest geofencingRequest,
       PendingIntent pendingIntent)
