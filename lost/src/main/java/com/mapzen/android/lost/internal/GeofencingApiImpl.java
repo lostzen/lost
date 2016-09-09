@@ -4,6 +4,8 @@ import com.mapzen.android.lost.api.Geofence;
 import com.mapzen.android.lost.api.GeofencingApi;
 import com.mapzen.android.lost.api.GeofencingRequest;
 import com.mapzen.android.lost.api.LostApiClient;
+import com.mapzen.android.lost.api.PendingResult;
+import com.mapzen.android.lost.api.Status;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -41,25 +43,25 @@ public class GeofencingApiImpl implements GeofencingApi {
   }
 
   @Override
-  public void addGeofences(LostApiClient client, GeofencingRequest geofencingRequest,
-      PendingIntent pendingIntent)
-      throws SecurityException {
+  public PendingResult<Status> addGeofences(LostApiClient client,
+      GeofencingRequest geofencingRequest, PendingIntent pendingIntent) throws SecurityException {
     List<Geofence> geofences = geofencingRequest.getGeofences();
     addGeofences(client, geofences, pendingIntent);
+    return new SimplePendingResult(true);
   }
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  @Override public void addGeofences(LostApiClient client, List<Geofence> geofences,
-      PendingIntent pendingIntent)
-      throws SecurityException {
+  @Override public PendingResult<Status> addGeofences(LostApiClient client,
+      List<Geofence> geofences, PendingIntent pendingIntent) throws SecurityException {
     for (Geofence geofence : geofences) {
       addGeofence(client, geofence, pendingIntent);
     }
+    return new SimplePendingResult(true);
   }
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  private void addGeofence(LostApiClient client, Geofence geofence, PendingIntent pendingIntent)
-          throws SecurityException {
+  private PendingResult<Status> addGeofence(LostApiClient client, Geofence geofence,
+      PendingIntent pendingIntent) throws SecurityException {
     ParcelableGeofence pGeofence = (ParcelableGeofence) geofence;
     String requestId = String.valueOf(pGeofence.hashCode());
     locationManager.addProximityAlert(
@@ -72,13 +74,20 @@ public class GeofencingApiImpl implements GeofencingApi {
       requestId = pGeofence.getRequestId();
     }
     pendingIntentMap.put(requestId, pendingIntent);
+    return new SimplePendingResult(true);
   }
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  @Override public void removeGeofences(LostApiClient client, List<String> geofenceRequestIds) {
+  @Override public PendingResult<Status> removeGeofences(LostApiClient client,
+      List<String> geofenceRequestIds) {
+    boolean hasResult = false;
     for (String geofenceRequestId : geofenceRequestIds) {
+      if (pendingIntentMap.containsKey(geofenceRequestId)) {
+        hasResult = true;
+      }
       removeGeofences(client, geofenceRequestId);
     }
+    return new SimplePendingResult(hasResult);
   }
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
@@ -89,9 +98,14 @@ public class GeofencingApiImpl implements GeofencingApi {
   }
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  @Override public void removeGeofences(LostApiClient client, PendingIntent pendingIntent)
-    throws SecurityException {
-      locationManager.removeProximityAlert(pendingIntent);
-      pendingIntentMap.values().remove(pendingIntent);
+  @Override public PendingResult<Status> removeGeofences(LostApiClient client,
+      PendingIntent pendingIntent) throws SecurityException {
+    boolean hasResult = false;
+    if (pendingIntentMap.values().contains(pendingIntent)) {
+      hasResult = true;
+    }
+    locationManager.removeProximityAlert(pendingIntent);
+    pendingIntentMap.values().remove(pendingIntent);
+    return new SimplePendingResult(hasResult);
   }
 }

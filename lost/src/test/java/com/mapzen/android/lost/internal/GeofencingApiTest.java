@@ -3,6 +3,8 @@ package com.mapzen.android.lost.internal;
 import com.mapzen.android.lost.api.Geofence;
 import com.mapzen.android.lost.api.GeofencingRequest;
 import com.mapzen.android.lost.api.LostApiClient;
+import com.mapzen.android.lost.api.PendingResult;
+import com.mapzen.android.lost.api.Status;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +16,7 @@ import android.location.LocationManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.LOCATION_SERVICE;
 import static com.mapzen.android.lost.api.Geofence.NEVER_EXPIRE;
@@ -27,6 +30,7 @@ public class GeofencingApiTest {
   Context context;
   LocationManager locationManager;
   GeofencingApiImpl geofencingApi;
+  LostApiClient client;
 
   @Before public void setUp() throws Exception {
     context = mock(Context.class);
@@ -34,6 +38,7 @@ public class GeofencingApiTest {
     when(context.getSystemService(LOCATION_SERVICE)).thenReturn(locationManager);
     geofencingApi = new GeofencingApiImpl();
     geofencingApi.connect(context);
+    client = new LostApiClient.Builder(context).build();
   }
 
   @Test public void shouldNotBeNull() throws Exception {
@@ -41,7 +46,6 @@ public class GeofencingApiTest {
   }
 
   @Test public void addGeofences_shouldAddProximityAlert() throws Exception {
-    LostApiClient client = new LostApiClient.Builder(context).build();
     Geofence geofence = new Geofence.Builder().setRequestId("test_id")
         .setCircularRegion(1, 2, 3)
         .setExpirationDuration(NEVER_EXPIRE)
@@ -54,8 +58,6 @@ public class GeofencingApiTest {
 
   //as suggested here: https://github.com/mapzen/LOST/pull/88#discussion_r77384417
   @Test public void addGeofencesArray_shouldAddProximityAlert() {
-    LostApiClient client = new LostApiClient.Builder(context).build();
-
     Geofence geofence = new Geofence.Builder()
         .setRequestId("test_id")
         .setCircularRegion(1, 2, 3)
@@ -76,16 +78,12 @@ public class GeofencingApiTest {
   }
 
   @Test public void removeGeofence_pendingIntent_shouldRemoveProximityAlert() {
-    LostApiClient client = new LostApiClient.Builder(context).build();
-
     PendingIntent intent = Mockito.mock(PendingIntent.class);
     geofencingApi.removeGeofences(client, intent);
     Mockito.verify(locationManager, times(1)).removeProximityAlert(intent);
   }
 
   @Test public void removeGeofences_ListOfString_shouldRemoveProximityAlert() {
-    LostApiClient client = new LostApiClient.Builder(context).build();
-
     Geofence geofence = new Geofence.Builder()
         .setRequestId("test_id")
         .setCircularRegion(1, 2, 3)
@@ -105,4 +103,131 @@ public class GeofencingApiTest {
     Mockito.verify(locationManager, times(1)).removeProximityAlert(intent);
   }
 
+  @Test public void addGeofences_request_shouldReturnPendingResult() {
+    Geofence geofence = new Geofence.Builder()
+        .setRequestId("test_id")
+        .setCircularRegion(1, 2, 3)
+        .setExpirationDuration(NEVER_EXPIRE)
+        .build();
+    GeofencingRequest request = new GeofencingRequest.Builder().addGeofence(geofence).build();
+    PendingIntent pendingIntent = mock(PendingIntent.class);
+    PendingResult result = geofencingApi.addGeofences(client, request, pendingIntent);
+
+    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
+        Status.SUCCESS);
+    assertThat(result.isCanceled()).isFalse();
+    TestResultCallback callback = new TestResultCallback();
+    result.setResultCallback(callback);
+    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    TestResultCallback otherCallback = new TestResultCallback();
+    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
+    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+  }
+
+  @Test public void addGeofences_geofences_shouldReturnPendingResult() {
+    Geofence geofence = new Geofence.Builder()
+        .setRequestId("test_id")
+        .setCircularRegion(1, 2, 3)
+        .setExpirationDuration(NEVER_EXPIRE)
+        .build();
+    List<Geofence> geofences = new ArrayList<>();
+    geofences.add(geofence);
+    PendingIntent pendingIntent = mock(PendingIntent.class);
+    PendingResult result = geofencingApi.addGeofences(client, geofences, pendingIntent);
+
+    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
+        Status.SUCCESS);
+    assertThat(result.isCanceled()).isFalse();
+    TestResultCallback callback = new TestResultCallback();
+    result.setResultCallback(callback);
+    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    TestResultCallback otherCallback = new TestResultCallback();
+    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
+    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+  }
+
+  @Test public void removeGeofence_geofenceRequestIds_shouldReturnPendingResult() {
+    Geofence geofence = new Geofence.Builder()
+        .setRequestId("test_id")
+        .setCircularRegion(1, 2, 3)
+        .setExpirationDuration(NEVER_EXPIRE)
+        .build();
+    List<Geofence> geofences = new ArrayList<>();
+    geofences.add(geofence);
+    PendingIntent pendingIntent = mock(PendingIntent.class);
+    geofencingApi.addGeofences(client, geofences, pendingIntent);
+    List<String> ids = new ArrayList<>();
+    ids.add("test_id");
+    PendingResult result = geofencingApi.removeGeofences(client, ids);
+
+    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
+        Status.SUCCESS);
+    assertThat(result.isCanceled()).isFalse();
+    TestResultCallback callback = new TestResultCallback();
+    result.setResultCallback(callback);
+    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    TestResultCallback otherCallback = new TestResultCallback();
+    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
+    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+  }
+
+  @Test public void removeGeofence_pendingIntent_shouldReturnPendingResult() {
+    Geofence geofence = new Geofence.Builder()
+        .setRequestId("test_id")
+        .setCircularRegion(1, 2, 3)
+        .setExpirationDuration(NEVER_EXPIRE)
+        .build();
+    List<Geofence> geofences = new ArrayList<>();
+    geofences.add(geofence);
+    PendingIntent pendingIntent = mock(PendingIntent.class);
+    geofencingApi.addGeofences(client, geofences, pendingIntent);
+    PendingResult result = geofencingApi.removeGeofences(client, pendingIntent);
+
+    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
+        Status.SUCCESS);
+    assertThat(result.isCanceled()).isFalse();
+    TestResultCallback callback = new TestResultCallback();
+    result.setResultCallback(callback);
+    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    TestResultCallback otherCallback = new TestResultCallback();
+    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
+    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+  }
+
+  @Test public void removeNoGeofence_pendingIntent_shouldReturnPendingResult() {
+    PendingIntent pendingIntent = mock(PendingIntent.class);
+    PendingResult result = geofencingApi.removeGeofences(client, pendingIntent);
+
+    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
+        Status.SUCCESS);
+    assertThat(result.isCanceled()).isFalse();
+    TestResultCallback callback = new TestResultCallback();
+    result.setResultCallback(callback);
+    assertThat(callback.getStatus()).isNull();
+    TestResultCallback otherCallback = new TestResultCallback();
+    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
+    assertThat(otherCallback.getStatus()).isNull();
+  }
+
+  @Test public void removeNoGeofence_requestIds_shouldReturnPendingResult() {
+    List<String> ids = new ArrayList<>();
+    ids.add("test_id");
+    PendingResult result = geofencingApi.removeGeofences(client, ids);
+
+    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
+        Status.SUCCESS);
+    assertThat(result.isCanceled()).isFalse();
+    TestResultCallback callback = new TestResultCallback();
+    result.setResultCallback(callback);
+    assertThat(callback.getStatus()).isNull();
+    TestResultCallback otherCallback = new TestResultCallback();
+    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
+    assertThat(otherCallback.getStatus()).isNull();
+  }
 }
