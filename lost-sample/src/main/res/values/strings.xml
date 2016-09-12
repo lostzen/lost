@@ -64,5 +64,12 @@
   <string name="longitude">longitude</string>
   <string name="radius">radius</string>
   <string name="create">Create</string>
+  <string name="sample_location_listener_title">LocationListener</string>
+  <string name="sample_location_listener_description">Demonstrates how to use a LocationListener to receive location updates</string>
+  <string name="request_updates">Request Updates</string>
+  <string name="pending_intent">Pending Intent</string>
+  <string name="sample_pending_intent_title">PendingIntent</string>
+  <string name="sample_pending_intent_description">Demonstrates how to use a PendingIntent to receive location updates</string>
+  <string name="requested">Requested</string>
 
 </resources>

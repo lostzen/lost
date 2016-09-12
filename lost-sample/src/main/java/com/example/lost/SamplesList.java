@@ -13,4 +13,11 @@ public class SamplesList {
       new Sample(R.string.sample_settings_api_title, R.string.sample_settings_api_description,
           SettingsApiActivity.class)
   };
+
+  public static final Sample[] FUSED_API_SAMPLES = {
+      new Sample(R.string.sample_location_listener_title,
+          R.string.sample_location_listener_description, LocationListenerActivity.class),
+      new Sample(R.string.sample_pending_intent_title,
+          R.string.sample_pending_intent_description, PendingIntentActivity.class)
+  };
 }
