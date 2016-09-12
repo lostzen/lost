@@ -4,10 +4,10 @@ LOST provides the ability to request ongoing location updates. You can specify t
 
 ```java
 LocationRequest request = LocationRequest.create() .setInterval(5000) .setSmallestDisplacement(10).setPriority(LocationRequest.PRIORITY_LOW_POWER);
-LocationListener listener = new LocationListener() { 
-    @Override 
-    public void onLocationChanged(Location location) { 
-      // Do stuff 
+LocationListener listener = new LocationListener() {
+    @Override
+    public void onLocationChanged(Location location) {
+      // Do stuff
     }
 };
 
