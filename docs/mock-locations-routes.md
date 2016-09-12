@@ -21,6 +21,6 @@ To mock an entire route you must first transfer a [GPX trace file](http://www.to
 
 ```java
 File file = new File(Environment.getExternalStorageDirectory(), "mock_track.gpx");
-LocationServices.FusedLocationApi.setMockMode(true); 
+LocationServices.FusedLocationApi.setMockMode(true);
 LocationServices.FusedLocationApi.setMockTrace(file);
 ```
