@@ -8,9 +8,9 @@ import java.util.concurrent.TimeUnit;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
-public class FusedLocationPendingResultTest {
+public class SimplePendingResultTest {
 
-  FusedLocationPendingResult result = new FusedLocationPendingResult(true);
+  SimplePendingResult result = new SimplePendingResult(true);
 
   @Test public void await_shouldReturnSuccess() {
     assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);

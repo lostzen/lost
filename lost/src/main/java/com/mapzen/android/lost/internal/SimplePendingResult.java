@@ -9,11 +9,11 @@ import android.support.annotation.NonNull;
 
 import java.util.concurrent.TimeUnit;
 
-public class FusedLocationPendingResult extends PendingResult<Status> {
+public class SimplePendingResult extends PendingResult<Status> {
 
   private boolean hasResult = false;
 
-  public FusedLocationPendingResult(boolean hasResult) {
+  public SimplePendingResult(boolean hasResult) {
     this.hasResult = hasResult;
   }
 

@@ -56,63 +56,63 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
       LocationListener listener) {
     clientManager.addListener(client, request, listener);
     locationEngine.setRequest(request);
-    return new FusedLocationPendingResult(true);
+    return new SimplePendingResult(true);
   }
 
   public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
       PendingIntent callbackIntent) {
     clientManager.addPendingIntent(client, request, callbackIntent);
     locationEngine.setRequest(request);
-    return new FusedLocationPendingResult(true);
+    return new SimplePendingResult(true);
   }
 
   public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
       LocationCallback callback, Looper looper) {
     clientManager.addLocationCallback(client, request, callback, looper);
     locationEngine.setRequest(request);
-    return new FusedLocationPendingResult(true);
+    return new SimplePendingResult(true);
   }
 
   public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       LocationListener listener) {
     boolean hasResult = clientManager.removeListener(client, listener);
     checkAllListenersPendingIntentsAndCallbacks();
-    return new FusedLocationPendingResult(hasResult);
+    return new SimplePendingResult(hasResult);
   }
 
   public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       PendingIntent callbackIntent) {
     boolean hasResult = clientManager.removePendingIntent(client, callbackIntent);
     checkAllListenersPendingIntentsAndCallbacks();
-    return new FusedLocationPendingResult(hasResult);
+    return new SimplePendingResult(hasResult);
   }
 
   public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       LocationCallback callback) {
     boolean hasResult = clientManager.removeLocationCallback(client, callback);
     checkAllListenersPendingIntentsAndCallbacks();
-    return new FusedLocationPendingResult(hasResult);
+    return new SimplePendingResult(hasResult);
   }
 
   public PendingResult<Status> setMockMode(LostApiClient client, boolean isMockMode) {
     if (mockMode != isMockMode) {
       toggleMockMode();
     }
-    return new FusedLocationPendingResult(true);
+    return new SimplePendingResult(true);
   }
 
   public PendingResult<Status> setMockLocation(LostApiClient client, Location mockLocation) {
     if (mockMode) {
       ((MockEngine) locationEngine).setLocation(mockLocation);
     }
-    return new FusedLocationPendingResult(true);
+    return new SimplePendingResult(true);
   }
 
   public PendingResult<Status> setMockTrace(LostApiClient client, File file) {
     if (mockMode) {
       ((MockEngine) locationEngine).setTrace(file);
     }
-    return new FusedLocationPendingResult(true);
+    return new SimplePendingResult(true);
   }
 
   public boolean isProviderEnabled(LostApiClient client, String provider) {
