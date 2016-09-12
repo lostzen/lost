@@ -44,37 +44,63 @@ public class LostApiClientImplTest {
     client.disconnect();
   }
 
-  @Test public void connect_shouldCreateFusedLocationProviderApiImpl() throws Exception {
+  @Test public void connect_shouldConnectFusedLocationProviderApiImpl() throws Exception {
     client.connect();
-    assertThat(LocationServices.FusedLocationApi).isInstanceOf(FusedLocationProviderApiImpl.class);
+    FusedLocationProviderApiImpl fusedApi =
+        (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
+    assertThat(fusedApi.isConnected()).isTrue();
   }
 
-  @Test public void connect_shouldCreateGeofencingApiImpl() throws Exception {
+  @Test public void connect_shouldConnectGeofencingApiImpl() throws Exception {
     client.connect();
-    assertThat(LocationServices.GeofencingApi).isInstanceOf(GeofencingApiImpl.class);
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    assertThat(geofencingApi.isConnected()).isTrue();
   }
 
-  @Test public void connect_shouldCreateSettingsApiImpl() throws Exception {
+  @Test public void connect_shouldConnectSettingsApiImpl() throws Exception {
     client.connect();
-    assertThat(LocationServices.SettingsApi).isInstanceOf(SettingsApiImpl.class);
+    SettingsApiImpl settingsApi = (SettingsApiImpl) LocationServices.SettingsApi;
+    assertThat(settingsApi.isConnected()).isTrue();
   }
 
-  @Test public void disconnect_shouldRemoveFusedLocationProviderApiImpl() throws Exception {
+  @Test public void disconnect_shouldNotRemoveFusedLocationProviderApiImpl() throws Exception {
     client.connect();
     client.disconnect();
-    assertThat(LocationServices.FusedLocationApi).isNull();
+    assertThat(LocationServices.FusedLocationApi).isNotNull();
   }
 
-  @Test public void disconnect_shouldRemoveGeofencingApiImpl() throws Exception {
+  @Test public void disconnect_shouldNotRemoveGeofencingApiImpl() throws Exception {
     client.connect();
     client.disconnect();
-    assertThat(LocationServices.GeofencingApi).isNull();
+    assertThat(LocationServices.GeofencingApi).isNotNull();
   }
 
-  @Test public void disconnect_shouldRemoveSettingsApiImpl() throws Exception {
+  @Test public void disconnect_shouldNotRemoveSettingsApiImpl() throws Exception {
     client.connect();
     client.disconnect();
-    assertThat(LocationServices.SettingsApi).isNull();
+    assertThat(LocationServices.SettingsApi).isNotNull();
+  }
+
+  @Test public void disconnect_shouldDisconnectFusedLocationProviderApiImpl() throws Exception {
+    client.connect();
+    client.disconnect();
+    FusedLocationProviderApiImpl fusedApi =
+        (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
+    assertThat(fusedApi.isConnected()).isFalse();
+  }
+
+  @Test public void disconnect_shouldDisconnectGeofencingApiImpl() throws Exception {
+    client.connect();
+    client.disconnect();
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    assertThat(geofencingApi.isConnected()).isFalse();
+  }
+
+  @Test public void disconnect_shouldDisconnectSettingsApiImpl() throws Exception {
+    client.connect();
+    client.disconnect();
+    SettingsApiImpl settingsApi = (SettingsApiImpl) LocationServices.SettingsApi;
+    assertThat(settingsApi.isConnected()).isFalse();
   }
 
   @Test public void disconnect_shouldUnregisterLocationUpdateListeners() throws Exception {
@@ -96,7 +122,8 @@ public class LostApiClientImplTest {
     assertThat(shadowOf(lm).getRequestLocationUpdateListeners()).isEmpty();
   }
 
-  @Test public void disconnect_shouldNotRemoveFusedLocationProviderApiImpl() throws Exception {
+  @Test public void disconnect_multipleClients_shouldNotRemoveFusedLocationProviderApiImpl()
+      throws Exception {
     LostApiClient anotherClient = new LostApiClient.Builder(application).build();
     anotherClient.connect();
     client.connect();
@@ -105,7 +132,7 @@ public class LostApiClientImplTest {
     anotherClient.disconnect();
   }
 
-  @Test public void disconnect_shouldNotRemoveGeofencingApiImpl() throws Exception {
+  @Test public void disconnect_multipleClients_shouldNotRemoveGeofencingApiImpl() throws Exception {
     LostApiClient anotherClient = new LostApiClient.Builder(application).build();
     anotherClient.connect();
     client.connect();
@@ -114,7 +141,7 @@ public class LostApiClientImplTest {
     anotherClient.disconnect();
   }
 
-  @Test public void disconnect_shouldNotRemoveSettingsApiImpl() throws Exception {
+  @Test public void disconnect_multipleClients_shouldNotRemoveSettingsApiImpl() throws Exception {
     LostApiClient anotherClient = new LostApiClient.Builder(application).build();
     anotherClient.connect();
     client.connect();

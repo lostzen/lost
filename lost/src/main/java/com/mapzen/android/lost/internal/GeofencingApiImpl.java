@@ -21,15 +21,25 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
  */
 public class GeofencingApiImpl implements GeofencingApi {
 
-  private final LocationManager locationManager;
+  private LocationManager locationManager;
   private final HashMap<String, PendingIntent> pendingIntentMap;
 
-  GeofencingApiImpl(Context context) {
-    locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+  public GeofencingApiImpl() {
     pendingIntentMap = new HashMap<>();
   }
 
-  @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
+  public void connect(Context context) {
+    locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+  }
+
+  public boolean isConnected() {
+    return locationManager != null;
+  }
+
+  public void disconnect() {
+    locationManager = null;
+  }
+
   @Override
   public void addGeofences(LostApiClient client, GeofencingRequest geofencingRequest,
       PendingIntent pendingIntent)

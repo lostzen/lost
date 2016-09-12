@@ -32,7 +32,7 @@ public class FusedLocationProviderApiImpl
 
   private static final String TAG = FusedLocationProviderApiImpl.class.getSimpleName();
 
-  private final Context context;
+  private Context context;
   private FusedLocationProviderService service;
   private boolean connecting;
 
@@ -66,17 +66,17 @@ public class FusedLocationProviderApiImpl
 
   Set<LostApiClient.ConnectionCallbacks> connectionCallbacks;
 
-  public FusedLocationProviderApiImpl(Context context) {
-    this.context = context;
-    connectionCallbacks = new HashSet<>();
-  }
 
   public boolean isConnecting() {
     return connecting;
   }
 
-  public void connect(LostApiClient.ConnectionCallbacks callbacks) {
-    connecting = true;
+  public FusedLocationProviderApiImpl() {
+    connectionCallbacks = new HashSet<>();
+  }
+
+  public void connect(Context context, LostApiClient.ConnectionCallbacks callbacks) {
+    this.context = context;
 
     Intent intent = new Intent(context, FusedLocationProviderService.class);
     context.startService(intent);
@@ -86,6 +86,10 @@ public class FusedLocationProviderApiImpl
     }
     intent = new Intent(context, FusedLocationProviderService.class);
     context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+  }
+
+  public void disconnect() {
+    disconnect(null, true);
   }
 
   public void disconnect(LostApiClient client, boolean stopService) {
@@ -98,7 +102,13 @@ public class FusedLocationProviderApiImpl
 
       Intent intent = new Intent(context, FusedLocationProviderService.class);
       context.stopService(intent);
+
+      service = null;
     }
+  }
+
+  public boolean isConnected() {
+    return service != null;
   }
 
   @Override public Location getLastLocation(LostApiClient client) {

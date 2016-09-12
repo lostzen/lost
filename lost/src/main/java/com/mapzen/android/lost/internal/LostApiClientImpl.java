@@ -19,18 +19,17 @@ public class LostApiClientImpl implements LostApiClient {
   }
 
   @Override public void connect() {
-    if (LocationServices.GeofencingApi == null) {
-      LocationServices.GeofencingApi = new GeofencingApiImpl(context);
+    GeofencingApiImpl geofencingApi = getGeofencingImpl();
+    if (!geofencingApi.isConnected()) {
+      geofencingApi.connect(context);
     }
-    if (LocationServices.SettingsApi == null) {
-      LocationServices.SettingsApi = new SettingsApiImpl(context);
+    SettingsApiImpl settingsApi = getSettingsApiImpl();
+    if (!settingsApi.isConnected()) {
+      settingsApi.connect(context);
     }
-    FusedLocationProviderApiImpl fusedApi
-        = (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
-    if (fusedApi == null) {
-      fusedApi = new FusedLocationProviderApiImpl(context);
-      fusedApi.connect(connectionCallbacks);
-      LocationServices.FusedLocationApi = fusedApi;
+    FusedLocationProviderApiImpl fusedApi = getFusedLocationProviderApiImpl();
+    if (!fusedApi.isConnected()) {
+      fusedApi.connect(context, connectionCallbacks);
     } else if (connectionCallbacks != null) {
       if (fusedApi.isConnecting()) {
         fusedApi.connectionCallbacks.add(connectionCallbacks);
@@ -43,27 +42,30 @@ public class LostApiClientImpl implements LostApiClient {
   }
 
   @Override public void disconnect() {
-    if (LocationServices.FusedLocationApi != null
-        && LocationServices.FusedLocationApi instanceof FusedLocationProviderApiImpl) {
-      FusedLocationProviderApiImpl fusedProvider =
-          (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
-      boolean stopService = clientManager.numberOfClients() == 1;
-      fusedProvider.disconnect(this, stopService);
-    }
-
     clientManager.removeClient(this);
     if (clientManager.numberOfClients() > 0) {
       return;
     }
 
-    LocationServices.FusedLocationApi = null;
-    LocationServices.GeofencingApi = null;
-    LocationServices.SettingsApi = null;
+    getSettingsApiImpl().disconnect();
+    getGeofencingImpl().disconnect();
+    getFusedLocationProviderApiImpl().disconnect();
   }
 
   @Override public boolean isConnected() {
-    return LocationServices.FusedLocationApi != null
-        && LocationServices.GeofencingApi != null
-        && LocationServices.SettingsApi != null;
+    return getGeofencingImpl().isConnected() && getSettingsApiImpl().isConnected()
+        && getFusedLocationProviderApiImpl().isConnected();
+  }
+
+  private GeofencingApiImpl getGeofencingImpl() {
+    return (GeofencingApiImpl) LocationServices.GeofencingApi;
+  }
+
+  private SettingsApiImpl getSettingsApiImpl() {
+    return (SettingsApiImpl) LocationServices.SettingsApi;
+  }
+
+  private FusedLocationProviderApiImpl getFusedLocationProviderApiImpl() {
+    return (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
   }
 }

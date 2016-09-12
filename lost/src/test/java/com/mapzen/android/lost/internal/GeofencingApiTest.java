@@ -1,7 +1,6 @@
 package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.api.Geofence;
-import com.mapzen.android.lost.api.GeofencingApi;
 import com.mapzen.android.lost.api.GeofencingRequest;
 import com.mapzen.android.lost.api.LostApiClient;
 
@@ -27,13 +26,14 @@ import static org.mockito.Mockito.when;
 public class GeofencingApiTest {
   Context context;
   LocationManager locationManager;
-  GeofencingApi geofencingApi;
+  GeofencingApiImpl geofencingApi;
 
   @Before public void setUp() throws Exception {
     context = mock(Context.class);
     locationManager = mock(LocationManager.class);
     when(context.getSystemService(LOCATION_SERVICE)).thenReturn(locationManager);
-    geofencingApi = new GeofencingApiImpl(context);
+    geofencingApi = new GeofencingApiImpl();
+    geofencingApi.connect(context);
   }
 
   @Test public void shouldNotBeNull() throws Exception {
