@@ -4,28 +4,28 @@ Location and bluetooth settings can be checked to see if the requirements are sa
 
 After creating a `LostApiClient`, create a `LocationSettingsRequest` specifying the location priority and whether or not the user needs BLE: 
 ```java
- ArrayList<LocationRequest> requests = new ArrayList<>();
- LocationRequest highAccuracy = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
- requests.add(highAccuracy);
+ArrayList<LocationRequest> requests = new ArrayList<>();
+LocationRequest highAccuracy = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+requests.add(highAccuracy);
 
-  boolean needBle = false;
-  LocationSettingsRequest request = new LocationSettingsRequest.Builder() 
+boolean needBle = false;
+LocationSettingsRequest request = new LocationSettingsRequest.Builder() 
           .addAllLocationRequests(requests)
           .setNeedBle(needBle)
           .build();
- ```
-
-  Then, use the `SettingsApi` to get a `PendingResult`:
- ```java
- PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(apiClient, request); 
 ```
 
-  Once you have a `PendingResult`, invoke either `await()` or `setResultCallback(ResultCallback)` to obtain a `LocationSettingsResult`. With this object, access the `LocationSettingsStates` to determine whether or not location settings have been satisfied:
- ```java
- private static final int REQUEST_CHECK_SETTINGS = 100;
-  LocationSettingsResult locationSettingsResult = result.await(); 
+Then, use the `SettingsApi` to get a `PendingResult`:
+```java
+PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(apiClient, request); 
+```
+
+Once you have a `PendingResult`, invoke either `await()` or `setResultCallback(ResultCallback)` to obtain a `LocationSettingsResult`. With this object, access the `LocationSettingsStates` to determine whether or not location settings have been satisfied:
+```java
+private static final int REQUEST_CHECK_SETTINGS = 100;
+LocationSettingsResult locationSettingsResult = result.await(); 
 LocationSettingsStates states = locationSettingsResult.getLocationSettingsStates();
-  Status status = locationSettingsResult.getStatus(); 
+Status status = locationSettingsResult.getStatus(); 
     switch (status.getStatusCode()) {
       case Status.SUCCESS:
         // All location and BLE settings are satisfied. The client can initialize location 
@@ -43,12 +43,12 @@ LocationSettingsStates states = locationSettingsResult.getLocationSettingsStates
         break;
       default:
         break;
-    } 
+    }
 ```
 
 If the status code is `RESOLUTION_REQUIRED`, the client can call `startResolutionForResult(Activity, int)` to bring up an `Activity`, asking for user's permission to modify the location settings to satisfy those requests. The result of the `Activity` will be returned via `onActivityResult(int, int, Intent)`.
 ```java
- @Override   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+@Override  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     switch (requestCode) { 
       case REQUEST_CHECK_SETTINGS: 
         // Check the location settings again and continue 
@@ -57,4 +57,4 @@ If the status code is `RESOLUTION_REQUIRED`, the client can call `startResolutio
         break;
       }
     }
- ``` 
+```
