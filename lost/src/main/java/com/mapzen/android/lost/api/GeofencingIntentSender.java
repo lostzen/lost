@@ -6,7 +6,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 
 import java.util.ArrayList;
@@ -16,7 +15,8 @@ import static com.mapzen.android.lost.api.GeofencingIntentService.EXTRA_PENDING_
 
 /**
  * Handles generating an intent populated with relevant extras from an {@link Intent} fired by
- * {@link LocationManager#addProximityAlert(double, double, float, long, PendingIntent)}
+ * {@link android.location.LocationManager#addProximityAlert(double, double, float, long,
+ * PendingIntent)}
  */
 public class GeofencingIntentSender {
 

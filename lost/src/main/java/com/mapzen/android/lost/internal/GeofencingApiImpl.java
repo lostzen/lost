@@ -74,7 +74,8 @@ public class GeofencingApiImpl implements GeofencingApi {
     internalIntent.putExtra(GeofencingIntentService.EXTRA_PENDING_INTENT, pendingIntent);
     ParcelableGeofence pGeofence = (ParcelableGeofence) geofence;
     internalIntent.putExtra(GeofencingIntentService.EXTRA_GEOFENCE, pGeofence);
-    PendingIntent internalPendingIntent = intentFactory.createPendingIntent(context, internalIntent);
+    PendingIntent internalPendingIntent = intentFactory.createPendingIntent(context,
+        internalIntent);
 
     String requestId = String.valueOf(pGeofence.hashCode());
     locationManager.addProximityAlert(

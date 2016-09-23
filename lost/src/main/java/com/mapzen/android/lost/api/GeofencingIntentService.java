@@ -1,13 +1,13 @@
 package com.mapzen.android.lost.api;
 
 import android.app.IntentService;
-import android.app.PendingIntent;
 import android.content.Intent;
 
 /**
  * Handles receiving proximity alerts triggered by the {@link android.location.LocationManager} and
- * adds extras to the {@link PendingIntent} that is fired to the original caller as called from
- * {@link GeofencingApi#addGeofences(LostApiClient, GeofencingRequest, PendingIntent)}
+ * adds extras to the {@link android.app.PendingIntent} that is fired to the original caller as
+ * called from {@link GeofencingApi#addGeofences(LostApiClient, GeofencingRequest,
+ * android.app.PendingIntent)}
  */
 public class GeofencingIntentService extends IntentService {
 
