@@ -17,6 +17,11 @@
     <activity android:name="com.mapzen.android.lost.internal.ResolveLocationActivity"/>
 
     <service android:name="com.mapzen.android.lost.internal.FusedLocationProviderService"/>
+    <service android:name="com.mapzen.android.lost.api.GeofencingIntentService">
+      <intent-filter>
+        <action android:name="com.mapzen.lost.action.ACTION_GEOFENCING_SERVICE"/>
+      </intent-filter>
+    </service>
 
   </application>
 

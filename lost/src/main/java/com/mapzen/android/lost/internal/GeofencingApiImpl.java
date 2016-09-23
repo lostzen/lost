@@ -2,6 +2,7 @@ package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.api.Geofence;
 import com.mapzen.android.lost.api.GeofencingApi;
+import com.mapzen.android.lost.api.GeofencingIntentService;
 import com.mapzen.android.lost.api.GeofencingRequest;
 import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.android.lost.api.PendingResult;
@@ -9,6 +10,7 @@ import com.mapzen.android.lost.api.Status;
 
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.location.LocationManager;
 import android.support.annotation.RequiresPermission;
 
@@ -23,14 +25,19 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
  */
 public class GeofencingApiImpl implements GeofencingApi {
 
+  private Context context;
   private LocationManager locationManager;
   private final HashMap<String, PendingIntent> pendingIntentMap;
+  private Intent internalIntent;
+  private IntentFactory intentFactory;
 
-  public GeofencingApiImpl() {
+  public GeofencingApiImpl(IntentFactory factory) {
+    intentFactory = factory;
     pendingIntentMap = new HashMap<>();
   }
 
   public void connect(Context context) {
+    this.context = context;
     locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
   }
 
@@ -62,14 +69,20 @@ public class GeofencingApiImpl implements GeofencingApi {
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   private PendingResult<Status> addGeofence(LostApiClient client, Geofence geofence,
       PendingIntent pendingIntent) throws SecurityException {
+
+    internalIntent = intentFactory.createIntent();
+    internalIntent.putExtra(GeofencingIntentService.EXTRA_PENDING_INTENT, pendingIntent);
     ParcelableGeofence pGeofence = (ParcelableGeofence) geofence;
+    internalIntent.putExtra(GeofencingIntentService.EXTRA_GEOFENCE, pGeofence);
+    PendingIntent internalPendingIntent = intentFactory.createPendingIntent(context, internalIntent);
+
     String requestId = String.valueOf(pGeofence.hashCode());
     locationManager.addProximityAlert(
             pGeofence.getLatitude(),
             pGeofence.getLongitude(),
             pGeofence.getRadius(),
             pGeofence.getDuration(),
-            pendingIntent);
+            internalPendingIntent);
     if (pGeofence.getRequestId() != null && !pGeofence.getRequestId().isEmpty()) {
       requestId = pGeofence.getRequestId();
     }
@@ -108,4 +121,5 @@ public class GeofencingApiImpl implements GeofencingApi {
     pendingIntentMap.values().remove(pendingIntent);
     return new SimplePendingResult(hasResult);
   }
+
 }

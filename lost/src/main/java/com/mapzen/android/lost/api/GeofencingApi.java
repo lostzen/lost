@@ -10,6 +10,10 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 public interface GeofencingApi {
 
+  String EXTRA_TRANSITION = "com.mapzen.lost.extra.transition";
+  String EXTRA_GEOFENCE_LIST = "com.mapzen.lost.extra.geofence_list";
+  String EXTRA_TRIGGERING_LOCATION = "com.mapzen.lost.extra.triggering_location";
+
   /**
    * Sets {@link PendingIntent} to be notified when the device enters or exits one of the specified
    * geofences.

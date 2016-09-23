@@ -1,29 +1,47 @@
 package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.api.Geofence;
+import com.mapzen.android.lost.api.GeofencingApi;
+import com.mapzen.android.lost.api.GeofencingIntentService;
 import com.mapzen.android.lost.api.GeofencingRequest;
+import com.mapzen.android.lost.api.LocationAvailability;
+import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.android.lost.api.PendingResult;
 import com.mapzen.android.lost.api.Status;
+import com.mapzen.lost.BuildConfig;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowApplication;
 
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
 import android.location.LocationManager;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.LOCATION_SERVICE;
+import static android.location.LocationManager.NETWORK_PROVIDER;
 import static com.mapzen.android.lost.api.Geofence.NEVER_EXPIRE;
+import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import static org.robolectric.RuntimeEnvironment.application;
 
 @SuppressWarnings("MissingPermission")
 public class GeofencingApiTest {
@@ -31,12 +49,14 @@ public class GeofencingApiTest {
   LocationManager locationManager;
   GeofencingApiImpl geofencingApi;
   LostApiClient client;
+  IntentFactory intentFactory;
 
   @Before public void setUp() throws Exception {
     context = mock(Context.class);
     locationManager = mock(LocationManager.class);
     when(context.getSystemService(LOCATION_SERVICE)).thenReturn(locationManager);
-    geofencingApi = new GeofencingApiImpl();
+    intentFactory = new TestIntentFactory();
+    geofencingApi = new GeofencingApiImpl(intentFactory);
     geofencingApi.connect(context);
     client = new LostApiClient.Builder(context).build();
   }
@@ -53,7 +73,9 @@ public class GeofencingApiTest {
     GeofencingRequest request = new GeofencingRequest.Builder().addGeofence(geofence).build();
     PendingIntent intent = Mockito.mock(PendingIntent.class);
     geofencingApi.addGeofences(client, request, intent);
-    Mockito.verify(locationManager, times(1)).addProximityAlert(1, 2, 3, NEVER_EXPIRE, intent);
+    PendingIntent pendingIntent = intentFactory.createPendingIntent(context, null);
+    Mockito.verify(locationManager, times(1)).addProximityAlert(1, 2, 3, NEVER_EXPIRE,
+        pendingIntent);
   }
 
   //as suggested here: https://github.com/mapzen/LOST/pull/88#discussion_r77384417
@@ -73,8 +95,11 @@ public class GeofencingApiTest {
     geofences.add(anotherGeofence);
     PendingIntent intent = Mockito.mock(PendingIntent.class);
     geofencingApi.addGeofences(client, geofences, intent);
-    Mockito.verify(locationManager, times(1)).addProximityAlert(1, 2, 3, NEVER_EXPIRE, intent);
-    Mockito.verify(locationManager, times(1)).addProximityAlert(4, 5, 6, NEVER_EXPIRE, intent);
+    PendingIntent pendingIntent = intentFactory.createPendingIntent(context, null);
+    Mockito.verify(locationManager, times(1)).addProximityAlert(1, 2, 3, NEVER_EXPIRE,
+        pendingIntent);
+    Mockito.verify(locationManager, times(1)).addProximityAlert(4, 5, 6, NEVER_EXPIRE,
+        pendingIntent);
   }
 
   @Test public void removeGeofence_pendingIntent_shouldRemoveProximityAlert() {
@@ -230,4 +255,5 @@ public class GeofencingApiTest {
     result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
     assertThat(otherCallback.getStatus()).isNull();
   }
+
 }
