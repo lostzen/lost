@@ -6,8 +6,7 @@ import android.content.Intent;
 /**
  * Handles receiving proximity alerts triggered by the {@link android.location.LocationManager} and
  * adds extras to the {@link android.app.PendingIntent} that is fired to the original caller as
- * called from {@link GeofencingApi#addGeofences(LostApiClient, GeofencingRequest,
- * android.app.PendingIntent)}
+ * called from {@link GeofencingApi#addGeofences(LostApiClient, GeofencingRequest, android.app.PendingIntent)}
  */
 public class GeofencingIntentService extends IntentService {
 
@@ -21,10 +20,8 @@ public class GeofencingIntentService extends IntentService {
     super("GeofencingIntentService");
   }
 
-  private GeofencingIntentSender intentGenerator =
-      new GeofencingIntentSender(this);
-
   @Override protected void onHandleIntent(Intent intent) {
+    GeofencingIntentSender intentGenerator = new GeofencingIntentSender(this);
     intentGenerator.sendIntent(intent);
   }
 
