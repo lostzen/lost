@@ -31,12 +31,14 @@ public class GeofencingApiTest {
   LocationManager locationManager;
   GeofencingApiImpl geofencingApi;
   LostApiClient client;
+  IntentFactory intentFactory;
 
   @Before public void setUp() throws Exception {
     context = mock(Context.class);
     locationManager = mock(LocationManager.class);
     when(context.getSystemService(LOCATION_SERVICE)).thenReturn(locationManager);
-    geofencingApi = new GeofencingApiImpl();
+    intentFactory = new TestIntentFactory();
+    geofencingApi = new GeofencingApiImpl(intentFactory);
     geofencingApi.connect(context);
     client = new LostApiClient.Builder(context).build();
   }
@@ -53,7 +55,9 @@ public class GeofencingApiTest {
     GeofencingRequest request = new GeofencingRequest.Builder().addGeofence(geofence).build();
     PendingIntent intent = Mockito.mock(PendingIntent.class);
     geofencingApi.addGeofences(client, request, intent);
-    Mockito.verify(locationManager, times(1)).addProximityAlert(1, 2, 3, NEVER_EXPIRE, intent);
+    PendingIntent pendingIntent = intentFactory.createPendingIntent(context, null);
+    Mockito.verify(locationManager, times(1)).addProximityAlert(1, 2, 3, NEVER_EXPIRE,
+        pendingIntent);
   }
 
   //as suggested here: https://github.com/mapzen/LOST/pull/88#discussion_r77384417
@@ -73,8 +77,11 @@ public class GeofencingApiTest {
     geofences.add(anotherGeofence);
     PendingIntent intent = Mockito.mock(PendingIntent.class);
     geofencingApi.addGeofences(client, geofences, intent);
-    Mockito.verify(locationManager, times(1)).addProximityAlert(1, 2, 3, NEVER_EXPIRE, intent);
-    Mockito.verify(locationManager, times(1)).addProximityAlert(4, 5, 6, NEVER_EXPIRE, intent);
+    PendingIntent pendingIntent = intentFactory.createPendingIntent(context, null);
+    Mockito.verify(locationManager, times(1)).addProximityAlert(1, 2, 3, NEVER_EXPIRE,
+        pendingIntent);
+    Mockito.verify(locationManager, times(1)).addProximityAlert(4, 5, 6, NEVER_EXPIRE,
+        pendingIntent);
   }
 
   @Test public void removeGeofence_pendingIntent_shouldRemoveProximityAlert() {
@@ -230,4 +237,5 @@ public class GeofencingApiTest {
     result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
     assertThat(otherCallback.getStatus()).isNull();
   }
+
 }
