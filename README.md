@@ -6,7 +6,7 @@ Location Open Source Tracker (for Android)
 
 # Usage
 
-Lost is a drop-in replacement for Google Play Services that makes calls directly to the [LocationManger][1].
+Lost is a drop-in replacement for Google Play services that makes calls directly to the [LocationManger][1].
 
 This project seeks to provide an open source alternative to the [Google APIs][2] that depends only on the Android SDK. It provides 1:1 replacements for the [FusedLocationProviderApi][3], [GeofencingApi][4], and [SettingsApi][5].
 
