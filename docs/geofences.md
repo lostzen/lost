@@ -1,6 +1,6 @@
 #Creating and Monitoring Geofences
 
-With LOST you can create `Geofence`s to monitor when a user enters or exits an area and get notifications when this occurs.
+With Lost you can create `Geofence`s to monitor when a user enters or exits an area and get notifications when this occurs.
 
 First create a `Geofence` object:
 ```java
