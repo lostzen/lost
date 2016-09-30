@@ -23,3 +23,20 @@ LostApiClient.ConnectionCallbacks callbacks = new LostApiClient.ConnectionCallba
 LostApiClient client = new LostApiClient.Builder(context).addConnectionCallbacks(callbacks).build();
 client.connect(); //Client is NOT ready for use
 ```
+
+##Explicitly Request Permissions
+We have removed permissions from Lost's manifest, allowing developers to declare only the permissions they need in their client applications. In addition, developers also need to request and check for runtime permissions.
+
+The permissions that Lost requires are as follows:
+
+###FusedLocationProviderApi & GeofencingApi
+```xml
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+```
+
+###SettingsApi
+```xml
+<uses-permission android:name="android.permission.BLUETOOTH"/>
+<uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+```
