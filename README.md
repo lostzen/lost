@@ -12,6 +12,7 @@ This project seeks to provide an open source alternative to the [Google APIs][2]
 
 Set up:
 - [Installation](https://github.com/mapzen/lost/blob/master/docs/installation.md)
+- [Upgrading 1.x to 2.0](https://github.com/mapzen/lost/blob/master/docs/upgrade-1x-2.md)
 - [Getting Started](https://github.com/mapzen/lost/blob/master/docs/getting-started.md)
 - [Getting the Last Known Location](https://github.com/mapzen/lost/blob/master/docs/last-known-location.md)
 - [Receiving Location Updates](https://github.com/mapzen/lost/blob/master/docs/location-updates.md)
