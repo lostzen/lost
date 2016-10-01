@@ -34,7 +34,9 @@ public class FusedLocationProviderApiImpl
 
   private Context context;
   private FusedLocationProviderService service;
-  private boolean connecting;
+  private enum ConnectState { IDLE, CONNECTING, CONNECTED };
+  private ConnectState connectState;
+
 
   private final ServiceConnection serviceConnection = new ServiceConnection() {
     @Override public void onServiceConnected(ComponentName name, IBinder binder) {
@@ -49,7 +51,7 @@ public class FusedLocationProviderApiImpl
           callbacks.onConnected();
         }
       }
-      connecting = false;
+      connectState = ConnectState.CONNECTED;
       Log.d(TAG, "[onServiceConnected]");
     }
 
@@ -59,7 +61,7 @@ public class FusedLocationProviderApiImpl
           callbacks.onConnectionSuspended();
         }
       }
-      connecting = false;
+      connectState = ConnectState.IDLE;
       Log.d(TAG, "[onServiceDisconnected]");
     }
   };
@@ -68,11 +70,12 @@ public class FusedLocationProviderApiImpl
 
 
   public boolean isConnecting() {
-    return connecting;
+    return connectState == ConnectState.CONNECTING;
   }
 
   public FusedLocationProviderApiImpl() {
     connectionCallbacks = new HashSet<>();
+    connectState = ConnectState.IDLE;
   }
 
   public void connect(Context context, LostApiClient.ConnectionCallbacks callbacks) {
@@ -93,22 +96,20 @@ public class FusedLocationProviderApiImpl
   }
 
   public void disconnect(LostApiClient client, boolean stopService) {
-    if (service != null) {
+    if (connectState != ConnectState.IDLE) {
       service.disconnect(client);
-    }
-
-    if (stopService) {
-      context.unbindService(serviceConnection);
-
-      Intent intent = new Intent(context, FusedLocationProviderService.class);
-      context.stopService(intent);
-
-      service = null;
+      connectState = ConnectState.IDLE;
+      if (stopService) {
+        context.unbindService(serviceConnection);
+        Intent intent = new Intent(context, FusedLocationProviderService.class);
+        context.stopService(intent);
+        service = null;
+      }
     }
   }
 
   public boolean isConnected() {
-    return service != null;
+    return connectState == ConnectState.CONNECTED;
   }
 
   @Override public Location getLastLocation(LostApiClient client) {
