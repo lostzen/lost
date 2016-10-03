@@ -3,7 +3,7 @@ package com.mapzen.android.lost.internal;
 import com.mapzen.android.lost.api.Geofence;
 import com.mapzen.android.lost.api.GeofencingApi;
 import com.mapzen.android.lost.api.GeofencingIntentSender;
-import com.mapzen.android.lost.api.GeofencingIntentService;
+import com.mapzen.android.lost.api.LocationServices;
 import com.mapzen.lost.BuildConfig;
 
 import org.junit.Before;
@@ -33,12 +33,16 @@ public class GeofencingIntentSenderTest {
   }
 
   @Test public void generateIntent_shouldHaveExtras() {
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    int intentId = 123;
+    ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000);
+    geofencingApi.setGeofenceForIntentId(intentId, geofence);
+
     Intent intent = new Intent("");
     Bundle extras = new Bundle();
-    extras.putInt(GeofencingIntentSender.EXTRA_ENTERING, 1);
-    ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000);
-    extras.putParcelable(GeofencingIntentService.EXTRA_GEOFENCE, geofence);
+    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, true);
     intent.putExtras(extras);
+    intent.addCategory(String.valueOf(intentId));
 
     Location location = new Location("");
     Intent generated = intentSender.generateIntent(intent, location);

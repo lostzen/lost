@@ -55,7 +55,7 @@ public class GeofencingApiTest {
     GeofencingRequest request = new GeofencingRequest.Builder().addGeofence(geofence).build();
     PendingIntent intent = Mockito.mock(PendingIntent.class);
     geofencingApi.addGeofences(client, request, intent);
-    PendingIntent pendingIntent = intentFactory.createPendingIntent(context, null);
+    PendingIntent pendingIntent = intentFactory.createPendingIntent(context, 123, null);
     Mockito.verify(locationManager, times(1)).addProximityAlert(1, 2, 3, NEVER_EXPIRE,
         pendingIntent);
   }
@@ -77,7 +77,7 @@ public class GeofencingApiTest {
     geofences.add(anotherGeofence);
     PendingIntent intent = Mockito.mock(PendingIntent.class);
     geofencingApi.addGeofences(client, geofences, intent);
-    PendingIntent pendingIntent = intentFactory.createPendingIntent(context, null);
+    PendingIntent pendingIntent = intentFactory.createPendingIntent(context, 123, null);
     Mockito.verify(locationManager, times(1)).addProximityAlert(1, 2, 3, NEVER_EXPIRE,
         pendingIntent);
     Mockito.verify(locationManager, times(1)).addProximityAlert(4, 5, 6, NEVER_EXPIRE,

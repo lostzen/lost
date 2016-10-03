@@ -11,11 +11,11 @@ public class TestIntentFactory implements IntentFactory {
   Intent intent = mock(Intent.class);
   PendingIntent pendingIntent = mock(PendingIntent.class);
 
-  @Override public Intent createIntent() {
+  @Override public Intent createIntent(Context context) {
     return intent;
   }
 
-  @Override public PendingIntent createPendingIntent(Context context, Intent intent) {
+  @Override public PendingIntent createPendingIntent(Context context, int intentId, Intent intent) {
     return pendingIntent;
   }
 }
