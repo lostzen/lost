@@ -38,7 +38,7 @@ public class GeofencingApiTest {
     locationManager = mock(LocationManager.class);
     when(context.getSystemService(LOCATION_SERVICE)).thenReturn(locationManager);
     intentFactory = new TestIntentFactory();
-    geofencingApi = new GeofencingApiImpl(intentFactory);
+    geofencingApi = new GeofencingApiImpl(intentFactory, new PendingIntentIdGenerator());
     geofencingApi.connect(context);
     client = new LostApiClient.Builder(context).build();
   }

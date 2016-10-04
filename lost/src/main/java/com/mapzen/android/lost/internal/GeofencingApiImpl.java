@@ -30,11 +30,13 @@ public class GeofencingApiImpl implements GeofencingApi {
   private Intent internalIntent;
   private IntentFactory intentFactory;
 
+  private IdGenerator idGenerator;
   private HashMap<Integer, PendingIntent> idToPendingIntent = new HashMap<>();
   private HashMap<Integer, Geofence> idToGeofence = new HashMap<>();
 
-  public GeofencingApiImpl(IntentFactory factory) {
+  public GeofencingApiImpl(IntentFactory factory, IdGenerator generator) {
     intentFactory = factory;
+    idGenerator = generator;
     pendingIntentMap = new HashMap<>();
   }
 
@@ -72,7 +74,7 @@ public class GeofencingApiImpl implements GeofencingApi {
   private PendingResult<Status> addGeofence(LostApiClient client, Geofence geofence,
       PendingIntent pendingIntent) throws SecurityException {
 
-    int pendingIntentId = (int) System.currentTimeMillis();
+    int pendingIntentId = idGenerator.generateId();
     internalIntent = intentFactory.createIntent(context);
     internalIntent.addCategory(String.valueOf(pendingIntentId));
     ParcelableGeofence pGeofence = (ParcelableGeofence) geofence;
@@ -135,10 +137,6 @@ public class GeofencingApiImpl implements GeofencingApi {
 
   public Geofence geofenceForIntentId(int intentId) {
     return idToGeofence.get(intentId);
-  }
-
-  public void setGeofenceForIntentId(int intentId, Geofence geofence) {
-    idToGeofence.put(intentId, geofence);
   }
 
 }

@@ -1,6 +1,7 @@
 package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.api.GeofencingIntentSender;
+import com.mapzen.android.lost.api.LocationServices;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -19,7 +20,8 @@ public class GeofencingIntentService extends IntentService {
   }
 
   @Override protected void onHandleIntent(Intent intent) {
-    GeofencingIntentSender intentGenerator = new GeofencingIntentSender(this);
+    GeofencingIntentSender intentGenerator = new GeofencingIntentSender(this,
+        LocationServices.GeofencingApi);
     intentGenerator.sendIntent(intent);
   }
 

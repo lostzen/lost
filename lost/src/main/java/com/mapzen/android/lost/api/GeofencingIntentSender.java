@@ -26,10 +26,10 @@ public class GeofencingIntentSender {
   private FusionEngine engine;
   private GeofencingApiImpl geofencingApi;
 
-  public GeofencingIntentSender(Context context) {
+  public GeofencingIntentSender(Context context, GeofencingApi geofencingApi) {
     this.context = context;
+    this.geofencingApi = (GeofencingApiImpl) geofencingApi;
     engine = new FusionEngine(context, null);
-    geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
   }
 
   public void sendIntent(Intent intent) {
