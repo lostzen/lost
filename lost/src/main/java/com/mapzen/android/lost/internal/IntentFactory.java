@@ -5,6 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 
 public interface IntentFactory {
-  Intent createIntent();
-  PendingIntent createPendingIntent(Context context, Intent intent);
+  Intent createIntent(Context context);
+  PendingIntent createPendingIntent(Context context, int pendingIntentId, Intent intent);
 }

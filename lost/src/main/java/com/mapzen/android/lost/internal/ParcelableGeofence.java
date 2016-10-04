@@ -12,9 +12,10 @@ public class ParcelableGeofence implements Geofence, Parcelable {
   private double longitude;
   private float radius;
   private long durationMillis = NEVER_EXPIRE;
+  private int transitionTypes;
 
   public ParcelableGeofence(String requestId, double latitude, double longitude, float radius,
-      long durationMillis) {
+      long durationMillis, int transitionTypes) {
     this.requestId = requestId;
     this.latitude = latitude;
     this.longitude = longitude;
@@ -25,6 +26,7 @@ public class ParcelableGeofence implements Geofence, Parcelable {
     } else {
       this.durationMillis = durationMillis;
     }
+    this.transitionTypes = transitionTypes;
   }
 
   @Override public String getRequestId() {
@@ -45,6 +47,10 @@ public class ParcelableGeofence implements Geofence, Parcelable {
 
   public long getDuration() {
     return durationMillis;
+  }
+
+  public int getTransitionTypes() {
+    return transitionTypes;
   }
 
   // Parcelable

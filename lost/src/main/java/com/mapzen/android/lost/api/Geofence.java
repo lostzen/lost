@@ -24,13 +24,15 @@ public interface Geofence {
     private double longitude;
     private float radius;
     private long durationMillis = NEVER_EXPIRE;
+    private int transitionTypes;
 
     /**
      * Construct and return a new {@link Geofence} object from the {@link Builder}'s properties.
      * @return new {@link Geofence} object.
      */
     public Geofence build() {
-      return new ParcelableGeofence(requestId, latitude, longitude, radius, durationMillis);
+      return new ParcelableGeofence(requestId, latitude, longitude, radius, durationMillis,
+          transitionTypes);
     }
 
     /**
@@ -82,10 +84,13 @@ public interface Geofence {
     }
 
     /**
-     * Not yet implemented
+     * Sets the transition type for the {@link Builder}.
+     * @param transitionTypes types to be used for geofence.
+     * @return the {@link Builder} object.
      */
     public Geofence.Builder setTransitionTypes(int transitionTypes) {
-      throw new RuntimeException("Sorry, not yet implemented");
+      this.transitionTypes = transitionTypes;
+      return this;
     }
   }
 }

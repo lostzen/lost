@@ -2,7 +2,6 @@ package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.api.Geofence;
 import com.mapzen.android.lost.api.GeofencingApi;
-import com.mapzen.android.lost.api.GeofencingIntentService;
 import com.mapzen.android.lost.api.GeofencingRequest;
 import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.android.lost.api.PendingResult;
@@ -31,8 +30,13 @@ public class GeofencingApiImpl implements GeofencingApi {
   private Intent internalIntent;
   private IntentFactory intentFactory;
 
-  public GeofencingApiImpl(IntentFactory factory) {
+  private IdGenerator idGenerator;
+  private HashMap<Integer, PendingIntent> idToPendingIntent = new HashMap<>();
+  private HashMap<Integer, Geofence> idToGeofence = new HashMap<>();
+
+  public GeofencingApiImpl(IntentFactory factory, IdGenerator generator) {
     intentFactory = factory;
+    idGenerator = generator;
     pendingIntentMap = new HashMap<>();
   }
 
@@ -70,12 +74,16 @@ public class GeofencingApiImpl implements GeofencingApi {
   private PendingResult<Status> addGeofence(LostApiClient client, Geofence geofence,
       PendingIntent pendingIntent) throws SecurityException {
 
-    internalIntent = intentFactory.createIntent();
-    internalIntent.putExtra(GeofencingIntentService.EXTRA_PENDING_INTENT, pendingIntent);
+    int pendingIntentId = idGenerator.generateId();
+    internalIntent = intentFactory.createIntent(context);
+    internalIntent.addCategory(String.valueOf(pendingIntentId));
     ParcelableGeofence pGeofence = (ParcelableGeofence) geofence;
-    internalIntent.putExtra(GeofencingIntentService.EXTRA_GEOFENCE, pGeofence);
+
+    idToPendingIntent.put(pendingIntentId, pendingIntent);
+    idToGeofence.put(pendingIntentId, pGeofence);
+
     PendingIntent internalPendingIntent = intentFactory.createPendingIntent(context,
-        internalIntent);
+        pendingIntentId, internalIntent);
 
     String requestId = String.valueOf(pGeofence.hashCode());
     locationManager.addProximityAlert(
@@ -121,6 +129,14 @@ public class GeofencingApiImpl implements GeofencingApi {
     locationManager.removeProximityAlert(pendingIntent);
     pendingIntentMap.values().remove(pendingIntent);
     return new SimplePendingResult(hasResult);
+  }
+
+  public PendingIntent pendingIntentForIntentId(int intentId) {
+    return idToPendingIntent.get(intentId);
+  }
+
+  public Geofence geofenceForIntentId(int intentId) {
+    return idToGeofence.get(intentId);
   }
 
 }
