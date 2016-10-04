@@ -42,7 +42,7 @@ public class FusedLocationProviderApiImpl
     @Override public void onServiceConnected(ComponentName name, IBinder binder) {
       FusedLocationProviderService.FusedLocationProviderBinder fusedBinder =
           (FusedLocationProviderService.FusedLocationProviderBinder) binder;
-      if(connectState != ConnectState.IDLE) {
+      if (connectState != ConnectState.IDLE) {
         if (fusedBinder != null) {
           service = fusedBinder.getService();
         }
@@ -58,7 +58,7 @@ public class FusedLocationProviderApiImpl
     }
 
     @Override public void onServiceDisconnected(ComponentName name) {
-      if(connectState != ConnectState.IDLE) {
+      if (connectState != ConnectState.IDLE) {
         if (!connectionCallbacks.isEmpty()) {
           for (LostApiClient.ConnectionCallbacks callbacks : connectionCallbacks) {
             callbacks.onConnectionSuspended();
@@ -83,7 +83,7 @@ public class FusedLocationProviderApiImpl
   }
 
   public void connect(Context context, LostApiClient.ConnectionCallbacks callbacks) {
-    if(connectState == ConnectState.IDLE) {
+    if (connectState == ConnectState.IDLE) {
       this.context = context;
       connectState = ConnectState.CONNECTING;
 
@@ -104,8 +104,9 @@ public class FusedLocationProviderApiImpl
 
   public void disconnect(LostApiClient client, boolean stopService) {
     if (connectState != ConnectState.IDLE) {
-      if(connectState == ConnectState.CONNECTED)
+      if (connectState == ConnectState.CONNECTED) {
         service.disconnect(client);
+      }
       connectState = ConnectState.IDLE;
       if (stopService) {
         context.unbindService(serviceConnection);
