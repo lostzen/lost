@@ -25,6 +25,7 @@ public interface Geofence {
     private float radius;
     private long durationMillis = NEVER_EXPIRE;
     private int transitionTypes;
+    private int loiteringDelayMs;
 
     /**
      * Construct and return a new {@link Geofence} object from the {@link Builder}'s properties.
@@ -32,7 +33,7 @@ public interface Geofence {
      */
     public Geofence build() {
       return new ParcelableGeofence(requestId, latitude, longitude, radius, durationMillis,
-          transitionTypes);
+          transitionTypes, loiteringDelayMs);
     }
 
     /**
@@ -60,10 +61,14 @@ public interface Geofence {
     }
 
     /**
-     * Not yet implemented
+     * Sets the loitering delay in millis for the {@link Builder}. If transition type is set to
+     * dwell then this value is used, otherwise it is ignored.
+     * @param loiteringDelayMs duration in milliseconds.
+     * @return the {@link Builder} object.
      */
     public Geofence.Builder setLoiteringDelay(int loiteringDelayMs) {
-      throw new RuntimeException("Sorry, not yet implemented");
+      this.loiteringDelayMs = loiteringDelayMs;
+      return this;
     }
 
     /**
