@@ -35,7 +35,8 @@ public class GeofencingIntentSenderTest {
   @Test public void generateIntent_shouldHaveExtras() {
     GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
     int intentId = 123;
-    ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000);
+    ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
+        Geofence.GEOFENCE_TRANSITION_ENTER);
     geofencingApi.setGeofenceForIntentId(intentId, geofence);
 
     Intent intent = new Intent("");
@@ -53,4 +54,218 @@ public class GeofencingIntentSenderTest {
     assertThat(generated.getExtras().get(GeofencingApi.EXTRA_TRIGGERING_LOCATION)).isEqualTo(
         location);
   }
+
+  @Test public void shouldSendIntent_enter_shouldReturnTrueForEnter() {
+    int intentId = 123;
+
+    Intent intent = new Intent("");
+    Bundle extras = new Bundle();
+    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, true);
+    intent.putExtras(extras);
+    intent.addCategory(String.valueOf(intentId));
+
+    ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
+        Geofence.GEOFENCE_TRANSITION_ENTER);
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    geofencingApi.setGeofenceForIntentId(intentId, geofence);
+
+    boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
+    assertThat(shouldSendIntent).isTrue();
+  }
+
+  @Test public void shouldSendIntent_exit_shouldReturnFalseForEnter() {
+    int intentId = 123;
+
+    Intent intent = new Intent("");
+    Bundle extras = new Bundle();
+    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, true);
+    intent.putExtras(extras);
+    intent.addCategory(String.valueOf(intentId));
+
+    ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
+        Geofence.GEOFENCE_TRANSITION_EXIT);
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    geofencingApi.setGeofenceForIntentId(intentId, geofence);
+
+    boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
+    assertThat(shouldSendIntent).isFalse();
+  }
+
+  @Test public void shouldSendIntent_enterExit_shouldReturnTrueForEnter() {
+    int intentId = 123;
+
+    Intent intent = new Intent("");
+    Bundle extras = new Bundle();
+    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, true);
+    intent.putExtras(extras);
+    intent.addCategory(String.valueOf(intentId));
+
+    ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
+        Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT);
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    geofencingApi.setGeofenceForIntentId(intentId, geofence);
+
+    boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
+    assertThat(shouldSendIntent).isTrue();
+  }
+
+  @Test public void shouldSendIntent_dwell_shouldReturnFalseForEnter() {
+    int intentId = 123;
+
+    Intent intent = new Intent("");
+    Bundle extras = new Bundle();
+    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, true);
+    intent.putExtras(extras);
+    intent.addCategory(String.valueOf(intentId));
+
+    ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
+        Geofence.GEOFENCE_TRANSITION_DWELL);
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    geofencingApi.setGeofenceForIntentId(intentId, geofence);
+
+    boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
+    assertThat(shouldSendIntent).isFalse();
+  }
+
+  @Test public void shouldSendIntent_enter_shouldReturnFalseForExit() {
+    int intentId = 123;
+
+    Intent intent = new Intent("");
+    Bundle extras = new Bundle();
+    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, false);
+    intent.putExtras(extras);
+    intent.addCategory(String.valueOf(intentId));
+
+    ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
+        Geofence.GEOFENCE_TRANSITION_ENTER);
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    geofencingApi.setGeofenceForIntentId(intentId, geofence);
+
+    boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
+    assertThat(shouldSendIntent).isFalse();
+  }
+
+  @Test public void shouldSendIntent_exit_shouldReturnTrueForExit() {
+    int intentId = 123;
+
+    Intent intent = new Intent("");
+    Bundle extras = new Bundle();
+    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, false);
+    intent.putExtras(extras);
+    intent.addCategory(String.valueOf(intentId));
+
+    ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
+        Geofence.GEOFENCE_TRANSITION_EXIT);
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    geofencingApi.setGeofenceForIntentId(intentId, geofence);
+
+    boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
+    assertThat(shouldSendIntent).isTrue();
+  }
+
+  @Test public void shouldSendIntent_enterExit_shouldReturnTrueForExit() {
+    int intentId = 123;
+
+    Intent intent = new Intent("");
+    Bundle extras = new Bundle();
+    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, false);
+    intent.putExtras(extras);
+    intent.addCategory(String.valueOf(intentId));
+
+    ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
+        Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT);
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    geofencingApi.setGeofenceForIntentId(intentId, geofence);
+
+    boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
+    assertThat(shouldSendIntent).isTrue();
+  }
+
+  @Test public void shouldSendIntent_dwell_shouldReturnFalseForExit() {
+    int intentId = 123;
+
+    Intent intent = new Intent("");
+    Bundle extras = new Bundle();
+    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, true);
+    intent.putExtras(extras);
+    intent.addCategory(String.valueOf(intentId));
+
+    ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
+        Geofence.GEOFENCE_TRANSITION_DWELL);
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    geofencingApi.setGeofenceForIntentId(intentId, geofence);
+
+    boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
+    assertThat(shouldSendIntent).isFalse();
+  }
+
+  @Test public void shouldSendIntent_enter_shouldReturnFalseForDwell() {
+    int intentId = 123;
+
+    Intent intent = new Intent("");
+    Bundle extras = new Bundle();
+    intent.putExtras(extras);
+    intent.addCategory(String.valueOf(intentId));
+
+    ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
+        Geofence.GEOFENCE_TRANSITION_ENTER);
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    geofencingApi.setGeofenceForIntentId(intentId, geofence);
+
+    boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
+    assertThat(shouldSendIntent).isFalse();
+  }
+
+  @Test public void shouldSendIntent_exit_shouldReturnFalseForDwell() {
+    int intentId = 123;
+
+    Intent intent = new Intent("");
+    Bundle extras = new Bundle();
+    intent.putExtras(extras);
+    intent.addCategory(String.valueOf(intentId));
+
+    ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
+        Geofence.GEOFENCE_TRANSITION_EXIT);
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    geofencingApi.setGeofenceForIntentId(intentId, geofence);
+
+    boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
+    assertThat(shouldSendIntent).isFalse();
+  }
+
+  @Test public void shouldSendIntent_enterExitDwell_shouldReturnTrueForDwell() {
+    int intentId = 123;
+
+    Intent intent = new Intent("");
+    Bundle extras = new Bundle();
+    intent.putExtras(extras);
+    intent.addCategory(String.valueOf(intentId));
+
+    ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
+        Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT
+            | Geofence.GEOFENCE_TRANSITION_DWELL);
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    geofencingApi.setGeofenceForIntentId(intentId, geofence);
+
+    boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
+    assertThat(shouldSendIntent).isTrue();
+  }
+
+  @Test public void shouldSendIntent_dwell_shouldReturnTrueForDwell() {
+    int intentId = 123;
+
+    Intent intent = new Intent("");
+    Bundle extras = new Bundle();
+    intent.putExtras(extras);
+    intent.addCategory(String.valueOf(intentId));
+
+    ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
+        Geofence.GEOFENCE_TRANSITION_DWELL);
+    GeofencingApiImpl geofencingApi = (GeofencingApiImpl) LocationServices.GeofencingApi;
+    geofencingApi.setGeofenceForIntentId(intentId, geofence);
+
+    boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
+    assertThat(shouldSendIntent).isTrue();
+  }
+
 }

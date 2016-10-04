@@ -49,7 +49,10 @@ public class ParcelableGeofence implements Geofence, Parcelable {
     return durationMillis;
   }
 
-  public int getTransitionTypes() { return transitionTypes; }
+  public int getTransitionTypes() {
+    return transitionTypes;
+  }
+
   // Parcelable
 
   protected ParcelableGeofence(Parcel in) {
