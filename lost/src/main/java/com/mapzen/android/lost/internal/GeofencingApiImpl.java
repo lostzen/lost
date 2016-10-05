@@ -19,6 +19,7 @@ import java.util.List;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.app.AlarmManager.RTC_WAKEUP;
 import static com.mapzen.android.lost.api.Geofence.LOITERING_DELAY_NONE;
 
 /**
@@ -158,7 +159,7 @@ public class GeofencingApiImpl implements GeofencingApi {
     intent.addCategory(String.valueOf(pendingIntentId));
     PendingIntent pendingIntent = dwellServiceIntentFactory.createPendingIntent(context,
         pendingIntentId, intent);
-    alarmManager.set(1, System.currentTimeMillis() + loiterDelay, pendingIntent);
+    alarmManager.set(RTC_WAKEUP, System.currentTimeMillis() + loiterDelay, pendingIntent);
 
     enteredFences.put(geofence, pendingIntent);
   }
