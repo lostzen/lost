@@ -23,6 +23,10 @@ public class GeofencingIntentService extends IntentService {
     GeofencingIntentSender intentGenerator = new GeofencingIntentSender(this,
         LocationServices.GeofencingApi);
     intentGenerator.sendIntent(intent);
+
+    GeofencingDwellManager dwellManager = new GeofencingDwellManager(
+        LocationServices.GeofencingApi);
+    dwellManager.handleIntent(intent);
   }
 
 }
