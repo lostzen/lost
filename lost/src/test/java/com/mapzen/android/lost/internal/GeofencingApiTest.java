@@ -276,4 +276,17 @@ public class GeofencingApiTest {
     verify(alarmManager).cancel(any(PendingIntent.class));
   }
 
+
+  @Test(expected = IllegalStateException.class)
+  public void requestGeofence_shouldThrowExceptionForMissingLoitering() {
+    Geofence geofence = new Geofence.Builder()
+        .setRequestId("test_id")
+        .setCircularRegion(1, 2, 3)
+        .setExpirationDuration(NEVER_EXPIRE)
+        .setTransitionTypes(GEOFENCE_TRANSITION_DWELL)
+        .build();
+    GeofencingRequest request = new GeofencingRequest.Builder().addGeofence(geofence).build();
+    PendingIntent intent = Mockito.mock(PendingIntent.class);
+    geofencingApi.addGeofences(client, request, intent);
+  }
 }

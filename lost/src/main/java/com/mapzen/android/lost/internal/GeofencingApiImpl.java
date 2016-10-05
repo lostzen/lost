@@ -19,6 +19,7 @@ import java.util.List;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static com.mapzen.android.lost.api.Geofence.LOITERING_DELAY_NONE;
 
 /**
  * Implementation of the {@link GeofencingApi}.
@@ -79,6 +80,8 @@ public class GeofencingApiImpl implements GeofencingApi {
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   private PendingResult<Status> addGeofence(LostApiClient client, Geofence geofence,
       PendingIntent pendingIntent) throws SecurityException {
+
+    checkGeofence(geofence);
 
     int pendingIntentId = idGenerator.generateId();
     internalIntent = geofencingServiceIntentFactory.createIntent(context);
@@ -166,6 +169,16 @@ public class GeofencingApiImpl implements GeofencingApi {
       AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
       alarmManager.cancel(pendingIntent);
       enteredFences.remove(geofence);
+    }
+  }
+
+  private void checkGeofence(Geofence geofence) {
+    ParcelableGeofence pGeofence = (ParcelableGeofence) geofence;
+    if ((pGeofence.getTransitionTypes() & Geofence.GEOFENCE_TRANSITION_DWELL) != 0) {
+      if (pGeofence.getLoiteringDelayMs() == LOITERING_DELAY_NONE) {
+        throw new IllegalStateException("Dwell transition type requested without loitering delay. "
+            + "Please set a loitering delay for this geofence.");
+      }
     }
   }
 }
