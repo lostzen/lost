@@ -16,6 +16,6 @@ public class DwellServiceIntentFactory implements IntentFactory {
 
   @Override
   public PendingIntent createPendingIntent(Context context, int pendingIntentId, Intent intent) {
-    return PendingIntent.getService(context, 0, intent, 0);
+    return PendingIntent.getService(context, pendingIntentId, intent, 0);
   }
 }
