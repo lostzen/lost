@@ -50,7 +50,6 @@ public class MockEngineTest {
   @Test public void setTrace_shouldReportEachLocation() throws Exception {
     mockEngine.setTrace(getTestGpxTrace());
     mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
-    Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(callback.locations).hasSize(3);
     assertThat(callback.locations.get(0).getLatitude()).isEqualTo(0.0);
@@ -64,7 +63,6 @@ public class MockEngineTest {
   @Test public void setTrace_shouldReportSpeed() throws Exception {
     mockEngine.setTrace(getTestGpxTrace());
     mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
-    Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(callback.locations.get(0).getSpeed()).isEqualTo(10f);
     assertThat(callback.locations.get(1).getSpeed()).isEqualTo(20f);
@@ -74,7 +72,6 @@ public class MockEngineTest {
   @Test public void setTrace_shouldCalculateBearing() throws Exception {
     mockEngine.setTrace(getTestGpxTrace());
     mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
-    Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(callback.locations.get(0).getBearing()).isEqualTo(0.0f);
     assertThat(callback.locations.get(1).getBearing()).isEqualTo(
@@ -86,7 +83,6 @@ public class MockEngineTest {
   @Test public void setTrace_shouldSetHasBearing() throws Exception {
     mockEngine.setTrace(getTestGpxTrace());
     mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
-    Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(callback.locations.get(0).hasBearing()).isFalse();
     assertThat(callback.locations.get(1).hasBearing()).isTrue();
@@ -96,29 +92,23 @@ public class MockEngineTest {
   @Test public void setTrace_shouldRespectFastestInterval() throws Exception {
     mockEngine.setTrace(getTestGpxTrace());
     mockEngine.setRequest(LocationRequest.create().setFastestInterval(100));
-    Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(callback.locations).hasSize(1);
-    Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(callback.locations).hasSize(2);
-    Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(callback.locations).hasSize(3);
   }
 
-  @Test  public void setTrace_shouldNotRequireSpeed() throws Exception {
+  @Test public void setTrace_shouldNotRequireSpeed() throws Exception {
     mockEngine.setTrace(getTestGpxTrace());
     mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
-    Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(callback.locations.get(0).hasSpeed()).isTrue();
     mockEngine.disable();
     callback.reset();
-    Thread.sleep(100);
     mockEngine.setTrace(getNoSpeedGpxTrace());
     mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
-    Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(callback.locations.get(0).hasSpeed()).isFalse();
   }
@@ -126,11 +116,9 @@ public class MockEngineTest {
   @Test public void disable_shouldCancelTraceReplay() throws Exception {
     mockEngine.setTrace(getTestGpxTrace());
     mockEngine.setRequest(LocationRequest.create().setFastestInterval(100));
-    Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(callback.locations).hasSize(1);
     mockEngine.disable();
-    Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(callback.locations).hasSize(1);
   }
