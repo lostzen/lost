@@ -47,7 +47,6 @@ public class MockEngineTest {
     assertThat(callback.lastLocation).isEqualTo(mockLocation);
   }
 
-  @Ignore("Intermittently failing. Find a better way to test without Thread.sleep(100)")
   @Test public void setTrace_shouldReportEachLocation() throws Exception {
     mockEngine.setTrace(getTestGpxTrace());
     mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
@@ -62,7 +61,6 @@ public class MockEngineTest {
     assertThat(callback.locations.get(2).getLongitude()).isEqualTo(2.1);
   }
 
-  @Ignore("Intermittently failing. Find a better way to test without Thread.sleep(100)")
   @Test public void setTrace_shouldReportSpeed() throws Exception {
     mockEngine.setTrace(getTestGpxTrace());
     mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
@@ -73,7 +71,6 @@ public class MockEngineTest {
     assertThat(callback.locations.get(2).getSpeed()).isEqualTo(30f);
   }
 
-  @Ignore("Intermittently failing. Find a better way to test without Thread.sleep(100)")
   @Test public void setTrace_shouldCalculateBearing() throws Exception {
     mockEngine.setTrace(getTestGpxTrace());
     mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
@@ -110,8 +107,7 @@ public class MockEngineTest {
     assertThat(callback.locations).hasSize(3);
   }
 
-  @Test @Ignore("Intermittently failing. Find a better way to test without Thread.sleep(100)")
-  public void setTrace_shouldNotRequireSpeed() throws Exception {
+  @Test  public void setTrace_shouldNotRequireSpeed() throws Exception {
     mockEngine.setTrace(getTestGpxTrace());
     mockEngine.setRequest(LocationRequest.create().setFastestInterval(0));
     Thread.sleep(100);
@@ -127,8 +123,7 @@ public class MockEngineTest {
     assertThat(callback.locations.get(0).hasSpeed()).isFalse();
   }
 
-  @Test @Ignore("Intermittently failing. Find a better way to test without Thread.sleep(100)")
-  public void disable_shouldCancelTraceReplay() throws Exception {
+  @Test public void disable_shouldCancelTraceReplay() throws Exception {
     mockEngine.setTrace(getTestGpxTrace());
     mockEngine.setRequest(LocationRequest.create().setFastestInterval(100));
     Thread.sleep(100);
