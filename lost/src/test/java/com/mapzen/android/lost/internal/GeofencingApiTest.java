@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.location.LocationManager;
@@ -19,10 +20,14 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.LOCATION_SERVICE;
+import static com.mapzen.android.lost.api.Geofence.GEOFENCE_TRANSITION_DWELL;
 import static com.mapzen.android.lost.api.Geofence.NEVER_EXPIRE;
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("MissingPermission")
@@ -31,14 +36,20 @@ public class GeofencingApiTest {
   LocationManager locationManager;
   GeofencingApiImpl geofencingApi;
   LostApiClient client;
-  IntentFactory intentFactory;
+  IntentFactory geofencingIntentFactory;
+  IntentFactory dwellIntentFactory;
+  AlarmManager alarmManager;
 
   @Before public void setUp() throws Exception {
     context = mock(Context.class);
     locationManager = mock(LocationManager.class);
     when(context.getSystemService(LOCATION_SERVICE)).thenReturn(locationManager);
-    intentFactory = new TestIntentFactory();
-    geofencingApi = new GeofencingApiImpl(intentFactory, new PendingIntentIdGenerator());
+    alarmManager = mock(AlarmManager.class);
+    when(context.getSystemService(Context.ALARM_SERVICE)).thenReturn(alarmManager);
+    geofencingIntentFactory = new TestIntentFactory();
+    dwellIntentFactory = new TestIntentFactory();
+    geofencingApi = new GeofencingApiImpl(geofencingIntentFactory, dwellIntentFactory,
+        new PendingIntentIdGenerator());
     geofencingApi.connect(context);
     client = new LostApiClient.Builder(context).build();
   }
@@ -55,7 +66,7 @@ public class GeofencingApiTest {
     GeofencingRequest request = new GeofencingRequest.Builder().addGeofence(geofence).build();
     PendingIntent intent = Mockito.mock(PendingIntent.class);
     geofencingApi.addGeofences(client, request, intent);
-    PendingIntent pendingIntent = intentFactory.createPendingIntent(context, 123, null);
+    PendingIntent pendingIntent = geofencingIntentFactory.createPendingIntent(context, 123, null);
     Mockito.verify(locationManager, times(1)).addProximityAlert(1, 2, 3, NEVER_EXPIRE,
         pendingIntent);
   }
@@ -77,7 +88,7 @@ public class GeofencingApiTest {
     geofences.add(anotherGeofence);
     PendingIntent intent = Mockito.mock(PendingIntent.class);
     geofencingApi.addGeofences(client, geofences, intent);
-    PendingIntent pendingIntent = intentFactory.createPendingIntent(context, 123, null);
+    PendingIntent pendingIntent = geofencingIntentFactory.createPendingIntent(context, 123, null);
     Mockito.verify(locationManager, times(1)).addProximityAlert(1, 2, 3, NEVER_EXPIRE,
         pendingIntent);
     Mockito.verify(locationManager, times(1)).addProximityAlert(4, 5, 6, NEVER_EXPIRE,
@@ -238,4 +249,44 @@ public class GeofencingApiTest {
     assertThat(otherCallback.getStatus()).isNull();
   }
 
+  @Test public void enterGeofence_shouldScheduleDwellPendingIntent() {
+    Geofence geofence = new Geofence.Builder()
+        .setRequestId("test_id")
+        .setCircularRegion(1, 2, 3)
+        .setExpirationDuration(NEVER_EXPIRE)
+        .setLoiteringDelay(1000)
+        .setTransitionTypes(GEOFENCE_TRANSITION_DWELL)
+        .build();
+    int pendingIntentId = 123;
+    geofencingApi.geofenceEntered(geofence, pendingIntentId);
+    verify(alarmManager).set(anyInt(), anyInt(), any(PendingIntent.class));
+  }
+
+  @Test public void exitGeofence_shouldCancelDwellPendingIntent() {
+    Geofence geofence = new Geofence.Builder()
+        .setRequestId("test_id")
+        .setCircularRegion(1, 2, 3)
+        .setExpirationDuration(NEVER_EXPIRE)
+        .setLoiteringDelay(1000)
+        .setTransitionTypes(GEOFENCE_TRANSITION_DWELL)
+        .build();
+    int pendingIntentId = 123;
+    geofencingApi.geofenceEntered(geofence, pendingIntentId);
+    geofencingApi.geofenceExited(geofence);
+    verify(alarmManager).cancel(any(PendingIntent.class));
+  }
+
+
+  @Test(expected = IllegalStateException.class)
+  public void requestGeofence_shouldThrowExceptionForMissingLoitering() {
+    Geofence geofence = new Geofence.Builder()
+        .setRequestId("test_id")
+        .setCircularRegion(1, 2, 3)
+        .setExpirationDuration(NEVER_EXPIRE)
+        .setTransitionTypes(GEOFENCE_TRANSITION_DWELL)
+        .build();
+    GeofencingRequest request = new GeofencingRequest.Builder().addGeofence(geofence).build();
+    PendingIntent intent = Mockito.mock(PendingIntent.class);
+    geofencingApi.addGeofences(client, request, intent);
+  }
 }

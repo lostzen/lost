@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import static com.mapzen.android.lost.api.Geofence.GEOFENCE_TRANSITION_DWELL;
 import static com.mapzen.android.lost.api.Geofence.GEOFENCE_TRANSITION_ENTER;
 import static com.mapzen.android.lost.api.Geofence.GEOFENCE_TRANSITION_EXIT;
 import static com.mapzen.android.lost.api.Geofence.NEVER_EXPIRE;
@@ -84,7 +85,9 @@ public class GeofencingApiActivity extends LostApiClientActivity {
     Geofence geofence = new Geofence.Builder()
         .setRequestId(requestId)
         .setCircularRegion(latitude, longitude, radius)
-        .setTransitionTypes(GEOFENCE_TRANSITION_ENTER | GEOFENCE_TRANSITION_EXIT)
+        .setTransitionTypes(GEOFENCE_TRANSITION_ENTER | GEOFENCE_TRANSITION_EXIT |
+            GEOFENCE_TRANSITION_DWELL)
+        .setLoiteringDelay(10000)
         .setExpirationDuration(NEVER_EXPIRE)
         .build();
     GeofencingRequest request = new GeofencingRequest.Builder()

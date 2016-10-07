@@ -22,7 +22,9 @@
         <action android:name="com.mapzen.lost.action.ACTION_GEOFENCING_SERVICE"/>
       </intent-filter>
     </service>
+    <service android:name="com.mapzen.android.lost.internal.DwellIntentService">
 
+    </service>
   </application>
 
 </manifest>

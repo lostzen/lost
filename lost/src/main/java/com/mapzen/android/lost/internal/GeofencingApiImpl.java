@@ -7,6 +7,7 @@ import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.android.lost.api.PendingResult;
 import com.mapzen.android.lost.api.Status;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +19,8 @@ import java.util.List;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.app.AlarmManager.RTC_WAKEUP;
+import static com.mapzen.android.lost.api.Geofence.LOITERING_DELAY_NONE;
 
 /**
  * Implementation of the {@link GeofencingApi}.
@@ -28,14 +31,19 @@ public class GeofencingApiImpl implements GeofencingApi {
   private LocationManager locationManager;
   private final HashMap<String, PendingIntent> pendingIntentMap;
   private Intent internalIntent;
-  private IntentFactory intentFactory;
+  private IntentFactory geofencingServiceIntentFactory;
+  private IntentFactory dwellServiceIntentFactory;
 
   private IdGenerator idGenerator;
   private HashMap<Integer, PendingIntent> idToPendingIntent = new HashMap<>();
   private HashMap<Integer, Geofence> idToGeofence = new HashMap<>();
 
-  public GeofencingApiImpl(IntentFactory factory, IdGenerator generator) {
-    intentFactory = factory;
+  private HashMap<Geofence, PendingIntent> enteredFences = new HashMap<>();
+
+  public GeofencingApiImpl(IntentFactory geofenceFactory, IntentFactory dwellFactory,
+      IdGenerator generator) {
+    geofencingServiceIntentFactory = geofenceFactory;
+    dwellServiceIntentFactory = dwellFactory;
     idGenerator = generator;
     pendingIntentMap = new HashMap<>();
   }
@@ -74,16 +82,18 @@ public class GeofencingApiImpl implements GeofencingApi {
   private PendingResult<Status> addGeofence(LostApiClient client, Geofence geofence,
       PendingIntent pendingIntent) throws SecurityException {
 
+    checkGeofence(geofence);
+
     int pendingIntentId = idGenerator.generateId();
-    internalIntent = intentFactory.createIntent(context);
+    internalIntent = geofencingServiceIntentFactory.createIntent(context);
     internalIntent.addCategory(String.valueOf(pendingIntentId));
     ParcelableGeofence pGeofence = (ParcelableGeofence) geofence;
 
     idToPendingIntent.put(pendingIntentId, pendingIntent);
     idToGeofence.put(pendingIntentId, pGeofence);
 
-    PendingIntent internalPendingIntent = intentFactory.createPendingIntent(context,
-        pendingIntentId, internalIntent);
+    PendingIntent internalPendingIntent = geofencingServiceIntentFactory.createPendingIntent(
+        context, pendingIntentId, internalIntent);
 
     String requestId = String.valueOf(pGeofence.hashCode());
     locationManager.addProximityAlert(
@@ -139,4 +149,37 @@ public class GeofencingApiImpl implements GeofencingApi {
     return idToGeofence.get(intentId);
   }
 
+  public void geofenceEntered(Geofence geofence, int pendingIntentId) {
+    ParcelableGeofence parcelableGeofence = (ParcelableGeofence) geofence;
+    long loiterDelay = parcelableGeofence.getLoiteringDelayMs();
+
+    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+    Intent intent = dwellServiceIntentFactory.createIntent(context);
+    intent.addCategory(String.valueOf(pendingIntentId));
+    PendingIntent pendingIntent = dwellServiceIntentFactory.createPendingIntent(context,
+        pendingIntentId, intent);
+    alarmManager.set(RTC_WAKEUP, System.currentTimeMillis() + loiterDelay, pendingIntent);
+
+    enteredFences.put(geofence, pendingIntent);
+  }
+
+  public void geofenceExited(Geofence geofence) {
+    PendingIntent pendingIntent = enteredFences.get(geofence);
+    if (pendingIntent != null) {
+      AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+      alarmManager.cancel(pendingIntent);
+      enteredFences.remove(geofence);
+    }
+  }
+
+  private void checkGeofence(Geofence geofence) {
+    ParcelableGeofence pGeofence = (ParcelableGeofence) geofence;
+    if ((pGeofence.getTransitionTypes() & Geofence.GEOFENCE_TRANSITION_DWELL) != 0) {
+      if (pGeofence.getLoiteringDelayMs() == LOITERING_DELAY_NONE) {
+        throw new IllegalStateException("Dwell transition type requested without loitering delay. "
+            + "Please set a loitering delay for this geofence.");
+      }
+    }
+  }
 }

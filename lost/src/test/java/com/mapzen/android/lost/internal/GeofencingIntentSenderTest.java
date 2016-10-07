@@ -19,6 +19,7 @@ import android.os.Bundle;
 
 import java.util.ArrayList;
 
+import static com.mapzen.android.lost.internal.GeofenceIntentHelper.EXTRA_ENTERING;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -35,7 +36,8 @@ public class GeofencingIntentSenderTest {
 
   @Before public void setup() {
     IdGenerator idGenerator = new TestIdGenerator();
-    geofencingApi = new GeofencingApiImpl(new TestIntentFactory(), idGenerator);
+    geofencingApi = new GeofencingApiImpl(new TestIntentFactory(), new TestIntentFactory(),
+        idGenerator);
     intentSender = new GeofencingIntentSender(mock(Context.class), geofencingApi);
     context = mock(Context.class);
     when(context.getSystemService(Context.LOCATION_SERVICE)).thenReturn(
@@ -46,14 +48,14 @@ public class GeofencingIntentSenderTest {
   @Test public void generateIntent_shouldHaveExtras() {
     int intentId = geofenceId;
     ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
-        Geofence.GEOFENCE_TRANSITION_ENTER);
+        Geofence.GEOFENCE_TRANSITION_ENTER, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
     geofencingApi.addGeofences(null, allGeofences, null);
 
     Intent intent = new Intent("");
     Bundle extras = new Bundle();
-    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, true);
+    extras.putBoolean(EXTRA_ENTERING, true);
     intent.putExtras(extras);
     intent.addCategory(String.valueOf(intentId));
 
@@ -72,12 +74,12 @@ public class GeofencingIntentSenderTest {
 
     Intent intent = new Intent("");
     Bundle extras = new Bundle();
-    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, true);
+    extras.putBoolean(EXTRA_ENTERING, true);
     intent.putExtras(extras);
     intent.addCategory(String.valueOf(intentId));
 
     ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
-        Geofence.GEOFENCE_TRANSITION_ENTER);
+        Geofence.GEOFENCE_TRANSITION_ENTER, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
     geofencingApi.addGeofences(null, allGeofences, null);
@@ -91,12 +93,12 @@ public class GeofencingIntentSenderTest {
 
     Intent intent = new Intent("");
     Bundle extras = new Bundle();
-    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, true);
+    extras.putBoolean(EXTRA_ENTERING, true);
     intent.putExtras(extras);
     intent.addCategory(String.valueOf(intentId));
 
     ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
-        Geofence.GEOFENCE_TRANSITION_EXIT);
+        Geofence.GEOFENCE_TRANSITION_EXIT, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
     geofencingApi.addGeofences(null, allGeofences, null);
@@ -110,12 +112,12 @@ public class GeofencingIntentSenderTest {
 
     Intent intent = new Intent("");
     Bundle extras = new Bundle();
-    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, true);
+    extras.putBoolean(EXTRA_ENTERING, true);
     intent.putExtras(extras);
     intent.addCategory(String.valueOf(intentId));
 
     ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
-        Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT);
+        Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
     geofencingApi.addGeofences(null, allGeofences, null);
@@ -129,12 +131,12 @@ public class GeofencingIntentSenderTest {
 
     Intent intent = new Intent("");
     Bundle extras = new Bundle();
-    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, true);
+    extras.putBoolean(EXTRA_ENTERING, true);
     intent.putExtras(extras);
     intent.addCategory(String.valueOf(intentId));
 
     ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
-        Geofence.GEOFENCE_TRANSITION_DWELL);
+        Geofence.GEOFENCE_TRANSITION_DWELL, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
     geofencingApi.addGeofences(null, allGeofences, null);
@@ -148,12 +150,12 @@ public class GeofencingIntentSenderTest {
 
     Intent intent = new Intent("");
     Bundle extras = new Bundle();
-    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, false);
+    extras.putBoolean(EXTRA_ENTERING, false);
     intent.putExtras(extras);
     intent.addCategory(String.valueOf(intentId));
 
     ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
-        Geofence.GEOFENCE_TRANSITION_ENTER);
+        Geofence.GEOFENCE_TRANSITION_ENTER, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
     geofencingApi.addGeofences(null, allGeofences, null);
@@ -167,12 +169,12 @@ public class GeofencingIntentSenderTest {
 
     Intent intent = new Intent("");
     Bundle extras = new Bundle();
-    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, false);
+    extras.putBoolean(EXTRA_ENTERING, false);
     intent.putExtras(extras);
     intent.addCategory(String.valueOf(intentId));
 
     ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
-        Geofence.GEOFENCE_TRANSITION_EXIT);
+        Geofence.GEOFENCE_TRANSITION_EXIT, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
     geofencingApi.addGeofences(null, allGeofences, null);
@@ -186,12 +188,12 @@ public class GeofencingIntentSenderTest {
 
     Intent intent = new Intent("");
     Bundle extras = new Bundle();
-    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, false);
+    extras.putBoolean(EXTRA_ENTERING, false);
     intent.putExtras(extras);
     intent.addCategory(String.valueOf(intentId));
 
     ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
-        Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT);
+        Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
     geofencingApi.addGeofences(null, allGeofences, null);
@@ -205,12 +207,12 @@ public class GeofencingIntentSenderTest {
 
     Intent intent = new Intent("");
     Bundle extras = new Bundle();
-    extras.putBoolean(GeofencingIntentSender.EXTRA_ENTERING, true);
+    extras.putBoolean(EXTRA_ENTERING, true);
     intent.putExtras(extras);
     intent.addCategory(String.valueOf(intentId));
 
     ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
-        Geofence.GEOFENCE_TRANSITION_DWELL);
+        Geofence.GEOFENCE_TRANSITION_DWELL, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
     geofencingApi.addGeofences(null, allGeofences, null);
@@ -228,7 +230,7 @@ public class GeofencingIntentSenderTest {
     intent.addCategory(String.valueOf(intentId));
 
     ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
-        Geofence.GEOFENCE_TRANSITION_ENTER);
+        Geofence.GEOFENCE_TRANSITION_ENTER, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
     geofencingApi.addGeofences(null, allGeofences, null);
@@ -246,7 +248,7 @@ public class GeofencingIntentSenderTest {
     intent.addCategory(String.valueOf(intentId));
 
     ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
-        Geofence.GEOFENCE_TRANSITION_EXIT);
+        Geofence.GEOFENCE_TRANSITION_EXIT, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
     geofencingApi.addGeofences(null, allGeofences, null);
@@ -265,7 +267,7 @@ public class GeofencingIntentSenderTest {
 
     ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
         Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT
-            | Geofence.GEOFENCE_TRANSITION_DWELL);
+            | Geofence.GEOFENCE_TRANSITION_DWELL, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
     geofencingApi.addGeofences(null, allGeofences, null);
@@ -283,7 +285,7 @@ public class GeofencingIntentSenderTest {
     intent.addCategory(String.valueOf(intentId));
 
     ParcelableGeofence geofence = new ParcelableGeofence("test", 40.0, 70.0, 50.0f, 1000,
-        Geofence.GEOFENCE_TRANSITION_DWELL);
+        Geofence.GEOFENCE_TRANSITION_DWELL, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
     geofencingApi.addGeofences(null, allGeofences, null);
