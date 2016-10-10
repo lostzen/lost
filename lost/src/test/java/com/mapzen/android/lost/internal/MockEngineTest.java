@@ -3,10 +3,6 @@ package com.mapzen.android.lost.internal;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.lost.BuildConfig;
 
-import android.content.Context;
-import android.location.Location;
-import android.os.Environment;
-
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
@@ -16,12 +12,14 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowEnvironment;
-import org.robolectric.shadows.ShadowLooper;
+
+import android.content.Context;
+import android.location.Location;
+import android.os.Environment;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.robolectric.RuntimeEnvironment.application;

@@ -1,7 +1,5 @@
 package com.mapzen.android.lost.internal;
 
-import com.mapzen.android.lost.api.LocationRequest;
-
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
@@ -10,7 +8,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowEnvironment;
-import org.robolectric.shadows.ShadowLooper;
 
 import android.location.Location;
 import android.os.Environment;
