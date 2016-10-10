@@ -1,14 +1,5 @@
 package com.mapzen.android.lost.internal;
 
-import com.mapzen.android.lost.api.FusedLocationProviderApi;
-import com.mapzen.android.lost.api.LocationAvailability;
-import com.mapzen.android.lost.api.LocationCallback;
-import com.mapzen.android.lost.api.LocationListener;
-import com.mapzen.android.lost.api.LocationRequest;
-import com.mapzen.android.lost.api.LostApiClient;
-import com.mapzen.android.lost.api.PendingResult;
-import com.mapzen.android.lost.api.Status;
-
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -18,6 +9,15 @@ import android.location.Location;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
+
+import com.mapzen.android.lost.api.FusedLocationProviderApi;
+import com.mapzen.android.lost.api.LocationAvailability;
+import com.mapzen.android.lost.api.LocationCallback;
+import com.mapzen.android.lost.api.LocationListener;
+import com.mapzen.android.lost.api.LocationRequest;
+import com.mapzen.android.lost.api.LostApiClient;
+import com.mapzen.android.lost.api.PendingResult;
+import com.mapzen.android.lost.api.Status;
 
 import java.io.File;
 import java.util.HashSet;
@@ -34,32 +34,38 @@ public class FusedLocationProviderApiImpl
 
   private Context context;
   private FusedLocationProviderService service;
-  private boolean connecting;
+  private enum ConnectState { IDLE, CONNECTING, CONNECTED };
+  private ConnectState connectState;
+
 
   private final ServiceConnection serviceConnection = new ServiceConnection() {
     @Override public void onServiceConnected(ComponentName name, IBinder binder) {
       FusedLocationProviderService.FusedLocationProviderBinder fusedBinder =
           (FusedLocationProviderService.FusedLocationProviderBinder) binder;
-      if (fusedBinder != null) {
-        service = fusedBinder.getService();
-      }
-
-      if (!connectionCallbacks.isEmpty()) {
-        for (LostApiClient.ConnectionCallbacks callbacks : connectionCallbacks) {
-          callbacks.onConnected();
+      if (connectState != ConnectState.IDLE) {
+        if (fusedBinder != null) {
+          service = fusedBinder.getService();
         }
+
+        if (!connectionCallbacks.isEmpty()) {
+          for (LostApiClient.ConnectionCallbacks callbacks : connectionCallbacks) {
+            callbacks.onConnected();
+          }
+        }
+        connectState = ConnectState.CONNECTED;
       }
-      connecting = false;
       Log.d(TAG, "[onServiceConnected]");
     }
 
     @Override public void onServiceDisconnected(ComponentName name) {
-      if (!connectionCallbacks.isEmpty()) {
-        for (LostApiClient.ConnectionCallbacks callbacks : connectionCallbacks) {
-          callbacks.onConnectionSuspended();
+      if (connectState != ConnectState.IDLE) {
+        if (!connectionCallbacks.isEmpty()) {
+          for (LostApiClient.ConnectionCallbacks callbacks : connectionCallbacks) {
+            callbacks.onConnectionSuspended();
+          }
         }
+        connectState = ConnectState.IDLE;
       }
-      connecting = false;
       Log.d(TAG, "[onServiceDisconnected]");
     }
   };
@@ -68,24 +74,28 @@ public class FusedLocationProviderApiImpl
 
 
   public boolean isConnecting() {
-    return connecting;
+    return connectState == ConnectState.CONNECTING;
   }
 
   public FusedLocationProviderApiImpl() {
     connectionCallbacks = new HashSet<>();
+    connectState = ConnectState.IDLE;
   }
 
   public void connect(Context context, LostApiClient.ConnectionCallbacks callbacks) {
-    this.context = context;
+    if (connectState == ConnectState.IDLE) {
+      this.context = context;
+      connectState = ConnectState.CONNECTING;
 
-    Intent intent = new Intent(context, FusedLocationProviderService.class);
-    context.startService(intent);
+      Intent intent = new Intent(context, FusedLocationProviderService.class);
+      context.startService(intent);
 
+      intent = new Intent(context, FusedLocationProviderService.class);
+      context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
     if (callbacks != null) {
       connectionCallbacks.add(callbacks);
     }
-    intent = new Intent(context, FusedLocationProviderService.class);
-    context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
   }
 
   public void disconnect() {
@@ -93,22 +103,22 @@ public class FusedLocationProviderApiImpl
   }
 
   public void disconnect(LostApiClient client, boolean stopService) {
-    if (service != null) {
-      service.disconnect(client);
-    }
-
-    if (stopService) {
-      context.unbindService(serviceConnection);
-
-      Intent intent = new Intent(context, FusedLocationProviderService.class);
-      context.stopService(intent);
-
-      service = null;
+    if (connectState != ConnectState.IDLE) {
+      if (connectState == ConnectState.CONNECTED) {
+        service.disconnect(client);
+      }
+      connectState = ConnectState.IDLE;
+      if (stopService) {
+        context.unbindService(serviceConnection);
+        Intent intent = new Intent(context, FusedLocationProviderService.class);
+        context.stopService(intent);
+        service = null;
+      }
     }
   }
 
   public boolean isConnected() {
-    return service != null;
+    return connectState == ConnectState.CONNECTED;
   }
 
   @Override public Location getLastLocation(LostApiClient client) {

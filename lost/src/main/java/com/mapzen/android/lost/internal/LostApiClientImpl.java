@@ -1,9 +1,9 @@
 package com.mapzen.android.lost.internal;
 
+import android.content.Context;
+
 import com.mapzen.android.lost.api.LocationServices;
 import com.mapzen.android.lost.api.LostApiClient;
-
-import android.content.Context;
 
 /**
  * Implementation for {@link LostApiClient}. Constructs API implementations with {@link Context}.
@@ -18,7 +18,8 @@ public class LostApiClientImpl implements LostApiClient {
     this.connectionCallbacks = callbacks;
   }
 
-  @Override public void connect() {
+  @Override
+  public void connect() {
     GeofencingApiImpl geofencingApi = getGeofencingImpl();
     if (!geofencingApi.isConnected()) {
       geofencingApi.connect(context);
@@ -28,20 +29,22 @@ public class LostApiClientImpl implements LostApiClient {
       settingsApi.connect(context);
     }
     FusedLocationProviderApiImpl fusedApi = getFusedLocationProviderApiImpl();
-    if (!fusedApi.isConnected()) {
-      fusedApi.connect(context, connectionCallbacks);
-    } else if (connectionCallbacks != null) {
-      if (fusedApi.isConnecting()) {
-        fusedApi.connectionCallbacks.add(connectionCallbacks);
-      } else {
+    if (fusedApi.isConnected()) {
+      if (connectionCallbacks != null) {
         connectionCallbacks.onConnected();
       }
+    } else if (fusedApi.isConnecting()) {
+      if (connectionCallbacks != null) {
+        fusedApi.connectionCallbacks.add(connectionCallbacks);
+      }
+    } else {
+      fusedApi.connect(context, connectionCallbacks);
     }
-
     clientManager.addClient(this);
   }
 
-  @Override public void disconnect() {
+  @Override
+  public void disconnect() {
     clientManager.removeClient(this);
     if (clientManager.numberOfClients() > 0) {
       return;
@@ -52,7 +55,8 @@ public class LostApiClientImpl implements LostApiClient {
     getFusedLocationProviderApiImpl().disconnect();
   }
 
-  @Override public boolean isConnected() {
+  @Override
+  public boolean isConnected() {
     return getGeofencingImpl().isConnected() && getSettingsApiImpl().isConnected()
         && getFusedLocationProviderApiImpl().isConnected();
   }

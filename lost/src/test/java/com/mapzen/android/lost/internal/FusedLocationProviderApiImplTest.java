@@ -1,5 +1,11 @@
 package com.mapzen.android.lost.internal;
 
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
+import android.location.Location;
+import android.os.Looper;
+
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LostApiClient;
@@ -11,14 +17,9 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
-import android.app.PendingIntent;
-import android.content.ComponentName;
-import android.content.Context;
-import android.location.Location;
-import android.os.Looper;
-
 import java.io.File;
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,12 +32,16 @@ import static org.robolectric.Shadows.shadowOf;
 public class FusedLocationProviderApiImplTest {
 
   private LostApiClient client;
+  private LostApiClient secondClient;
   private FusedLocationProviderApiImpl api;
   private FusedLocationProviderService service;
 
   @Before public void setUp() throws Exception {
     mockService();
     client = new LostApiClient.Builder(mock(Context.class)).build();
+
+    // do not call connect on this!
+    secondClient = new LostApiClient.Builder(mock(Context.class)).build();
     api = new FusedLocationProviderApiImpl();
     api.connect(application, null);
     service = api.getService();
@@ -48,6 +53,12 @@ public class FusedLocationProviderApiImplTest {
     when(stubBinder.getService()).thenReturn(mock(FusedLocationProviderService.class));
     shadowOf(application).setComponentNameAndServiceForBindService(
         new ComponentName("com.mapzen.lost", "FusedLocationProviderService"), stubBinder);
+  }
+
+  @Test public void disconnect_shouldBeHarmlessBeforeConnect() {
+    assertThat(!secondClient.isConnected());
+    secondClient.disconnect();
+    assertThat(!secondClient.isConnected());
   }
 
   @Test public void getLastLocation_shouldCallService() {
