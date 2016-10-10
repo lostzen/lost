@@ -3,20 +3,19 @@ package com.mapzen.android.lost.internal;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.lost.BuildConfig;
 
+import android.location.Location;
+import android.os.Environment;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowEnvironment;
 import org.robolectric.shadows.ShadowLooper;
-
-import android.location.Location;
-import android.os.Environment;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -26,7 +25,7 @@ import java.util.ArrayList;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.robolectric.RuntimeEnvironment.application;
 
-@RunWith(RobolectricGradleTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
 public class MockEngineTest {
   private MockEngine mockEngine;
