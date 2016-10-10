@@ -31,21 +31,24 @@ class TraceThread extends Thread {
   private Location previous;
 
   private final Context context;
-  private final LocationRequestUnbundled request;
   private final File traceFile;
   private final MockEngine engine;
+  private final SleepFactory sleepFactory;
 
-  TraceThread(Context context, LocationRequestUnbundled request, File traceFile,
-      MockEngine engine) {
+  TraceThread(Context context, File traceFile, MockEngine engine, SleepFactory sleepFactory) {
     this.context = context;
-    this.request = request;
     this.traceFile = traceFile;
     this.engine = engine;
+    this.sleepFactory = sleepFactory;
   }
 
   public void cancel() {
     canceled = true;
     interrupt();
+  }
+
+  public boolean isCanceled() {
+    return canceled;
   }
 
   @Override public void run() {
@@ -106,12 +109,9 @@ class TraceThread extends Thread {
   }
 
   private void sleepFastestInterval() {
+    final LocationRequestUnbundled request = engine.getRequest();
     if (request != null) {
-      try {
-        Thread.sleep(request.getFastestInterval());
-      } catch (InterruptedException e) {
-        canceled = true;
-      }
+      sleepFactory.sleep(request.getFastestInterval());
     }
   }
 

@@ -13,10 +13,13 @@ public class MockEngine extends LocationEngine {
 
   private Location location;
   private File traceFile;
+  private TraceThreadFactory traceThreadFactory;
   protected TraceThread traceThread;
 
-  public MockEngine(Context context, FusionEngine.Callback callback) {
+  public MockEngine(Context context, FusionEngine.Callback callback,
+      TraceThreadFactory traceThreadFactory) {
     super(context, callback);
+    this.traceThreadFactory = traceThreadFactory;
   }
 
   @Override public Location getLastLocation() {
@@ -29,7 +32,8 @@ public class MockEngine extends LocationEngine {
 
   @Override protected void enable() {
     if (traceFile != null) {
-      traceThread = new TraceThread(getContext(), getRequest(), traceFile, this);
+      traceThread = traceThreadFactory.createTraceThread(getContext(), traceFile, this,
+          new ThreadSleepFactory());
       traceThread.start();
     }
   }

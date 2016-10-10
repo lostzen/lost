@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Set of location requests used to synthesize parameters for location updates.
  */
 public class LocationRequestUnbundled {
 
