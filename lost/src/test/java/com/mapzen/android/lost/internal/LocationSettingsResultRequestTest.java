@@ -48,7 +48,7 @@ import static org.mockito.Mockito.when;
         .build();
 
     resultRequest =
-        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+        new LocationSettingsResultRequest(context, bluetoothAdapter, pm, locationManager, generator,
             request);
   }
 
@@ -177,7 +177,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(false)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+        new LocationSettingsResultRequest(context, bluetoothAdapter, pm, locationManager, generator,
             settingsRequest);
 
     LocationSettingsResult result = settingsResultRequest.await();
@@ -201,7 +201,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(true)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+        new LocationSettingsResultRequest(context, bluetoothAdapter, pm, locationManager, generator,
             settingsRequest);
 
     LocationSettingsResult result = settingsResultRequest.await();
@@ -226,7 +226,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(false)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+        new LocationSettingsResultRequest(context, bluetoothAdapter, pm, locationManager, generator,
             settingsRequest);
 
     LocationSettingsResult result = settingsResultRequest.await();
@@ -247,7 +247,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(false)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+        new LocationSettingsResultRequest(context, bluetoothAdapter, pm, locationManager, generator,
             settingsRequest);
 
     LocationSettingsResult result = settingsResultRequest.await();
@@ -268,7 +268,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(true)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+        new LocationSettingsResultRequest(context, bluetoothAdapter, pm, locationManager, generator,
             settingsRequest);
 
     LocationSettingsResult result = settingsResultRequest.await();
@@ -282,8 +282,8 @@ import static org.mockito.Mockito.when;
 
     DelayTestPendingIntentGenerator delayedGenerator = new DelayTestPendingIntentGenerator(context);
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, delayedGenerator,
-            request);
+        new LocationSettingsResultRequest(context, bluetoothAdapter, pm, locationManager,
+            delayedGenerator, request);
 
     LocationSettingsResult resultRequest = settingsResultRequest.await(1000, TimeUnit.MILLISECONDS);
     assertThat(resultRequest.getStatus().getStatusCode()).isEqualTo(Status.TIMEOUT);
@@ -433,7 +433,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(false)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+        new LocationSettingsResultRequest(context, bluetoothAdapter, pm, locationManager, generator,
             settingsRequest);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
@@ -461,7 +461,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(true)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+        new LocationSettingsResultRequest(context, bluetoothAdapter, pm, locationManager, generator,
             settingsRequest);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
@@ -489,7 +489,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(false)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+        new LocationSettingsResultRequest(context, bluetoothAdapter, pm, locationManager, generator,
             settingsRequest);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
@@ -513,7 +513,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(false)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+        new LocationSettingsResultRequest(context, bluetoothAdapter, pm, locationManager, generator,
             settingsRequest);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
@@ -537,7 +537,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(true)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, generator,
+        new LocationSettingsResultRequest(context, bluetoothAdapter, pm, locationManager, generator,
             settingsRequest);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
@@ -554,8 +554,8 @@ import static org.mockito.Mockito.when;
 
     DelayTestPendingIntentGenerator delayedGenerator = new DelayTestPendingIntentGenerator(context);
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(bluetoothAdapter, pm, locationManager, delayedGenerator,
-            request);
+        new LocationSettingsResultRequest(context, bluetoothAdapter, pm, locationManager,
+            delayedGenerator, request);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
       @Override public void onResult(@NonNull LocationSettingsResult result) {
