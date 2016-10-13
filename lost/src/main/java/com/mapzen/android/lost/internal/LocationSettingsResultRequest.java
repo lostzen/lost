@@ -44,12 +44,11 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
   Future<LocationSettingsResult> future;
 
   public LocationSettingsResultRequest(Context context, BluetoothAdapter btAdapter,
-      PackageManager pm, LocationManager lm, PendingIntentGenerator generator,
-      LocationSettingsRequest request) {
+      PendingIntentGenerator generator, LocationSettingsRequest request) {
     this.context = context;
+    packageManager = context.getPackageManager();
+    locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     bluetoothAdapter = btAdapter;
-    packageManager = pm;
-    locationManager = lm;
     pendingIntentGenerator = generator;
     settingsRequest = request;
   }
