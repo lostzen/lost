@@ -175,7 +175,7 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     mockMode = !mockMode;
     locationEngine.setRequest(null);
     if (mockMode) {
-      locationEngine = new MockEngine(context, this);
+      locationEngine = new MockEngine(context, this, new GpxTraceThreadFactory());
     } else {
       locationEngine = new FusionEngine(context, this);
     }
@@ -186,5 +186,4 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     final LocationAvailability availability = locationEngine.createLocationAvailability();
     clientManager.notifyLocationAvailability(availability);
   }
-
 }

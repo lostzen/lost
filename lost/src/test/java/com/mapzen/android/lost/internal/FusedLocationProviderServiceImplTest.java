@@ -15,7 +15,6 @@ import com.google.common.io.Files;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
@@ -323,7 +322,6 @@ public class FusedLocationProviderServiceImplTest {
     assertThat(listener.getMostRecentLocation()).isEqualTo(mockLocation);
   }
 
-  @Test @Ignore("Intermittently failing. Find a better way to test without Thread.sleep(100)")
   public void setMockTrace_shouldInvokeListenerForEachLocation() throws Exception {
     api.setMockMode(client, true);
     api.setMockTrace(client, getTestGpxTrace());
@@ -342,7 +340,6 @@ public class FusedLocationProviderServiceImplTest {
     assertThat(listener.getAllLocations().get(2).getLongitude()).isEqualTo(2.1);
   }
 
-  @Test @Ignore("Intermittently failing. Find a better way to test without Thread.sleep(100)")
   public void setMockTrace_shouldBroadcastSpeedWithLocation() throws Exception {
     api.setMockMode(client, true);
     api.setMockTrace(client, getTestGpxTrace());
@@ -357,7 +354,6 @@ public class FusedLocationProviderServiceImplTest {
     assertThat(listener.getAllLocations().get(2).getSpeed()).isEqualTo(30f);
   }
 
-  @Test @Ignore("Intermittently failing. Find a better way to test without Thread.sleep(100)")
   public void setMockTrace_shouldRespectFastestInterval() throws Exception {
     api.setMockMode(client, true);
     api.setMockTrace(client, getTestGpxTrace());

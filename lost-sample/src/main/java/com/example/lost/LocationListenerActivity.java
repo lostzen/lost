@@ -150,22 +150,25 @@ public class LocationListenerActivity extends AppCompatActivity  implements
 
     if (prefs.getBoolean(getString(R.string.mock_mode_gpx_key), false)) {
       String filename = prefs.getString(getString(R.string.mock_gpx_file_key), null);
-      File file = new File(Environment.getExternalStorageDirectory(), filename);
+      File file = new File(getExternalFilesDir(null), filename);
       FusedLocationApi.setMockTrace(client, file);
     }
+
+    final Resources res = getResources();
 
     final String intervalKey = getString(R.string.interval_key);
     final String displacementKey = getString(R.string.displacement_key);
     final String priorityKey = getString(R.string.priority_key);
 
-    final Resources res = getResources();
+    final int intervalDefaultValue = res.getInteger(R.integer.interval_default_value);
+    final int displacementDefaultValue = res.getInteger(R.integer.displacement_default_value);
+    final int priorityDefaultValue = res.getInteger(R.integer.priority_default_value);
+
     final LocationRequest locationRequest = LocationRequest.create()
-        .setInterval(
-            prefs.getInt(intervalKey, res.getInteger(R.integer.interval_default_value)))
-        .setSmallestDisplacement(
-            prefs.getInt(displacementKey, res.getInteger(R.integer.displacement_default_value)))
-        .setPriority(
-            prefs.getInt(priorityKey, res.getInteger(R.integer.priority_default_value)));
+        .setInterval(prefs.getInt(intervalKey, intervalDefaultValue))
+        .setFastestInterval(prefs.getInt(intervalKey, intervalDefaultValue))
+        .setSmallestDisplacement(prefs.getInt(displacementKey, displacementDefaultValue))
+        .setPriority(prefs.getInt(priorityKey, priorityDefaultValue));
 
     FusedLocationApi.requestLocationUpdates(client, locationRequest, listener);
 
