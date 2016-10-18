@@ -69,10 +69,11 @@ public class FusedLocationServiceConnectionManager {
 
   public void onServiceConnected(IBinder binder) {
     if (connectState != ConnectState.IDLE) {
+      connectState = ConnectState.CONNECTED;
       if (eventCallbacks != null) {
         eventCallbacks.onServiceConnected(binder);
       }
-      connectState = ConnectState.CONNECTED;
+
       if (!connectionCallbacks.isEmpty()) {
         for (LostApiClient.ConnectionCallbacks callbacks : connectionCallbacks) {
           callbacks.onConnected();
@@ -83,12 +84,12 @@ public class FusedLocationServiceConnectionManager {
 
   public void onServiceDisconnected() {
     if (connectState != ConnectState.IDLE) {
+      connectState = ConnectState.IDLE;
       if (!connectionCallbacks.isEmpty()) {
         for (LostApiClient.ConnectionCallbacks callbacks : connectionCallbacks) {
           callbacks.onConnectionSuspended();
         }
       }
-      connectState = ConnectState.IDLE;
     }
   }
 }

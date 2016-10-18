@@ -56,6 +56,13 @@ public class FusedLocationServiceConnectionManagerTest {
     assertThat(eventCallbacks.connected).isTrue();
   }
 
+  @Test public void connect_shouldBeConnectingWhenEventCallbacksCalled() {
+    TestEventCallbacks eventCallbacks = new TestEventCallbacks();
+    connectionManager.setEventCallbacks(eventCallbacks);
+    connectionManager.connect(null, null);
+    assertThat(eventCallbacks.connectingOnConnected).isTrue();
+  }
+
   @Test public void connect_shouldAddConnectionCallbacks() {
     TestConnectionCallbacks connectionCallbacks = new TestConnectionCallbacks();
     connectionManager.connect(null, connectionCallbacks);
@@ -88,6 +95,14 @@ public class FusedLocationServiceConnectionManagerTest {
     assertThat(callbacks.connected).isFalse();
   }
 
+  @Test public void disconnect_shouldBeIdleOnEventCallbackCalled() {
+    TestEventCallbacks callbacks = new TestEventCallbacks();
+    connectionManager.setEventCallbacks(callbacks);
+    connectionManager.connect(null, null);
+    connectionManager.disconnect(null, false);
+    assertThat(callbacks.idleOnDisconnect).isTrue();
+  }
+
   @Test public void disconnect_shouldNotCallEventCallback() {
     TestEventCallbacks callbacks = new TestEventCallbacks();
     callbacks.onConnect(null);
@@ -113,10 +128,11 @@ public class FusedLocationServiceConnectionManagerTest {
 
   @Test public void onServiceConnected_shouldCallConnectionCallbackAndBeConnected() {
     TestConnectionCallbacks connectionCallbacks = new TestConnectionCallbacks();
+    connectionCallbacks.setConnectionManager(connectionManager);
     connectionManager.connect(null, connectionCallbacks);
     connectionManager.onServiceConnected(null);
     assertThat(connectionCallbacks.isConnected()).isTrue();
-    assertThat(connectionManager.isConnected()).isTrue();
+    assertThat(connectionCallbacks.isManagerConnectedOnConnect()).isTrue();
   }
 
   @Test public void onServiceConnected_shouldNotCallEventCallbacks() {
@@ -132,11 +148,27 @@ public class FusedLocationServiceConnectionManagerTest {
     assertThat(connectionCallbacks.isConnected()).isFalse();
   }
 
+  @Test public void onServiceConnected_managerShouldBeConnectedWhenEventCallbackCalled() {
+    TestEventCallbacks eventCallbacks = new TestEventCallbacks();
+    connectionManager.setEventCallbacks(eventCallbacks);
+    connectionManager.connect(null, null);
+    connectionManager.onServiceConnected(null);
+    assertThat(eventCallbacks.connectedOnServiceConnected).isTrue();
+  }
+
   @Test public void onServiceDisconnected_shouldCallConnectionCallback() {
     TestConnectionCallbacks connectionCallbacks = new TestConnectionCallbacks();
     connectionManager.connect(null, connectionCallbacks);
     connectionManager.onServiceDisconnected();
     assertThat(connectionCallbacks.isConnected()).isFalse();
+  }
+
+  @Test public void onServiceDisconnected_shouldBeIdleOnConnectionCallbackCalled() {
+    TestConnectionCallbacks connectionCallbacks = new TestConnectionCallbacks();
+    connectionCallbacks.setConnectionManager(connectionManager);
+    connectionManager.connect(null, connectionCallbacks);
+    connectionManager.onServiceDisconnected();
+    assertThat(connectionCallbacks.isIdleOnDisconnected()).isTrue();
   }
 
   @Test public void onServiceDisconnected_shouldNotBeConnectingOrConnected() {
@@ -156,19 +188,27 @@ public class FusedLocationServiceConnectionManagerTest {
   class TestEventCallbacks implements FusedLocationServiceConnectionManager.EventCallbacks {
 
     private boolean connected = false;
+    private boolean connectingOnConnected = false;
+
     private boolean serviceConnected = false;
+    private boolean connectedOnServiceConnected = false;
+
+    private boolean idleOnDisconnect = false;
 
     @Override public void onConnect(Context context) {
       connected = true;
+      connectingOnConnected = connectionManager.isConnecting();
     }
 
     @Override public void onServiceConnected(IBinder binder) {
       serviceConnected = true;
+      connectedOnServiceConnected = connectionManager.isConnected();
     }
 
     @Override
     public void onDisconnect(LostApiClient client, boolean stopService, boolean disconnectService) {
       connected = false;
+      idleOnDisconnect = !connectionManager.isConnected() && !connectionManager.isConnecting();
     }
   }
 }
