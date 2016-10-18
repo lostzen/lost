@@ -50,7 +50,7 @@ public class LostApiClientImpl implements LostApiClient {
 
     getSettingsApiImpl().disconnect();
     getGeofencingImpl().disconnect();
-    getFusedLocationProviderApiImpl().disconnect();
+    getFusedLocationProviderApiImpl().disconnect(null);
   }
 
   @Override public boolean isConnected() {

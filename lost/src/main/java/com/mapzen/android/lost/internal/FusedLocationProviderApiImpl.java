@@ -52,17 +52,14 @@ public class FusedLocationProviderApiImpl
       }
     }
 
-    @Override public void onDisconnect(LostApiClient client, boolean stopService,
-        boolean disconnectService) {
+    @Override public void onDisconnect(LostApiClient client, boolean disconnectService) {
       if (disconnectService) {
         service.disconnect(client);
       }
-      if (stopService) {
-        context.unbindService(serviceConnection);
-        Intent intent = new Intent(context, FusedLocationProviderService.class);
-        context.stopService(intent);
-        service = null;
-      }
+      context.unbindService(serviceConnection);
+      Intent intent = new Intent(context, FusedLocationProviderService.class);
+      context.stopService(intent);
+      service = null;
     }
   };
 
@@ -93,12 +90,8 @@ public class FusedLocationProviderApiImpl
     serviceConnectionManager.connect(context, callbacks);
   }
 
-  public void disconnect() {
-    disconnect(null, true);
-  }
-
-  public void disconnect(LostApiClient client, boolean stopService) {
-    serviceConnectionManager.disconnect(client, stopService);
+  public void disconnect(LostApiClient client) {
+    serviceConnectionManager.disconnect(client);
   }
 
   public boolean isConnected() {

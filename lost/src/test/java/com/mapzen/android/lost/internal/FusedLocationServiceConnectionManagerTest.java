@@ -82,7 +82,7 @@ public class FusedLocationServiceConnectionManagerTest {
 
   @Test public void disconnect_shouldNotSetStateConnectingConnected() {
     connectionManager.connect(null, null);
-    connectionManager.disconnect(null, false);
+    connectionManager.disconnect(null);
     assertThat(connectionManager.isConnecting()).isFalse();
     assertThat(connectionManager.isConnected()).isFalse();
   }
@@ -91,7 +91,7 @@ public class FusedLocationServiceConnectionManagerTest {
     TestEventCallbacks callbacks = new TestEventCallbacks();
     connectionManager.setEventCallbacks(callbacks);
     connectionManager.connect(null, null);
-    connectionManager.disconnect(null, false);
+    connectionManager.disconnect(null);
     assertThat(callbacks.connected).isFalse();
   }
 
@@ -99,7 +99,7 @@ public class FusedLocationServiceConnectionManagerTest {
     TestEventCallbacks callbacks = new TestEventCallbacks();
     connectionManager.setEventCallbacks(callbacks);
     connectionManager.connect(null, null);
-    connectionManager.disconnect(null, false);
+    connectionManager.disconnect(null);
     assertThat(callbacks.idleOnDisconnect).isTrue();
   }
 
@@ -107,7 +107,7 @@ public class FusedLocationServiceConnectionManagerTest {
     TestEventCallbacks callbacks = new TestEventCallbacks();
     callbacks.onConnect(null);
     connectionManager.setEventCallbacks(callbacks);
-    connectionManager.disconnect(null, false);
+    connectionManager.disconnect(null);
     assertThat(callbacks.connected).isTrue();
   }
 
@@ -206,7 +206,7 @@ public class FusedLocationServiceConnectionManagerTest {
     }
 
     @Override
-    public void onDisconnect(LostApiClient client, boolean stopService, boolean disconnectService) {
+    public void onDisconnect(LostApiClient client, boolean disconnectService) {
       connected = false;
       idleOnDisconnect = !connectionManager.isConnected() && !connectionManager.isConnecting();
     }

@@ -95,9 +95,8 @@ public class FusedLocationProviderApiImplTest {
 
   @Test public void disconnect_shouldCallConnectionManager() {
     LostApiClient client = mock(LostApiClient.class);
-    boolean stopService = true;
-    api.disconnect(client, stopService);
-    verify(connectionManager).disconnect(client, stopService);
+    api.disconnect(client);
+    verify(connectionManager).disconnect(client);
   }
 
   @Test public void isConnected_shouldCallConnectionManager() {
