@@ -47,12 +47,12 @@ public class FusedLocationProviderApiImpl
           service = fusedBinder.getService();
         }
 
+        connectState = ConnectState.CONNECTED;
         if (!connectionCallbacks.isEmpty()) {
           for (LostApiClient.ConnectionCallbacks callbacks : connectionCallbacks) {
             callbacks.onConnected();
           }
         }
-        connectState = ConnectState.CONNECTED;
       }
       Log.d(TAG, "[onServiceConnected]");
     }
