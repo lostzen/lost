@@ -34,7 +34,7 @@ public class LostApiClientImpl implements LostApiClient {
       }
     } else if (fusedApi.isConnecting()) {
       if (connectionCallbacks != null) {
-        fusedApi.connectionCallbacks.add(connectionCallbacks);
+        fusedApi.addConnectionCallbacks(connectionCallbacks);
       }
     } else {
       fusedApi.connect(context, connectionCallbacks);
