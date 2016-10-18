@@ -34,7 +34,7 @@ public class FusedLocationProviderApiImpl
 
   private Context context;
   private FusedLocationProviderService service;
-  private enum ConnectState { IDLE, CONNECTING, CONNECTED };
+  private enum ConnectState { IDLE, CONNECTING, CONNECTED }
   private ConnectState connectState;
 
 
