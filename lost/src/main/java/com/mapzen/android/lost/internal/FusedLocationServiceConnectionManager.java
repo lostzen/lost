@@ -23,12 +23,13 @@ public class FusedLocationServiceConnectionManager {
   private ConnectState connectState;
   Set<ConnectionCallbacks> connectionCallbacks;
 
-
-
-  public FusedLocationServiceConnectionManager(EventCallbacks callbacks) {
-    eventCallbacks = callbacks;
+  public FusedLocationServiceConnectionManager() {
     connectionCallbacks = new HashSet<>();
     connectState = ConnectState.IDLE;
+  }
+
+  public void setEventCallbacks(EventCallbacks callbacks) {
+    eventCallbacks = callbacks;
   }
 
   public void addCallbacks(ConnectionCallbacks callbacks) {

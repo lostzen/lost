@@ -77,8 +77,9 @@ public class FusedLocationProviderApiImpl
     }
   };
 
-  public FusedLocationProviderApiImpl() {
-    serviceConnectionManager = new FusedLocationServiceConnectionManager(eventCallbacks);
+  public FusedLocationProviderApiImpl(FusedLocationServiceConnectionManager connectionManager) {
+    serviceConnectionManager = connectionManager;
+    serviceConnectionManager.setEventCallbacks(eventCallbacks);
   }
 
   public boolean isConnecting() {

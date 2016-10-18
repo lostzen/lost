@@ -14,13 +14,16 @@ import com.mapzen.lost.BuildConfig;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.File;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
@@ -35,6 +38,7 @@ public class FusedLocationProviderApiImplTest {
   private LostApiClient secondClient;
   private FusedLocationProviderApiImpl api;
   private FusedLocationProviderService service;
+  private FusedLocationServiceConnectionManager connectionManager;
 
   @Before public void setUp() throws Exception {
     mockService();
@@ -42,7 +46,12 @@ public class FusedLocationProviderApiImplTest {
 
     // do not call connect on this!
     secondClient = new LostApiClient.Builder(mock(Context.class)).build();
-    api = new FusedLocationProviderApiImpl();
+    connectionManager = spy(new FusedLocationServiceConnectionManager());
+    Mockito.doCallRealMethod().when(connectionManager).setEventCallbacks(any(
+        FusedLocationServiceConnectionManager.EventCallbacks.class));
+    Mockito.doCallRealMethod().when(connectionManager).connect(any(Context.class), any(
+        LostApiClient.ConnectionCallbacks.class));
+    api = new FusedLocationProviderApiImpl(connectionManager);
     api.connect(application, null);
     service = api.getService();
   }
@@ -59,6 +68,41 @@ public class FusedLocationProviderApiImplTest {
     assertThat(!secondClient.isConnected());
     secondClient.disconnect();
     assertThat(!secondClient.isConnected());
+  }
+
+  @Test public void shouldSetEventCallbacks() {
+    verify(connectionManager).setEventCallbacks(any(
+        FusedLocationServiceConnectionManager.EventCallbacks.class));
+  }
+
+  @Test public void isConnecting_shouldCallConnectionManager() {
+    api.isConnecting();
+    verify(connectionManager).isConnecting();
+  }
+
+  @Test public void addConnectionCallbacks_shouldCallConnectionManager() {
+    TestConnectionCallbacks callbacks = new TestConnectionCallbacks();
+    api.addConnectionCallbacks(callbacks);
+    verify(connectionManager).addCallbacks(callbacks);
+  }
+
+  @Test public void connect_shouldCallConnectionManager() {
+    Context context = mock(Context.class);
+    TestConnectionCallbacks callbacks = new TestConnectionCallbacks();
+    api.connect(context, callbacks);
+    verify(connectionManager).connect(context, callbacks);
+  }
+
+  @Test public void disconnect_shouldCallConnectionManager() {
+    LostApiClient client = mock(LostApiClient.class);
+    boolean stopService = true;
+    api.disconnect(client, stopService);
+    verify(connectionManager).disconnect(client, stopService);
+  }
+
+  @Test public void isConnected_shouldCallConnectionManager() {
+    api.isConnected();
+    verify(connectionManager).isConnected();
   }
 
   @Test public void getLastLocation_shouldCallService() {
@@ -137,6 +181,17 @@ public class FusedLocationProviderApiImplTest {
   @Test public void getListeners() {
     api.getLocationListeners();
     verify(service).getLocationListeners();
+  }
+
+  class TestConnectionCallbacks implements LostApiClient.ConnectionCallbacks {
+
+    @Override public void onConnected() {
+
+    }
+
+    @Override public void onConnectionSuspended() {
+
+    }
   }
 
 }
