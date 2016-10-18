@@ -17,7 +17,6 @@ import android.content.ServiceConnection;
 import android.location.Location;
 import android.os.IBinder;
 import android.os.Looper;
-import android.util.Log;
 
 import java.io.File;
 import java.util.Map;

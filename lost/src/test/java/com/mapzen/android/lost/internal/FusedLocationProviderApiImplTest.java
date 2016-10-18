@@ -182,16 +182,4 @@ public class FusedLocationProviderApiImplTest {
     api.getLocationListeners();
     verify(service).getLocationListeners();
   }
-
-  class TestConnectionCallbacks implements LostApiClient.ConnectionCallbacks {
-
-    @Override public void onConnected() {
-
-    }
-
-    @Override public void onConnectionSuspended() {
-
-    }
-  }
-
 }
