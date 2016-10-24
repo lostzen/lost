@@ -150,7 +150,6 @@ public class LostApiClientImplTest {
     anotherClient.disconnect();
   }
 
-
   @Test
   public void isConnected_shouldReturnFalseBeforeConnected() throws Exception {
     assertThat(client.isConnected()).isFalse();
@@ -166,4 +165,14 @@ public class LostApiClientImplTest {
     client.disconnect();
     assertThat(client.isConnected()).isFalse();
   }
+
+  @Test public void isConnected_multipleClients_shouldReturnFalseAfterDisconnected() throws Exception {
+    LostApiClient anotherClient = new LostApiClient.Builder(application).build();
+    anotherClient.connect();
+    client.connect();
+    client.disconnect();
+    assertThat(client.isConnected()).isFalse();
+    anotherClient.disconnect();
+  }
+
 }
