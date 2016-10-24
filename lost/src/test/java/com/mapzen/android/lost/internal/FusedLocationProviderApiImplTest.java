@@ -26,6 +26,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
@@ -209,5 +210,13 @@ public class FusedLocationProviderApiImplTest {
     api.onServiceDisconnected(mock(ComponentName.class));
     api.onDisconnect();
     verify(context, never()).unbindService(api);
+  }
+
+  @Test public void onDisconnect_shouldNotAttemptToUnbindServiceMoreThanOnce() throws Exception {
+    Context context = mock(Context.class);
+    api.onConnect(context);
+    api.onDisconnect();
+    api.onDisconnect();
+    verify(context, times(1)).unbindService(api);
   }
 }

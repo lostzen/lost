@@ -53,6 +53,7 @@ public class FusedLocationProviderApiImpl
   @Override public void onDisconnect() {
     if (isBound) {
       context.unbindService(this);
+      isBound = false;
     }
 
     Intent intent = new Intent(context, FusedLocationProviderService.class);
