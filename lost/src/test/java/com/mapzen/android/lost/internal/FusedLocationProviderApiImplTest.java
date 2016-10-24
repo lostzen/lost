@@ -1,11 +1,5 @@
 package com.mapzen.android.lost.internal;
 
-import android.app.PendingIntent;
-import android.content.ComponentName;
-import android.content.Context;
-import android.location.Location;
-import android.os.Looper;
-
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LostApiClient;
@@ -15,21 +9,30 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
+import android.os.Looper;
 
 import java.io.File;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 import static org.robolectric.Shadows.shadowOf;
 
-@RunWith(RobolectricGradleTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @SuppressWarnings("MissingPermission")
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
 public class FusedLocationProviderApiImplTest {
@@ -94,9 +97,8 @@ public class FusedLocationProviderApiImplTest {
   }
 
   @Test public void disconnect_shouldCallConnectionManager() {
-    LostApiClient client = mock(LostApiClient.class);
-    api.disconnect(client);
-    verify(connectionManager).disconnect(client);
+    api.disconnect();
+    verify(connectionManager).disconnect();
   }
 
   @Test public void isConnected_shouldCallConnectionManager() {
@@ -180,5 +182,41 @@ public class FusedLocationProviderApiImplTest {
   @Test public void getListeners() {
     api.getLocationListeners();
     verify(service).getLocationListeners();
+  }
+
+  @Test public void onConnect_shouldStartService() throws Exception {
+    Context context = mock(Context.class);
+    api.onConnect(context);
+    verify(context).startService(new Intent(context, FusedLocationProviderService.class));
+  }
+
+  @Test public void onConnect_shouldBindService() throws Exception {
+    Context context = mock(Context.class);
+    api.onConnect(context);
+    verify(context).bindService(new Intent(context, FusedLocationProviderService.class), api,
+        Context.BIND_AUTO_CREATE);
+  }
+
+  @Test public void onDisconnect_shouldUnbindServiceIfBound() throws Exception {
+    Context context = mock(Context.class);
+    api.onConnect(context);
+    api.onDisconnect();
+    verify(context).unbindService(api);
+  }
+
+  @Test public void onDisconnect_shouldNotUnbindServiceIfNotBound() throws Exception {
+    Context context = mock(Context.class);
+    api.onConnect(context);
+    api.onServiceDisconnected(mock(ComponentName.class));
+    api.onDisconnect();
+    verify(context, never()).unbindService(api);
+  }
+
+  @Test public void onDisconnect_shouldNotAttemptToUnbindServiceMoreThanOnce() throws Exception {
+    Context context = mock(Context.class);
+    api.onConnect(context);
+    api.onDisconnect();
+    api.onDisconnect();
+    verify(context, times(1)).unbindService(api);
   }
 }

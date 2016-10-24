@@ -41,7 +41,6 @@ public interface ClientManager {
   void reportProviderDisabled(String provider);
   void notifyLocationAvailability(final LocationAvailability availability);
   boolean hasNoListeners();
-  void disconnect(LostApiClient client);
   void shutdown();
   Map<LostApiClient, Set<LocationListener>> getLocationListeners();
   Map<LostApiClient, Set<PendingIntent>> getPendingIntents();

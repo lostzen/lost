@@ -23,10 +23,12 @@ public class LostApiClientImpl implements LostApiClient {
     if (!geofencingApi.isConnected()) {
       geofencingApi.connect(context);
     }
+
     SettingsApiImpl settingsApi = getSettingsApiImpl();
     if (!settingsApi.isConnected()) {
       settingsApi.connect(context);
     }
+
     FusedLocationProviderApiImpl fusedApi = getFusedLocationProviderApiImpl();
     if (fusedApi.isConnected()) {
       if (connectionCallbacks != null) {
@@ -39,6 +41,7 @@ public class LostApiClientImpl implements LostApiClient {
     } else {
       fusedApi.connect(context, connectionCallbacks);
     }
+
     clientManager.addClient(this);
   }
 
@@ -50,7 +53,7 @@ public class LostApiClientImpl implements LostApiClient {
 
     getSettingsApiImpl().disconnect();
     getGeofencingImpl().disconnect();
-    getFusedLocationProviderApiImpl().disconnect(null);
+    getFusedLocationProviderApiImpl().disconnect();
   }
 
   @Override public boolean isConnected() {

@@ -1,7 +1,5 @@
 package com.mapzen.android.lost.internal;
 
-import com.mapzen.android.lost.api.LostApiClient;
-
 import org.junit.Test;
 
 import android.content.Context;
@@ -82,7 +80,7 @@ public class FusedLocationServiceConnectionManagerTest {
 
   @Test public void disconnect_shouldNotSetStateConnectingConnected() {
     connectionManager.connect(null, null);
-    connectionManager.disconnect(null);
+    connectionManager.disconnect();
     assertThat(connectionManager.isConnecting()).isFalse();
     assertThat(connectionManager.isConnected()).isFalse();
   }
@@ -91,7 +89,7 @@ public class FusedLocationServiceConnectionManagerTest {
     TestEventCallbacks callbacks = new TestEventCallbacks();
     connectionManager.setEventCallbacks(callbacks);
     connectionManager.connect(null, null);
-    connectionManager.disconnect(null);
+    connectionManager.disconnect();
     assertThat(callbacks.connected).isFalse();
   }
 
@@ -99,7 +97,7 @@ public class FusedLocationServiceConnectionManagerTest {
     TestEventCallbacks callbacks = new TestEventCallbacks();
     connectionManager.setEventCallbacks(callbacks);
     connectionManager.connect(null, null);
-    connectionManager.disconnect(null);
+    connectionManager.disconnect();
     assertThat(callbacks.idleOnDisconnect).isTrue();
   }
 
@@ -107,7 +105,7 @@ public class FusedLocationServiceConnectionManagerTest {
     TestEventCallbacks callbacks = new TestEventCallbacks();
     callbacks.onConnect(null);
     connectionManager.setEventCallbacks(callbacks);
-    connectionManager.disconnect(null);
+    connectionManager.disconnect();
     assertThat(callbacks.connected).isTrue();
   }
 
@@ -206,7 +204,7 @@ public class FusedLocationServiceConnectionManagerTest {
     }
 
     @Override
-    public void onDisconnect(LostApiClient client, boolean disconnectService) {
+    public void onDisconnect() {
       connected = false;
       idleOnDisconnect = !connectionManager.isConnected() && !connectionManager.isConnecting();
     }

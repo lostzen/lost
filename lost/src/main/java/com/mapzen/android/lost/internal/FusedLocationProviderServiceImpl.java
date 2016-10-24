@@ -157,10 +157,6 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     return clientManager.getLocationCallbacks();
   }
 
-  public void disconnect(LostApiClient client) {
-    clientManager.disconnect(client);
-  }
-
   /**
    * Checks if any listeners or pending intents are still registered for location updates. If not,
    * then shutdown the location engines.
