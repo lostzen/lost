@@ -14,7 +14,7 @@ public class FusedLocationServiceConnectionManager {
   public interface EventCallbacks {
     void onConnect(Context context);
     void onServiceConnected(IBinder binder);
-    void onDisconnect(LostApiClient client, boolean disconnectService);
+    void onDisconnect();
   }
 
   private enum ConnectState { IDLE, CONNECTING, CONNECTED }
@@ -57,12 +57,12 @@ public class FusedLocationServiceConnectionManager {
     addCallbacks(callbacks);
   }
 
-  public void disconnect(LostApiClient client) {
+  public void disconnect() {
     if (connectState != ConnectState.IDLE) {
       boolean disconnectService = (connectState == ConnectState.CONNECTED);
       connectState = ConnectState.IDLE;
       if (eventCallbacks != null) {
-        eventCallbacks.onDisconnect(client, disconnectService);
+        eventCallbacks.onDisconnect();
       }
     }
   }

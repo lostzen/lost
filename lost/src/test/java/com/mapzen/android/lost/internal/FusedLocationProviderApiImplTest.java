@@ -1,11 +1,5 @@
 package com.mapzen.android.lost.internal;
 
-import android.app.PendingIntent;
-import android.content.ComponentName;
-import android.content.Context;
-import android.location.Location;
-import android.os.Looper;
-
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LostApiClient;
@@ -17,6 +11,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
+
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
+import android.location.Location;
+import android.os.Looper;
 
 import java.io.File;
 
@@ -94,9 +94,8 @@ public class FusedLocationProviderApiImplTest {
   }
 
   @Test public void disconnect_shouldCallConnectionManager() {
-    LostApiClient client = mock(LostApiClient.class);
-    api.disconnect(client);
-    verify(connectionManager).disconnect(client);
+    api.disconnect();
+    verify(connectionManager).disconnect();
   }
 
   @Test public void isConnected_shouldCallConnectionManager() {

@@ -61,6 +61,10 @@ public class LostClientManager implements ClientManager {
 
   public void removeClient(LostApiClient client) {
     clients.remove(client);
+    clientToListeners.remove(client);
+    clientToPendingIntents.remove(client);
+    clientToLocationCallbacks.remove(client);
+    clientCallbackToLoopers.remove(client);
   }
 
   public int numberOfClients() {
@@ -241,13 +245,6 @@ public class LostClientManager implements ClientManager {
   public boolean hasNoListeners() {
     return clientToListeners.isEmpty() && clientToPendingIntents.isEmpty() &&
         clientToLocationCallbacks.isEmpty();
-  }
-
-  public void disconnect(LostApiClient client) {
-    clientToListeners.remove(client);
-    clientToPendingIntents.remove(client);
-    clientToLocationCallbacks.remove(client);
-    clientCallbackToLoopers.remove(client);
   }
 
   public void shutdown() {

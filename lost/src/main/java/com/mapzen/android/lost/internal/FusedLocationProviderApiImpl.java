@@ -52,10 +52,7 @@ public class FusedLocationProviderApiImpl
       }
     }
 
-    @Override public void onDisconnect(LostApiClient client, boolean disconnectService) {
-      if (disconnectService) {
-        service.disconnect(client);
-      }
+    @Override public void onDisconnect() {
       context.unbindService(serviceConnection);
       Intent intent = new Intent(context, FusedLocationProviderService.class);
       context.stopService(intent);
@@ -90,8 +87,8 @@ public class FusedLocationProviderApiImpl
     serviceConnectionManager.connect(context, callbacks);
   }
 
-  public void disconnect(LostApiClient client) {
-    serviceConnectionManager.disconnect(client);
+  public void disconnect() {
+    serviceConnectionManager.disconnect();
   }
 
   public boolean isConnected() {

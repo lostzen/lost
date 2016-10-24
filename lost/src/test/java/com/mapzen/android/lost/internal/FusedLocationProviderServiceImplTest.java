@@ -813,36 +813,6 @@ public class FusedLocationProviderServiceImplTest {
     assertThat(otherCallback.getAvailability()).isNull();
   }
 
-  @Test public void disconnect_otherClientShouldHavePendingIntents() {
-    client.connect();
-    otherClient.connect();
-    api.requestLocationUpdates(otherClient, LocationRequest.create(),
-        mock(PendingIntent.class));
-    api.disconnect(client);
-
-    assertThat(api.getPendingIntents().get(otherClient)).isNotNull();
-  }
-
-  @Test public void disconnect_otherClientShouldHaveListeners() {
-    client.connect();
-    otherClient.connect();
-    api.requestLocationUpdates(otherClient, LocationRequest.create(),
-        new TestLocationListener());
-    api.disconnect(client);
-
-    assertThat(api.getLocationListeners().get(otherClient)).isNotNull();
-  }
-
-  @Test public void disconnect_otherClientShouldHaveLocationListeners() {
-    client.connect();
-    otherClient.connect();
-    api.requestLocationUpdates(otherClient, LocationRequest.create(),
-        new TestLocationCallback(), Looper.myLooper());
-    api.disconnect(client);
-
-    assertThat(api.getLocationCallbacks().get(otherClient)).isNotNull();
-  }
-
   @Test public void requestLocationUpdates_listener_shouldReturnFusedLocationPendingResult() {
     TestLocationListener listener = new TestLocationListener();
     PendingResult<Status> result = api.requestLocationUpdates(client, LocationRequest.create(),

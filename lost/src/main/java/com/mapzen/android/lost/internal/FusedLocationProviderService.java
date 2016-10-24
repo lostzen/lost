@@ -113,8 +113,4 @@ public class FusedLocationProviderService extends Service {
   public Map<LostApiClient, Set<LocationListener>> getLocationListeners() {
     return serviceImpl.getLocationListeners();
   }
-
-  public void disconnect(LostApiClient client) {
-    serviceImpl.disconnect(client);
-  }
 }
