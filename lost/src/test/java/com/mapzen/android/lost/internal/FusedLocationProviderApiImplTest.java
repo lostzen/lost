@@ -24,6 +24,7 @@ import java.io.File;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -198,12 +199,6 @@ public class FusedLocationProviderApiImplTest {
   @Test public void onDisconnect_shouldUnbindServiceIfBound() throws Exception {
     Context context = mock(Context.class);
     api.onConnect(context);
-
-    FusedLocationProviderService.FusedLocationProviderBinder binder =
-        mock(FusedLocationProviderService.FusedLocationProviderBinder.class);
-    when(binder.getService()).thenReturn(mock(FusedLocationProviderService.class));
-    api.onServiceConnected(binder);
-
     api.onDisconnect();
     verify(context).unbindService(api);
   }
@@ -211,8 +206,8 @@ public class FusedLocationProviderApiImplTest {
   @Test public void onDisconnect_shouldNotUnbindServiceIfNotBound() throws Exception {
     Context context = mock(Context.class);
     api.onConnect(context);
-
+    api.onServiceDisconnected(mock(ComponentName.class));
     api.onDisconnect();
-    verify(context).unbindService(api);
+    verify(context, never()).unbindService(api);
   }
 }
