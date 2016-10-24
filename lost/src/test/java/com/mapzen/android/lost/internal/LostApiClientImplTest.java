@@ -166,7 +166,8 @@ public class LostApiClientImplTest {
     assertThat(client.isConnected()).isFalse();
   }
 
-  @Test public void isConnected_multipleClients_shouldReturnFalseAfterDisconnected() throws Exception {
+  @Test public void isConnected_multipleClients_shouldReturnFalseAfterDisconnected() throws
+      Exception {
     LostApiClient anotherClient = new LostApiClient.Builder(application).build();
     anotherClient.connect();
     client.connect();
