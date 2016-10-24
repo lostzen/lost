@@ -59,7 +59,6 @@ public class FusedLocationServiceConnectionManager {
 
   public void disconnect() {
     if (connectState != ConnectState.IDLE) {
-      boolean disconnectService = (connectState == ConnectState.CONNECTED);
       connectState = ConnectState.IDLE;
       if (eventCallbacks != null) {
         eventCallbacks.onDisconnect();

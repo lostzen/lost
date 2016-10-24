@@ -9,12 +9,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Looper;
 
@@ -29,7 +30,7 @@ import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 import static org.robolectric.Shadows.shadowOf;
 
-@RunWith(RobolectricGradleTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @SuppressWarnings("MissingPermission")
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
 public class FusedLocationProviderApiImplTest {
@@ -179,5 +180,39 @@ public class FusedLocationProviderApiImplTest {
   @Test public void getListeners() {
     api.getLocationListeners();
     verify(service).getLocationListeners();
+  }
+
+  @Test public void onConnect_shouldStartService() throws Exception {
+    Context context = mock(Context.class);
+    api.onConnect(context);
+    verify(context).startService(new Intent(context, FusedLocationProviderService.class));
+  }
+
+  @Test public void onConnect_shouldBindService() throws Exception {
+    Context context = mock(Context.class);
+    api.onConnect(context);
+    verify(context).bindService(new Intent(context, FusedLocationProviderService.class), api,
+        Context.BIND_AUTO_CREATE);
+  }
+
+  @Test public void onDisconnect_shouldUnbindServiceIfBound() throws Exception {
+    Context context = mock(Context.class);
+    api.onConnect(context);
+
+    FusedLocationProviderService.FusedLocationProviderBinder binder =
+        mock(FusedLocationProviderService.FusedLocationProviderBinder.class);
+    when(binder.getService()).thenReturn(mock(FusedLocationProviderService.class));
+    api.onServiceConnected(binder);
+
+    api.onDisconnect();
+    verify(context).unbindService(api);
+  }
+
+  @Test public void onDisconnect_shouldNotUnbindServiceIfNotBound() throws Exception {
+    Context context = mock(Context.class);
+    api.onConnect(context);
+
+    api.onDisconnect();
+    verify(context).unbindService(api);
   }
 }

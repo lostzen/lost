@@ -8,6 +8,7 @@ import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.android.lost.api.PendingResult;
 import com.mapzen.android.lost.api.Status;
+import com.mapzen.android.lost.internal.FusedLocationServiceConnectionManager.EventCallbacks;
 
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -26,53 +27,52 @@ import java.util.Set;
  * Implementation of the {@link FusedLocationProviderApi}.
  */
 public class FusedLocationProviderApiImpl
-    implements FusedLocationProviderApi {
+    implements FusedLocationProviderApi, EventCallbacks, ServiceConnection {
 
   private Context context;
   private FusedLocationProviderService service;
   private FusedLocationServiceConnectionManager serviceConnectionManager;
+  private boolean isBound;
 
-  private FusedLocationServiceConnectionManager.EventCallbacks eventCallbacks =
-      new FusedLocationServiceConnectionManager.EventCallbacks() {
-    @Override public void onConnect(Context context) {
-      FusedLocationProviderApiImpl.this.context = context;
+  @Override public void onConnect(Context context) {
+    this.context = context;
+    final Intent intent = new Intent(context, FusedLocationProviderService.class);
+    context.startService(intent);
+    context.bindService(intent, this, Context.BIND_AUTO_CREATE);
+  }
 
-      Intent intent = new Intent(context, FusedLocationProviderService.class);
-      context.startService(intent);
+  @Override public void onServiceConnected(IBinder binder) {
+    FusedLocationProviderService.FusedLocationProviderBinder fusedBinder =
+        (FusedLocationProviderService.FusedLocationProviderBinder) binder;
+    if (fusedBinder != null) {
+      service = fusedBinder.getService();
+      isBound = true;
+    }
+  }
 
-      intent = new Intent(context, FusedLocationProviderService.class);
-      context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+  @Override public void onDisconnect() {
+    if (isBound) {
+      context.unbindService(this);
     }
 
-    @Override public void onServiceConnected(IBinder binder) {
-      FusedLocationProviderService.FusedLocationProviderBinder fusedBinder =
-          (FusedLocationProviderService.FusedLocationProviderBinder) binder;
-      if (fusedBinder != null) {
-        service = fusedBinder.getService();
-      }
-    }
+    Intent intent = new Intent(context, FusedLocationProviderService.class);
+    context.stopService(intent);
+    service = null;
+  }
 
-    @Override public void onDisconnect() {
-      context.unbindService(serviceConnection);
-      Intent intent = new Intent(context, FusedLocationProviderService.class);
-      context.stopService(intent);
-      service = null;
-    }
-  };
+  @Override public void onServiceConnected(ComponentName name, IBinder binder) {
+    serviceConnectionManager.onServiceConnected(binder);
+    isBound = true;
+  }
 
-  private final ServiceConnection serviceConnection = new ServiceConnection() {
-    @Override public void onServiceConnected(ComponentName name, IBinder binder) {
-      serviceConnectionManager.onServiceConnected(binder);
-    }
-
-    @Override public void onServiceDisconnected(ComponentName name) {
-      serviceConnectionManager.onServiceDisconnected();
-    }
-  };
+  @Override public void onServiceDisconnected(ComponentName name) {
+    serviceConnectionManager.onServiceDisconnected();
+    isBound = false;
+  }
 
   public FusedLocationProviderApiImpl(FusedLocationServiceConnectionManager connectionManager) {
     serviceConnectionManager = connectionManager;
-    serviceConnectionManager.setEventCallbacks(eventCallbacks);
+    serviceConnectionManager.setEventCallbacks(this);
   }
 
   public boolean isConnecting() {
