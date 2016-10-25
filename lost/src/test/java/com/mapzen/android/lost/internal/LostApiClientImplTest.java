@@ -28,9 +28,11 @@ import static org.robolectric.Shadows.shadowOf;
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
 public class LostApiClientImplTest {
   private LostApiClient client;
+  private TestConnectionCallbacks callbacks;
 
   @Before public void setUp() throws Exception {
-    client = new LostApiClient.Builder(application).build();
+    callbacks = new TestConnectionCallbacks();
+    client = new LostApiClientImpl(application, callbacks, new TestClientManager());
 
     FusedLocationProviderService.FusedLocationProviderBinder stubBinder = mock(
         FusedLocationProviderService.FusedLocationProviderBinder.class);
@@ -124,30 +126,30 @@ public class LostApiClientImplTest {
 
   @Test public void disconnect_multipleClients_shouldNotRemoveFusedLocationProviderApiImpl()
       throws Exception {
-    LostApiClient anotherClient = new LostApiClient.Builder(application).build();
+    LostApiClient anotherClient = new LostApiClientImpl(application, callbacks,
+        new TestClientManager());
     anotherClient.connect();
     client.connect();
     client.disconnect();
     assertThat(LocationServices.FusedLocationApi).isNotNull();
-    anotherClient.disconnect();
   }
 
   @Test public void disconnect_multipleClients_shouldNotRemoveGeofencingApiImpl() throws Exception {
-    LostApiClient anotherClient = new LostApiClient.Builder(application).build();
+    LostApiClient anotherClient = new LostApiClientImpl(application, callbacks,
+        new TestClientManager());
     anotherClient.connect();
     client.connect();
     client.disconnect();
     assertThat(LocationServices.GeofencingApi).isNotNull();
-    anotherClient.disconnect();
   }
 
   @Test public void disconnect_multipleClients_shouldNotRemoveSettingsApiImpl() throws Exception {
-    LostApiClient anotherClient = new LostApiClient.Builder(application).build();
+    LostApiClient anotherClient = new LostApiClientImpl(application, callbacks,
+        new TestClientManager());
     anotherClient.connect();
     client.connect();
     client.disconnect();
     assertThat(LocationServices.SettingsApi).isNotNull();
-    anotherClient.disconnect();
   }
 
   @Test
@@ -168,12 +170,12 @@ public class LostApiClientImplTest {
 
   @Test public void isConnected_multipleClients_shouldReturnFalseAfterDisconnected() throws
       Exception {
-    LostApiClient anotherClient = new LostApiClient.Builder(application).build();
+    LostApiClient anotherClient = new LostApiClientImpl(application, callbacks,
+        new TestClientManager());
     anotherClient.connect();
     client.connect();
     client.disconnect();
     assertThat(client.isConnected()).isFalse();
-    anotherClient.disconnect();
   }
 
 }

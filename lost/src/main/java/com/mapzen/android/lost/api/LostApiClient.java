@@ -1,6 +1,7 @@
 package com.mapzen.android.lost.api;
 
 import com.mapzen.android.lost.internal.LostApiClientImpl;
+import com.mapzen.android.lost.internal.LostClientManager;
 
 import android.content.Context;
 
@@ -31,7 +32,7 @@ public interface LostApiClient {
     }
 
     public LostApiClient build() {
-      return new LostApiClientImpl(context, connectionCallbacks);
+      return new LostApiClientImpl(context, connectionCallbacks, LostClientManager.shared());
     }
   }
 }
