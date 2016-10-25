@@ -67,6 +67,10 @@ public class LostClientManager implements ClientManager {
     clientCallbackToLoopers.remove(client);
   }
 
+  public boolean containsClient(LostApiClient client) {
+    return clients.contains(client);
+  }
+
   public int numberOfClients() {
     return clients.size();
   }

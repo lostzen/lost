@@ -58,7 +58,7 @@ public class LostApiClientImpl implements LostApiClient {
 
   @Override public boolean isConnected() {
     return getGeofencingImpl().isConnected() && getSettingsApiImpl().isConnected()
-        && getFusedLocationProviderApiImpl().isConnected();
+        && getFusedLocationProviderApiImpl().isConnected() && clientManager.containsClient(this);
   }
 
   private GeofencingApiImpl getGeofencingImpl() {

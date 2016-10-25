@@ -24,6 +24,7 @@ public interface ClientManager {
 
   void addClient(LostApiClient client);
   void removeClient(LostApiClient client);
+  boolean containsClient(LostApiClient client);
   int numberOfClients();
   void addListener(LostApiClient client, LocationRequest request, LocationListener listener);
   void addPendingIntent(LostApiClient client, LocationRequest request,
