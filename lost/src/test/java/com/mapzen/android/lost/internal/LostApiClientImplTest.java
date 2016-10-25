@@ -65,6 +65,24 @@ public class LostApiClientImplTest {
     assertThat(settingsApi.isConnected()).isTrue();
   }
 
+  @Test public void connect_shouldBeConnectedWhenConnectionCallbackInvoked()
+      throws Exception {
+    callbacks.setLostClient(client);
+    client.connect();
+    assertThat(callbacks.isClientConnectedOnConnect()).isTrue();
+  }
+
+  @Test public void connect_multipleClients_shouldBeConnectedWhenConnectionCallbackInvoked()
+      throws Exception {
+    client.connect();
+    TestConnectionCallbacks callbacks = new TestConnectionCallbacks();
+    LostApiClient anotherClient = new LostApiClientImpl(application, callbacks,
+        new TestClientManager());
+    callbacks.setLostClient(anotherClient);
+    anotherClient.connect();
+    assertThat(callbacks.isClientConnectedOnConnect()).isTrue();
+  }
+
   @Test public void disconnect_shouldNotRemoveFusedLocationProviderApiImpl() throws Exception {
     client.connect();
     client.disconnect();

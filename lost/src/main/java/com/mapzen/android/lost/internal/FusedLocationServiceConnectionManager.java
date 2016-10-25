@@ -47,6 +47,7 @@ public class FusedLocationServiceConnectionManager {
   }
 
   public void connect(Context context, ConnectionCallbacks callbacks) {
+    addCallbacks(callbacks);
     if (connectState == ConnectState.IDLE) {
       connectState = ConnectState.CONNECTING;
 
@@ -54,7 +55,6 @@ public class FusedLocationServiceConnectionManager {
         eventCallbacks.onConnect(context);
       }
     }
-    addCallbacks(callbacks);
   }
 
   public void disconnect() {
@@ -90,5 +90,9 @@ public class FusedLocationServiceConnectionManager {
         }
       }
     }
+  }
+
+  public Set<ConnectionCallbacks> getConnectionCallbacks() {
+    return connectionCallbacks;
   }
 }

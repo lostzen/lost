@@ -1,5 +1,7 @@
 package com.mapzen.android.lost.internal;
 
+import com.mapzen.android.lost.api.LostApiClient;
+
 import org.junit.Test;
 
 import android.content.Context;
@@ -68,6 +70,15 @@ public class FusedLocationServiceConnectionManagerTest {
     assertThat(connectionCallbacks.isConnected()).isTrue();
     connectionManager.onServiceDisconnected();
     assertThat(connectionCallbacks.isConnected()).isFalse();
+  }
+
+  @Test public void connect_shouldAddConnectionCallbacksBeforeEventCallbacksCalled() {
+    TestEventCallbacks eventCallbacks = new TestEventCallbacks();
+    TestConnectionCallbacks connectionCallbacks = new TestConnectionCallbacks();
+    eventCallbacks.setConnectionCallbacks(connectionCallbacks);
+    connectionManager.setEventCallbacks(eventCallbacks);
+    connectionManager.connect(null, connectionCallbacks);
+    assertThat(eventCallbacks.containsConnectionCallbacks).isTrue();
   }
 
   @Test public void connect_shouldNotCallEventCallbacks() {
@@ -193,14 +204,25 @@ public class FusedLocationServiceConnectionManagerTest {
 
     private boolean idleOnDisconnect = false;
 
+    private LostApiClient.ConnectionCallbacks connectionCallbacks;
+    private boolean containsConnectionCallbacks = false;
+
     @Override public void onConnect(Context context) {
       connected = true;
       connectingOnConnected = connectionManager.isConnecting();
+      if (connectionCallbacks != null) {
+        containsConnectionCallbacks = connectionManager.getConnectionCallbacks().contains(
+            connectionCallbacks);
+      }
     }
 
     @Override public void onServiceConnected(IBinder binder) {
       serviceConnected = true;
       connectedOnServiceConnected = connectionManager.isConnected();
+    }
+
+    public void setConnectionCallbacks(LostApiClient.ConnectionCallbacks connectionCallbacks) {
+      this.connectionCallbacks = connectionCallbacks;
     }
 
     @Override
