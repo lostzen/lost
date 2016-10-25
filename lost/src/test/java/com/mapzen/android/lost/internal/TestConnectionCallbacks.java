@@ -8,15 +8,24 @@ class TestConnectionCallbacks implements LostApiClient.ConnectionCallbacks {
   private FusedLocationServiceConnectionManager connectionManager;
   private boolean managerConnectedOnConnect = false;
   private boolean idleOnDisconnected = false;
+  private LostApiClient client;
+  private boolean clientConnectedOnConnect = false;
 
   public void setConnectionManager(FusedLocationServiceConnectionManager manager) {
     connectionManager = manager;
+  }
+
+  public void setLostClient(LostApiClient c) {
+    client = c;
   }
 
   @Override public void onConnected() {
     connected = true;
     if (connectionManager != null) {
       managerConnectedOnConnect = connectionManager.isConnected();
+    }
+    if (client != null) {
+      clientConnectedOnConnect = client.isConnected();
     }
   }
 
@@ -37,5 +46,9 @@ class TestConnectionCallbacks implements LostApiClient.ConnectionCallbacks {
 
   public boolean isIdleOnDisconnected() {
     return idleOnDisconnected;
+  }
+
+  public boolean isClientConnectedOnConnect() {
+    return clientConnectedOnConnect;
   }
 }

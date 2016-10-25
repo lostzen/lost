@@ -11,14 +11,18 @@ import android.content.Context;
 public class LostApiClientImpl implements LostApiClient {
   private final Context context;
   private final ConnectionCallbacks connectionCallbacks;
-  private final ClientManager clientManager = LostClientManager.shared();
+  private final ClientManager clientManager;
 
-  public LostApiClientImpl(Context context, ConnectionCallbacks callbacks) {
+  public LostApiClientImpl(Context context, ConnectionCallbacks callbacks,
+      ClientManager clientManager) {
     this.context = context;
     this.connectionCallbacks = callbacks;
+    this.clientManager = clientManager;
   }
 
   @Override public void connect() {
+    clientManager.addClient(this);
+
     GeofencingApiImpl geofencingApi = getGeofencingImpl();
     if (!geofencingApi.isConnected()) {
       geofencingApi.connect(context);
@@ -41,8 +45,6 @@ public class LostApiClientImpl implements LostApiClient {
     } else {
       fusedApi.connect(context, connectionCallbacks);
     }
-
-    clientManager.addClient(this);
   }
 
   @Override public void disconnect() {
