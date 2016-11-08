@@ -18,6 +18,8 @@ public class SamplesList {
       new Sample(R.string.sample_location_listener_title,
           R.string.sample_location_listener_description, LocationListenerActivity.class),
       new Sample(R.string.sample_pending_intent_title,
-          R.string.sample_pending_intent_description, PendingIntentActivity.class)
+          R.string.sample_pending_intent_description, PendingIntentActivity.class),
+      new Sample(R.string.sample_location_availability_title,
+          R.string.sample_location_availability_description, LocationAvailabilityActivity.class)
   };
 }

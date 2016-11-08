@@ -36,7 +36,8 @@
     <activity android:name=".SettingsApiActivity"/>
     <activity android:name=".LocationListenerActivity"/>
     <activity android:name=".PendingIntentActivity"/>
-    
+    <activity android:name=".LocationAvailabilityActivity"/>
+
     <service
         android:name=".GeofenceIntentService"
         android:exported="false">
