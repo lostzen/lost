@@ -25,8 +25,9 @@ public class LocationAvailabilityActivity extends AppCompatActivity {
         @Override
         public void onLocationAvailability(LocationAvailability locationAvailability) {
             boolean isAvailable = locationAvailability.isLocationAvailable();
-            Toast.makeText(LocationAvailabilityActivity.this, isAvailable ? R.string.location_available
-                    : R.string.location_unavailable, Toast.LENGTH_SHORT).show();
+            Toast.makeText(LocationAvailabilityActivity.this, isAvailable ?
+                    R.string.location_available : R.string.location_unavailable,
+                    Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -56,7 +57,8 @@ public class LocationAvailabilityActivity extends AppCompatActivity {
     }
 
     private void connect() {
-        client = new LostApiClient.Builder(this).addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+        client = new LostApiClient.Builder(this).addConnectionCallbacks(
+                new LostApiClient.ConnectionCallbacks() {
             @Override
             public void onConnected() {
                 checkLocationAvailability();

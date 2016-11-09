@@ -1,7 +1,6 @@
 package com.mapzen.android.lost.api;
 
 import android.location.Location;
-import android.os.Looper;
 
 /**
  * Used for receiving notifications from the FusedLocationProviderApi when the location has changed.
