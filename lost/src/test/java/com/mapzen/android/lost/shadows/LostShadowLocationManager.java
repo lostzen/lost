@@ -34,8 +34,10 @@ public class LostShadowLocationManager {
 
     private final Map<String, LocationProviderEntry> providersEnabled = new LinkedHashMap<>();
     private final Map<String, Location> lastKnownLocations = new HashMap<>();
-    private final Map<PendingIntent, Criteria> requestLocationUdpateCriteriaPendingIntents = new HashMap<>();
-    private final Map<PendingIntent, String> requestLocationUdpateProviderPendingIntents = new HashMap<>();
+    private final Map<PendingIntent, Criteria> requestLocationUdpateCriteriaPendingIntents =
+            new HashMap<>();
+    private final Map<PendingIntent, String> requestLocationUdpateProviderPendingIntents =
+            new HashMap<>();
     private final ArrayList<LocationListener> removedLocationListeners = new ArrayList<>();
 
     private final ArrayList<GpsStatus.Listener> gpsStatusListeners = new ArrayList<>();
@@ -52,8 +54,8 @@ public class LostShadowLocationManager {
         Location lastSeenLocation;
         long lastSeenTime;
 
-        ListenerRegistration(String provider, long minTime, float minDistance, Location locationAtCreation,
-                             LocationListener listener) {
+        ListenerRegistration(String provider, long minTime, float minDistance, Location
+                locationAtCreation, LocationListener listener) {
             this.provider = provider;
             this.minTime = minTime;
             this.minDistance = minDistance;
@@ -64,17 +66,32 @@ public class LostShadowLocationManager {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
             ListenerRegistration that = (ListenerRegistration) o;
 
-            if (minTime != that.minTime) return false;
-            if (Float.compare(that.minDistance, minDistance) != 0) return false;
-            if (lastSeenTime != that.lastSeenTime) return false;
-            if (!listener.equals(that.listener)) return false;
-            if (!provider.equals(that.provider)) return false;
-            return lastSeenLocation != null ? lastSeenLocation.equals(that.lastSeenLocation) : that.lastSeenLocation == null;
+            if (minTime != that.minTime) {
+                return false;
+            }
+            if (Float.compare(that.minDistance, minDistance) != 0) {
+                return false;
+            }
+            if (lastSeenTime != that.lastSeenTime) {
+                return false;
+            }
+            if (!listener.equals(that.listener)) {
+                return false;
+            }
+            if (!provider.equals(that.provider)) {
+                return false;
+            }
+            return lastSeenLocation != null ? lastSeenLocation.equals(that.lastSeenLocation) :
+                    that.lastSeenLocation == null;
 
         }
 
@@ -115,7 +132,8 @@ public class LostShadowLocationManager {
     }
 
     /**
-     * Sets the value to return from {@link #isProviderEnabled(String)} for the given {@code provider}
+     * Sets the value to return from {@link #isProviderEnabled(String)} for the given {@code
+     * provider}
      *
      * @param provider
      *            name of the provider whose status to set
@@ -134,7 +152,8 @@ public class LostShadowLocationManager {
         providerEntry.enabled = isEnabled;
         providerEntry.criteria = criteria;
         providersEnabled.put(provider, providerEntry);
-        List<LocationListener> locationUpdateListeners = new ArrayList<>(getRequestLocationUpdateListeners());
+        List<LocationListener> locationUpdateListeners = new ArrayList<>(
+                getRequestLocationUpdateListeners());
         for (LocationListener locationUpdateListener : locationUpdateListeners) {
             if (isEnabled) {
                 locationUpdateListener.onProviderEnabled(provider);
@@ -146,9 +165,10 @@ public class LostShadowLocationManager {
         final Intent intent = new Intent();
         intent.putExtra(LocationManager.KEY_PROVIDER_ENABLED, isEnabled);
         ShadowApplication.getInstance().sendBroadcast(intent);
-        Set<PendingIntent> requestLocationUdpatePendingIntentSet = requestLocationUdpateCriteriaPendingIntents
-                .keySet();
-        for (PendingIntent requestLocationUdpatePendingIntent : requestLocationUdpatePendingIntentSet) {
+        Set<PendingIntent> requestLocationUdpatePendingIntentSet =
+                requestLocationUdpateCriteriaPendingIntents.keySet();
+        for (PendingIntent requestLocationUdpatePendingIntent :
+                requestLocationUdpatePendingIntentSet) {
             try {
                 requestLocationUdpatePendingIntent.send();
             } catch (PendingIntent.CanceledException e) {
@@ -228,15 +248,18 @@ public class LostShadowLocationManager {
         }
         // TODO: these conditions are incomplete
         for (String provider : providers) {
-            if (provider.equals(LocationManager.NETWORK_PROVIDER) && (accuracy == Criteria.ACCURACY_COARSE || powerRequirement == Criteria.POWER_LOW)) {
+            if (provider.equals(LocationManager.NETWORK_PROVIDER) && (accuracy ==
+                    Criteria.ACCURACY_COARSE || powerRequirement == Criteria.POWER_LOW)) {
                 return provider;
-            } else if (provider.equals(LocationManager.GPS_PROVIDER) && accuracy == Criteria.ACCURACY_FINE && powerRequirement != Criteria.POWER_LOW) {
+            } else if (provider.equals(LocationManager.GPS_PROVIDER) && accuracy ==
+                    Criteria.ACCURACY_FINE && powerRequirement != Criteria.POWER_LOW) {
                 return provider;
             }
         }
 
-        // No enabled provider found with the desired criteria, then return the the first registered provider(?)
-        return providers.isEmpty()? null : providers.get(0);
+        // No enabled provider found with the desired criteria, then return the the first registered
+        // provider(?)
+        return providers.isEmpty() ? null : providers.get(0);
     }
 
     private String getBestProviderWithNoCriteria(boolean enabled) {
@@ -255,11 +278,13 @@ public class LostShadowLocationManager {
     }
 
     @Implementation
-    public void requestLocationUpdates(String provider, long minTime, float minDistance, LocationListener listener) {
+    public void requestLocationUpdates(String provider, long minTime, float minDistance,
+                                       LocationListener listener) {
         addLocationListener(provider, listener, minTime, minDistance);
     }
 
-    private void addLocationListener(String provider, LocationListener listener, long minTime, float minDistance) {
+    private void addLocationListener(String provider, LocationListener listener, long minTime,
+                                     float minDistance) {
         List<ListenerRegistration> providerListeners = locationListeners.get(provider);
         if (providerListeners == null) {
             providerListeners = new ArrayList<>();
@@ -278,13 +303,14 @@ public class LostShadowLocationManager {
     }
 
     @Implementation
-    public void requestLocationUpdates(String provider, long minTime, float minDistance, LocationListener listener,
-                                       Looper looper) {
+    public void requestLocationUpdates(String provider, long minTime, float minDistance,
+                                       LocationListener listener, Looper looper) {
         addLocationListener(provider, listener, minTime, minDistance);
     }
 
     @Implementation
-    public void requestLocationUpdates(long minTime, float minDistance, Criteria criteria, PendingIntent pendingIntent) {
+    public void requestLocationUpdates(long minTime, float minDistance, Criteria criteria,
+                                       PendingIntent pendingIntent) {
         if (pendingIntent == null) {
             throw new IllegalStateException("Intent must not be null");
         }
@@ -317,7 +343,7 @@ public class LostShadowLocationManager {
             List<ListenerRegistration> listenerRegistrations = entry.getValue();
             for (int i = listenerRegistrations.size() - 1; i >= 0; i--) {
                 LocationListener listener = listenerRegistrations.get(i).listener;
-                if(removedLocationListeners.contains(listener)) {
+                if (removedLocationListeners.contains(listener)) {
                     listenerRegistrations.remove(i);
                 }
             }
@@ -326,8 +352,12 @@ public class LostShadowLocationManager {
 
     @Implementation
     public void removeUpdates(PendingIntent pendingIntent) {
-        while (requestLocationUdpateCriteriaPendingIntents.remove(pendingIntent) != null);
-        while (requestLocationUdpateProviderPendingIntents.remove(pendingIntent) != null);
+        while (requestLocationUdpateCriteriaPendingIntents.containsKey(pendingIntent)) {
+            requestLocationUdpateCriteriaPendingIntents.remove(pendingIntent);
+        }
+        while (requestLocationUdpateProviderPendingIntents.containsKey(pendingIntent)) {
+            requestLocationUdpateProviderPendingIntents.remove(pendingIntent);
+        }
     }
 
     public boolean hasGpsStatusListener(GpsStatus.Listener listener) {
@@ -338,7 +368,8 @@ public class LostShadowLocationManager {
      * Non-Android accessor.
      *
      * <p>
-     * Gets the criteria value used in the last call to {@link #getBestProvider(android.location.Criteria, boolean)}
+     * Gets the criteria value used in the last call to {@link #getBestProvider(
+     * android.location.Criteria, boolean)}
      *
      * @return the criteria used to find the best provider
      */
@@ -350,7 +381,8 @@ public class LostShadowLocationManager {
      * Non-Android accessor.
      *
      * <p>
-     * Gets the enabled value used in the last call to {@link #getBestProvider(android.location.Criteria, boolean)}
+     * Gets the enabled value used in the last call to {@link #getBestProvider(
+     * android.location.Criteria, boolean)}
      *
      * @return the enabled value used to find the best provider
      */
@@ -359,20 +391,24 @@ public class LostShadowLocationManager {
     }
 
     /**
-     * Sets the value to return from {@link #getBestProvider(android.location.Criteria, boolean)} for the given
+     * Sets the value to return from {@link #getBestProvider(android.location.Criteria, boolean)}
+     * for the given
      * {@code provider}
      *
      * @param provider name of the provider who should be considered best
      * @param enabled Enabled
      * @param criteria List of criteria
      * @throws Exception if provider is not known
-     * @return false If provider is not enabled but it is supposed to be set as the best enabled provider don't set it, otherwise true
+     * @return false If provider is not enabled but it is supposed to be set as the best enabled
+     * provider don't set it, otherwise true
      */
-    public boolean setBestProvider(String provider, boolean enabled, List<Criteria> criteria) throws Exception {
+    public boolean setBestProvider(String provider, boolean enabled, List<Criteria> criteria)
+            throws Exception {
         if (!getAllProviders().contains(provider)) {
             throw new IllegalStateException("Best provider is not a known provider");
         }
-        // If provider is not enabled but it is supposed to be set as the best enabled provider don't set it.
+        // If provider is not enabled but it is supposed to be set as the best enabled provider
+        // don't set it.
         for (String prvdr : providersEnabled.keySet()) {
             if (provider.equals(prvdr) && providersEnabled.get(prvdr).enabled != enabled) {
                 return false;
@@ -411,7 +447,8 @@ public class LostShadowLocationManager {
     }
 
     /**
-     * Sets the value to return from {@link #getLastKnownLocation(String)} for the given {@code provider}
+     * Sets the value to return from {@link #getLastKnownLocation(String)} for the given {@code
+     * provider}
      *
      * @param provider
      *            name of the provider whose location to set
@@ -445,14 +482,19 @@ public class LostShadowLocationManager {
 
         List<ListenerRegistration> providerListeners = locationListeners.get(
                 location.getProvider());
-        if (providerListeners == null) return;
+        if (providerListeners == null) {
+            return;
+        }
 
         for (ListenerRegistration listenerReg : providerListeners) {
-            if(listenerReg.lastSeenLocation != null && location != null) {
+            if (listenerReg.lastSeenLocation != null && location != null) {
                 float distanceChange = distanceBetween(location, listenerReg.lastSeenLocation);
                 boolean withinMinDistance = distanceChange < listenerReg.minDistance;
-                boolean exceededMinTime = location.getTime() - listenerReg.lastSeenTime > listenerReg.minTime;
-                if (withinMinDistance || !exceededMinTime) continue;
+                boolean exceededMinTime = location.getTime() - listenerReg.lastSeenTime >
+                        listenerReg.minTime;
+                if (withinMinDistance || !exceededMinTime) {
+                    continue;
+                }
             }
             listenerReg.lastSeenLocation = copyOf(location);
             listenerReg.lastSeenTime = location == null ? 0 : location.getTime();
@@ -462,7 +504,9 @@ public class LostShadowLocationManager {
     }
 
     private Location copyOf(Location location) {
-        if (location == null) return null;
+        if (location == null) {
+            return null;
+        }
         Location copy = new Location(location);
         copy.setAccuracy(location.getAccuracy());
         copy.setAltitude(location.getAltitude());
@@ -478,16 +522,18 @@ public class LostShadowLocationManager {
 
     /**
      * Returns the distance between the two locations in meters.
-     * Adapted from: http://stackoverflow.com/questions/837872/calculate-distance-in-meters-when-you-know-longitude-and-latitude-in-java
+     * Adapted from: http://stackoverflow.com/questions/837872/calculate-distance-in-meters-when-
+     * you-know-longitude-and-latitude-in-java
      */
     private static float distanceBetween(Location location1, Location location2) {
         double earthRadius = 3958.75;
         double latDifference = Math.toRadians(location2.getLatitude() - location1.getLatitude());
         double lonDifference = Math.toRadians(location2.getLongitude() - location2.getLongitude());
-        double a = Math.sin(latDifference/2) * Math.sin(latDifference/2) +
-                Math.cos(Math.toRadians(location1.getLatitude())) * Math.cos(Math.toRadians(location2.getLatitude())) *
-                        Math.sin(lonDifference/2) * Math.sin(lonDifference/2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double a = Math.sin(latDifference / 2) * Math.sin(latDifference / 2) +
+                Math.cos(Math.toRadians(location1.getLatitude())) * Math.cos(Math.toRadians(
+                        location2.getLatitude())) *
+                        Math.sin(lonDifference / 2) * Math.sin(lonDifference / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double dist = Math.abs(earthRadius * c);
 
         int meterConversion = 1609;
@@ -520,7 +566,7 @@ public class LostShadowLocationManager {
     public void requestSingleUpdate(String provider, LocationListener listener, Looper looper) {
     }
 
-    final private class LocationProviderEntry implements Map.Entry<Boolean, List<Criteria>> {
+    private final class LocationProviderEntry implements Map.Entry<Boolean, List<Criteria>> {
         private Boolean enabled;
         private List<Criteria> criteria;
 

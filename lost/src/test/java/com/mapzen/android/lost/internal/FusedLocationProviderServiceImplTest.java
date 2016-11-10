@@ -1,5 +1,17 @@
 package com.mapzen.android.lost.internal;
 
+import android.app.IntentService;
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
+import android.location.LocationManager;
+import android.os.Environment;
+import android.os.Looper;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import com.mapzen.android.lost.api.LocationAvailability;
 import com.mapzen.android.lost.api.LocationCallback;
 import com.mapzen.android.lost.api.LocationListener;
@@ -11,9 +23,6 @@ import com.mapzen.android.lost.api.Status;
 import com.mapzen.android.lost.shadows.LostShadowLocationManager;
 import com.mapzen.lost.BuildConfig;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,23 +33,10 @@ import org.robolectric.internal.ShadowExtractor;
 import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowEnvironment;
 import org.robolectric.shadows.ShadowLooper;
-import org.robolectric.util.ReflectionHelpers;
-
-import android.app.IntentService;
-import android.app.PendingIntent;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.location.Location;
-import android.location.LocationManager;
-import android.os.Environment;
-import android.os.Looper;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.LOCATION_SERVICE;
@@ -57,7 +53,8 @@ import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @SuppressWarnings("MissingPermission")
-@Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE, shadows = { LostShadowLocationManager.class})
+@Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE, shadows = {
+        LostShadowLocationManager.class})
 public class FusedLocationProviderServiceImplTest {
   private LostApiClient client;
   private FusedLocationProviderServiceImpl api;
