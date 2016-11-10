@@ -8,6 +8,7 @@ import com.mapzen.android.lost.api.LocationResult;
 import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.android.lost.api.PendingResult;
 import com.mapzen.android.lost.api.Status;
+import com.mapzen.android.lost.shadows.LostShadowLocationManager;
 import com.mapzen.lost.BuildConfig;
 
 import com.google.common.base.Charsets;
@@ -19,9 +20,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.internal.ShadowExtractor;
 import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowEnvironment;
-import org.robolectric.shadows.ShadowLocationManager;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.util.ReflectionHelpers;
 
@@ -56,23 +57,24 @@ import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @SuppressWarnings("MissingPermission")
-@Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
+@Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE, shadows = { LostShadowLocationManager.class})
 public class FusedLocationProviderServiceImplTest {
   private LostApiClient client;
   private FusedLocationProviderServiceImpl api;
   private LocationManager locationManager;
-  private ShadowLocationManager shadowLocationManager;
+  private LostShadowLocationManager shadowLocationManager;
   private LostApiClient otherClient;
   private ClientManager clientManager;
 
   @Before public void setUp() throws Exception {
+
     mockService();
     client = new LostApiClient.Builder(mock(Context.class)).build();
     otherClient = new LostApiClient.Builder(mock(Context.class)).build();
     clientManager = LostClientManager.shared();
     api = new FusedLocationProviderServiceImpl(application, clientManager);
     locationManager = (LocationManager) application.getSystemService(LOCATION_SERVICE);
-    shadowLocationManager = shadowOf(locationManager);
+    shadowLocationManager = (LostShadowLocationManager) ShadowExtractor.extract(locationManager);
     client.connect();
   }
 
@@ -653,8 +655,7 @@ public class FusedLocationProviderServiceImplTest {
         new TestLocationListener());
 
     api.shutdown();
-    LocationManager lm = (LocationManager) application.getSystemService(LOCATION_SERVICE);
-    assertThat(shadowOf(lm).getRequestLocationUpdateListeners()).isEmpty();
+    assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 
   @Test public void shutdown_shouldClearListeners() {
@@ -999,10 +1000,10 @@ public class FusedLocationProviderServiceImplTest {
 
   /**
    * Due to a bug in Robolectric that allows the same location listener to be registered twice,
-   * we need to manually clear the `ShadowLocationManager` to prevent duplicate listeners.
+   * we need to manually clear the `LostShadowLocationManager` to prevent duplicate listeners.
    *
    * @see <a href="https://github.com/robolectric/robolectric/issues/2603">
-   * ShadowLocationManager should not allow duplicate listeners</a>
+   * LostShadowLocationManager should not allow duplicate listeners</a>
    */
   private void clearShadowLocationListeners() {
     Map<String, List> map = ReflectionHelpers.getField(shadowLocationManager, "locationListeners");
