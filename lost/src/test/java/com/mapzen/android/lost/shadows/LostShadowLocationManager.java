@@ -61,6 +61,33 @@ public class LostShadowLocationManager {
             this.lastSeenLocation = locationAtCreation;
             this.listener = listener;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ListenerRegistration that = (ListenerRegistration) o;
+
+            if (minTime != that.minTime) return false;
+            if (Float.compare(that.minDistance, minDistance) != 0) return false;
+            if (lastSeenTime != that.lastSeenTime) return false;
+            if (!listener.equals(that.listener)) return false;
+            if (!provider.equals(that.provider)) return false;
+            return lastSeenLocation != null ? lastSeenLocation.equals(that.lastSeenLocation) : that.lastSeenLocation == null;
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = (int) (minTime ^ (minTime >>> 32));
+            result = 31 * result + (minDistance != +0.0f ? Float.floatToIntBits(minDistance) : 0);
+            result = 31 * result + listener.hashCode();
+            result = 31 * result + provider.hashCode();
+            result = 31 * result + (lastSeenLocation != null ? lastSeenLocation.hashCode() : 0);
+            result = 31 * result + (int) (lastSeenTime ^ (lastSeenTime >>> 32));
+            return result;
+        }
     }
 
     /** Mapped by provider. */
@@ -238,8 +265,15 @@ public class LostShadowLocationManager {
             providerListeners = new ArrayList<>();
             locationListeners.put(provider, providerListeners);
         }
-        providerListeners.add(new ListenerRegistration(provider,
-                minTime, minDistance, copyOf(getLastKnownLocation(provider)), listener));
+        ListenerRegistration registrationToAdd = new ListenerRegistration(provider,
+                minTime, minDistance, copyOf(getLastKnownLocation(provider)), listener);
+        for (ListenerRegistration registration : providerListeners) {
+            if (registration.equals(registrationToAdd)) {
+                providerListeners.remove(registration);
+                break;
+            }
+        }
+        providerListeners.add(registrationToAdd);
 
     }
 

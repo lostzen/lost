@@ -527,7 +527,6 @@ public class FusedLocationProviderServiceImplTest {
     PendingIntent pendingIntent1 = PendingIntent.getService(application, 0, intent, 0);
     PendingIntent pendingIntent2 = PendingIntent.getService(application, 0, intent, 0);
     api.requestLocationUpdates(client, request, pendingIntent1);
-    clearShadowLocationListeners();
     api.requestLocationUpdates(client, request, pendingIntent2);
 
     api.removeLocationUpdates(client, pendingIntent2);
@@ -996,18 +995,6 @@ public class FusedLocationProviderServiceImplTest {
     TestResultCallback otherCallback = new TestResultCallback();
     result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
     assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-  }
-
-  /**
-   * Due to a bug in Robolectric that allows the same location listener to be registered twice,
-   * we need to manually clear the `LostShadowLocationManager` to prevent duplicate listeners.
-   *
-   * @see <a href="https://github.com/robolectric/robolectric/issues/2603">
-   * LostShadowLocationManager should not allow duplicate listeners</a>
-   */
-  private void clearShadowLocationListeners() {
-    Map<String, List> map = ReflectionHelpers.getField(shadowLocationManager, "locationListeners");
-    map.clear();
   }
 
   public class TestService extends IntentService {
