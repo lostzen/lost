@@ -71,5 +71,10 @@
   <string name="sample_pending_intent_title">PendingIntent</string>
   <string name="sample_pending_intent_description">Demonstrates how to use a PendingIntent to receive location updates</string>
   <string name="requested">Requested</string>
+  <string name="sample_location_availability_title">Location Availability</string>
+  <string name="sample_location_availability_description">Demonstrates how to determine if location requested is available</string>
+  <string name="check_availability">Check Availability</string>
+  <string name="location_available">Location Available</string>
+  <string name="location_unavailable">Location NOT Available</string>
 
 </resources>

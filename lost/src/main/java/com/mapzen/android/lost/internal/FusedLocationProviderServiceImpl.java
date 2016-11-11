@@ -12,6 +12,8 @@ import com.mapzen.android.lost.api.Status;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.location.Location;
+import android.location.LocationManager;
+import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.RequiresPermission;
 
@@ -143,6 +145,28 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
   public void reportProviderEnabled(String provider) {
     clientManager.reportProviderEnabled(provider);
     notifyLocationAvailabilityChanged();
+    LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+    manager.requestSingleUpdate(provider, new android.location.LocationListener() {
+      @Override
+      public void onLocationChanged(Location location) {
+        notifyLocationAvailabilityChanged();
+      }
+
+      @Override
+      public void onStatusChanged(String s, int i, Bundle bundle) {
+
+      }
+
+      @Override
+      public void onProviderEnabled(String s) {
+
+      }
+
+      @Override
+      public void onProviderDisabled(String s) {
+
+      }
+    }, Looper.myLooper());
   }
 
   public Map<LostApiClient, Set<LocationListener>> getLocationListeners() {
