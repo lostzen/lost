@@ -1,5 +1,9 @@
 package com.mapzen.android.lost.internal;
 
+import android.content.ComponentName;
+import android.location.Location;
+import android.location.LocationManager;
+
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationServices;
@@ -12,10 +16,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
-
-import android.content.ComponentName;
-import android.location.Location;
-import android.location.LocationManager;
 
 import static android.content.Context.LOCATION_SERVICE;
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -168,6 +168,16 @@ public class LostApiClientImplTest {
     client.connect();
     client.disconnect();
     assertThat(LocationServices.SettingsApi).isNotNull();
+  }
+
+  @Test public void disconnect_shouldRemoveConnectionCallbacks() {
+    client.connect();
+    client.disconnect();
+    FusedLocationProviderApiImpl fusedLocationProviderApi = (FusedLocationProviderApiImpl)
+            LocationServices.FusedLocationApi;
+    FusedLocationServiceConnectionManager serviceConnectionManager =
+            fusedLocationProviderApi.getServiceConnectionManager();
+    assertThat(serviceConnectionManager.connectionCallbacks.size()).isEqualTo(0);
   }
 
   @Test
