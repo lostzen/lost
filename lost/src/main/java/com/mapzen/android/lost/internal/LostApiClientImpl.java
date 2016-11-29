@@ -48,6 +48,8 @@ public class LostApiClientImpl implements LostApiClient {
   }
 
   @Override public void disconnect() {
+    getFusedLocationProviderApiImpl().removeConnectionCallbacks(connectionCallbacks);
+
     clientManager.removeClient(this);
     if (clientManager.numberOfClients() > 0) {
       return;

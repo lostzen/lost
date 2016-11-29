@@ -38,6 +38,12 @@ public class FusedLocationServiceConnectionManager {
     }
   }
 
+  public void removeCallbacks(ConnectionCallbacks callbacks) {
+    if (callbacks != null) {
+      connectionCallbacks.remove(callbacks);
+    }
+  }
+
   public boolean isConnected() {
     return connectState == ConnectState.CONNECTED;
   }
