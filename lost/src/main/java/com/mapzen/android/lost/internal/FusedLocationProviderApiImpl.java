@@ -165,11 +165,11 @@ public class FusedLocationProviderApiImpl
     return service;
   }
 
-  public void removeConnectionCallbacks(LostApiClient.ConnectionCallbacks callbacks) {
+  void removeConnectionCallbacks(LostApiClient.ConnectionCallbacks callbacks) {
     serviceConnectionManager.removeCallbacks(callbacks);
   }
 
-  public FusedLocationServiceConnectionManager getServiceConnectionManager() {
+  FusedLocationServiceConnectionManager getServiceConnectionManager() {
     return serviceConnectionManager;
   }
 }
