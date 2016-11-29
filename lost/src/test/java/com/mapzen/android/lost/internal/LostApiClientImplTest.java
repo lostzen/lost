@@ -1,9 +1,5 @@
 package com.mapzen.android.lost.internal;
 
-import android.content.ComponentName;
-import android.location.Location;
-import android.location.LocationManager;
-
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationServices;
@@ -16,6 +12,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
+
+import android.content.ComponentName;
+import android.location.Location;
+import android.location.LocationManager;
 
 import static android.content.Context.LOCATION_SERVICE;
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -34,12 +34,11 @@ public class LostApiClientImplTest {
     callbacks = new TestConnectionCallbacks();
     client = new LostApiClientImpl(application, callbacks, new TestClientManager());
 
-    FusedLocationProviderService.FusedLocationProviderBinder stubBinder = mock(
-        FusedLocationProviderService.FusedLocationProviderBinder.class);
+    FusedLocationProviderService.FusedLocationProviderBinder stubBinder =
+        mock(FusedLocationProviderService.FusedLocationProviderBinder.class);
     when(stubBinder.getService()).thenReturn(mock(FusedLocationProviderService.class));
     shadowOf(application).setComponentNameAndServiceForBindService(
         new ComponentName("com.mapzen.lost", "FusedLocationProviderService"), stubBinder);
-
   }
 
   @After public void tearDown() throws Exception {
@@ -65,8 +64,7 @@ public class LostApiClientImplTest {
     assertThat(settingsApi.isConnected()).isTrue();
   }
 
-  @Test public void connect_shouldBeConnectedWhenConnectionCallbackInvoked()
-      throws Exception {
+  @Test public void connect_shouldBeConnectedWhenConnectionCallbackInvoked() throws Exception {
     callbacks.setLostClient(client);
     client.connect();
     assertThat(callbacks.isClientConnectedOnConnect()).isTrue();
@@ -76,8 +74,8 @@ public class LostApiClientImplTest {
       throws Exception {
     client.connect();
     TestConnectionCallbacks callbacks = new TestConnectionCallbacks();
-    LostApiClient anotherClient = new LostApiClientImpl(application, callbacks,
-        new TestClientManager());
+    LostApiClient anotherClient =
+        new LostApiClientImpl(application, callbacks, new TestClientManager());
     callbacks.setLostClient(anotherClient);
     anotherClient.connect();
     assertThat(callbacks.isClientConnectedOnConnect()).isTrue();
@@ -144,8 +142,8 @@ public class LostApiClientImplTest {
 
   @Test public void disconnect_multipleClients_shouldNotRemoveFusedLocationProviderApiImpl()
       throws Exception {
-    LostApiClient anotherClient = new LostApiClientImpl(application, callbacks,
-        new TestClientManager());
+    LostApiClient anotherClient =
+        new LostApiClientImpl(application, callbacks, new TestClientManager());
     anotherClient.connect();
     client.connect();
     client.disconnect();
@@ -153,8 +151,8 @@ public class LostApiClientImplTest {
   }
 
   @Test public void disconnect_multipleClients_shouldNotRemoveGeofencingApiImpl() throws Exception {
-    LostApiClient anotherClient = new LostApiClientImpl(application, callbacks,
-        new TestClientManager());
+    LostApiClient anotherClient =
+        new LostApiClientImpl(application, callbacks, new TestClientManager());
     anotherClient.connect();
     client.connect();
     client.disconnect();
@@ -162,8 +160,8 @@ public class LostApiClientImplTest {
   }
 
   @Test public void disconnect_multipleClients_shouldNotRemoveSettingsApiImpl() throws Exception {
-    LostApiClient anotherClient = new LostApiClientImpl(application, callbacks,
-        new TestClientManager());
+    LostApiClient anotherClient =
+        new LostApiClientImpl(application, callbacks, new TestClientManager());
     anotherClient.connect();
     client.connect();
     client.disconnect();
@@ -173,15 +171,14 @@ public class LostApiClientImplTest {
   @Test public void disconnect_shouldRemoveConnectionCallbacks() {
     client.connect();
     client.disconnect();
-    FusedLocationProviderApiImpl fusedLocationProviderApi = (FusedLocationProviderApiImpl)
-            LocationServices.FusedLocationApi;
+    FusedLocationProviderApiImpl fusedLocationProviderApi =
+        (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
     FusedLocationServiceConnectionManager serviceConnectionManager =
-            fusedLocationProviderApi.getServiceConnectionManager();
+        fusedLocationProviderApi.getServiceConnectionManager();
     assertThat(serviceConnectionManager.connectionCallbacks.size()).isEqualTo(0);
   }
 
-  @Test
-  public void isConnected_shouldReturnFalseBeforeConnected() throws Exception {
+  @Test public void isConnected_shouldReturnFalseBeforeConnected() throws Exception {
     assertThat(client.isConnected()).isFalse();
   }
 
@@ -196,14 +193,13 @@ public class LostApiClientImplTest {
     assertThat(client.isConnected()).isFalse();
   }
 
-  @Test public void isConnected_multipleClients_shouldReturnFalseAfterDisconnected() throws
-      Exception {
-    LostApiClient anotherClient = new LostApiClientImpl(application, callbacks,
-        new TestClientManager());
+  @Test public void isConnected_multipleClients_shouldReturnFalseAfterDisconnected()
+      throws Exception {
+    LostApiClient anotherClient =
+        new LostApiClientImpl(application, callbacks, new TestClientManager());
     anotherClient.connect();
     client.connect();
     client.disconnect();
     assertThat(client.isConnected()).isFalse();
   }
-
 }
