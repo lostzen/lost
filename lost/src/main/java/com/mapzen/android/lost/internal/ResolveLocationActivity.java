@@ -1,7 +1,6 @@
 package com.mapzen.android.lost.internal;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -15,12 +14,6 @@ public class ResolveLocationActivity extends Activity {
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
-    BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-    if (adapter != null) {
-      adapter.enable();
-    }
-
     Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
     settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     startActivityForResult(settingsIntent, REQUEST_CODE);
