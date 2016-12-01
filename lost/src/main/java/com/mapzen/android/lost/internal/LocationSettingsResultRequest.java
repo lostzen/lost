@@ -29,17 +29,16 @@ import static com.mapzen.android.lost.api.Status.SETTINGS_CHANGE_UNAVAILABLE;
 import static com.mapzen.android.lost.api.Status.SUCCESS;
 import static com.mapzen.android.lost.api.Status.TIMEOUT;
 
-public class LocationSettingsResultRequest extends PendingResult<LocationSettingsResult> {
+class LocationSettingsResultRequest extends PendingResult<LocationSettingsResult> {
 
   private final PackageManager packageManager;
   private final LocationManager locationManager;
   private final PendingIntentGenerator pendingIntentGenerator;
   private final LocationSettingsRequest settingsRequest;
   private ResultCallback<? super LocationSettingsResult> resultCallback;
+  private Future<LocationSettingsResult> future;
 
-  Future<LocationSettingsResult> future;
-
-  public LocationSettingsResultRequest(Context context, PendingIntentGenerator generator,
+  LocationSettingsResultRequest(Context context, PendingIntentGenerator generator,
       LocationSettingsRequest request) {
     packageManager = context.getPackageManager();
     locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);

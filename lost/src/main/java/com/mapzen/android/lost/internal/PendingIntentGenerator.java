@@ -5,11 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
 
-public class PendingIntentGenerator {
+class PendingIntentGenerator {
 
   private final Context context;
 
-  public PendingIntentGenerator(Context context) {
+  PendingIntentGenerator(Context context) {
     this.context = context;
   }
 
