@@ -14,12 +14,7 @@ public class PendingIntentGenerator {
   }
 
   public PendingIntent generatePendingIntent(boolean hasBleResolution) {
-    Intent intent;
-    if (hasBleResolution) {
-      intent = new Intent(context, ResolveLocationActivity.class);
-    } else {
-      intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-    }
+    final Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
     return PendingIntent.getActivity(context, 0, intent, 0);
   }
 }
