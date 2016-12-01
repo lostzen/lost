@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
@@ -25,7 +24,6 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("MissingPermission") public class LocationSettingsResultRequestTest {
 
   Context context;
-  BluetoothAdapter bluetoothAdapter;
   PackageManager pm;
   LocationManager locationManager;
   PendingIntentGenerator generator;
@@ -34,7 +32,6 @@ import static org.mockito.Mockito.when;
 
   @Before public void setup() {
     context = Mockito.mock(Context.class);
-    bluetoothAdapter = Mockito.mock(BluetoothAdapter.class);
     pm = Mockito.mock(PackageManager.class);
     locationManager = Mockito.mock(LocationManager.class);
     generator = new TestPendingIntentGenerator(context);
@@ -50,8 +47,7 @@ import static org.mockito.Mockito.when;
         .setNeedBle(true)
         .build();
 
-    resultRequest =
-        new LocationSettingsResultRequest(context, bluetoothAdapter, generator, request);
+    resultRequest = new LocationSettingsResultRequest(context, generator, request);
   }
 
   @Test public void await_shouldReturnSuccessfulResult() {
@@ -59,7 +55,6 @@ import static org.mockito.Mockito.when;
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
     when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
-    when(bluetoothAdapter.isEnabled()).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
 
     LocationSettingsResult result = resultRequest.await();
@@ -107,14 +102,15 @@ import static org.mockito.Mockito.when;
     assertThat(result.getLocationSettingsStates().isLocationPresent()).isTrue();
     assertThat(result.getLocationSettingsStates().isLocationUsable()).isTrue();
     assertThat(result.getLocationSettingsStates().isBlePresent()).isTrue();
-    assertThat(result.getLocationSettingsStates().isBleUsable()).isFalse();
+    assertThat(result.getLocationSettingsStates().isBleUsable()).isTrue();
   }
 
   @Test public void await_shouldReturnLocationUsableIfNetworkOrGpsEnabled() {
-    when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
+    when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true);
+    when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(false);
 
     LocationSettingsResult result = resultRequest.await();
     assertThat(result.getStatus().getStatusCode()).isEqualTo(Status.RESOLUTION_REQUIRED);
@@ -127,25 +123,26 @@ import static org.mockito.Mockito.when;
     assertThat(result.getLocationSettingsStates().isBlePresent()).isTrue();
     assertThat(result.getLocationSettingsStates().isBleUsable()).isFalse();
 
-    when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(false);
-    when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(false);
-    when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
+    when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
+    when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
+    when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(false);
+    when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
 
     result = resultRequest.await();
     assertThat(result.getStatus().getStatusCode()).isEqualTo(Status.RESOLUTION_REQUIRED);
-    assertThat(result.getLocationSettingsStates().isGpsPresent()).isFalse();
+    assertThat(result.getLocationSettingsStates().isGpsPresent()).isTrue();
     assertThat(result.getLocationSettingsStates().isGpsUsable()).isFalse();
     assertThat(result.getLocationSettingsStates().isNetworkLocationPresent()).isTrue();
     assertThat(result.getLocationSettingsStates().isNetworkLocationUsable()).isTrue();
     assertThat(result.getLocationSettingsStates().isLocationPresent()).isTrue();
     assertThat(result.getLocationSettingsStates().isLocationUsable()).isTrue();
     assertThat(result.getLocationSettingsStates().isBlePresent()).isTrue();
-    assertThat(result.getLocationSettingsStates().isBleUsable()).isFalse();
+    assertThat(result.getLocationSettingsStates().isBleUsable()).isTrue();
   }
 
-  @Test public void await_shouldReturnBleUsableIfBleEnabled() {
-    when(bluetoothAdapter.isEnabled()).thenReturn(true);
+  @Test public void await_shouldReturnBleUsableIfNetworkIsEnabled() {
+    when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
@@ -155,9 +152,9 @@ import static org.mockito.Mockito.when;
     assertThat(result.getLocationSettingsStates().isGpsPresent()).isTrue();
     assertThat(result.getLocationSettingsStates().isGpsUsable()).isFalse();
     assertThat(result.getLocationSettingsStates().isNetworkLocationPresent()).isTrue();
-    assertThat(result.getLocationSettingsStates().isNetworkLocationUsable()).isFalse();
+    assertThat(result.getLocationSettingsStates().isNetworkLocationUsable()).isTrue();
     assertThat(result.getLocationSettingsStates().isLocationPresent()).isTrue();
-    assertThat(result.getLocationSettingsStates().isLocationUsable()).isFalse();
+    assertThat(result.getLocationSettingsStates().isLocationUsable()).isTrue();
     assertThat(result.getLocationSettingsStates().isBlePresent()).isTrue();
     assertThat(result.getLocationSettingsStates().isBleUsable()).isTrue();
   }
@@ -179,7 +176,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(false)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(context, bluetoothAdapter, generator, settingsRequest);
+        new LocationSettingsResultRequest(context, generator, settingsRequest);
 
     LocationSettingsResult result = settingsResultRequest.await();
     assertThat(result.getStatus().getStatusCode()).isEqualTo(Status.RESOLUTION_REQUIRED);
@@ -202,7 +199,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(true)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(context, bluetoothAdapter, generator, settingsRequest);
+        new LocationSettingsResultRequest(context, generator, settingsRequest);
 
     LocationSettingsResult result = settingsResultRequest.await();
     assertThat(result.getStatus().getStatusCode()).isEqualTo(Status.RESOLUTION_REQUIRED);
@@ -226,7 +223,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(false)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(context, bluetoothAdapter, generator, settingsRequest);
+        new LocationSettingsResultRequest(context, generator, settingsRequest);
 
     LocationSettingsResult result = settingsResultRequest.await();
     assertThat(result.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
@@ -246,7 +243,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(false)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(context, bluetoothAdapter, generator, settingsRequest);
+        new LocationSettingsResultRequest(context, generator, settingsRequest);
 
     LocationSettingsResult result = settingsResultRequest.await();
     assertThat(result.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
@@ -266,7 +263,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(true)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(context, bluetoothAdapter, generator, settingsRequest);
+        new LocationSettingsResultRequest(context, generator, settingsRequest);
 
     LocationSettingsResult result = settingsResultRequest.await();
     assertThat(result.getStatus().getStatusCode()).isEqualTo(Status.RESOLUTION_REQUIRED);
@@ -279,7 +276,7 @@ import static org.mockito.Mockito.when;
 
     DelayTestPendingIntentGenerator delayedGenerator = new DelayTestPendingIntentGenerator(context);
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(context, bluetoothAdapter, delayedGenerator, request);
+        new LocationSettingsResultRequest(context, delayedGenerator, request);
 
     LocationSettingsResult resultRequest = settingsResultRequest.await(1000, TimeUnit.MILLISECONDS);
     assertThat(resultRequest.getStatus().getStatusCode()).isEqualTo(Status.TIMEOUT);
@@ -290,7 +287,6 @@ import static org.mockito.Mockito.when;
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
     when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
-    when(bluetoothAdapter.isEnabled()).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
 
     resultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
@@ -345,16 +341,17 @@ import static org.mockito.Mockito.when;
         assertThat(result.getLocationSettingsStates().isLocationPresent()).isTrue();
         assertThat(result.getLocationSettingsStates().isLocationUsable()).isTrue();
         assertThat(result.getLocationSettingsStates().isBlePresent()).isTrue();
-        assertThat(result.getLocationSettingsStates().isBleUsable()).isFalse();
+        assertThat(result.getLocationSettingsStates().isBleUsable()).isTrue();
       }
     });
   }
 
   @Test public void setResultCallback_shouldReturnLocationUsableIfNetworkOrGpsEnabled() {
-    when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
+    when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(true);
+    when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(false);
 
     resultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
       @Override public void onResult(@NonNull LocationSettingsResult result) {
@@ -370,28 +367,29 @@ import static org.mockito.Mockito.when;
       }
     });
 
-    when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(false);
-    when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(false);
-    when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
+    when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
+    when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
+    when(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)).thenReturn(false);
+    when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
 
     resultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
       @Override public void onResult(@NonNull LocationSettingsResult result) {
         assertThat(result.getStatus().getStatusCode()).isEqualTo(Status.RESOLUTION_REQUIRED);
-        assertThat(result.getLocationSettingsStates().isGpsPresent()).isFalse();
+        assertThat(result.getLocationSettingsStates().isGpsPresent()).isTrue();
         assertThat(result.getLocationSettingsStates().isGpsUsable()).isFalse();
         assertThat(result.getLocationSettingsStates().isNetworkLocationPresent()).isTrue();
         assertThat(result.getLocationSettingsStates().isNetworkLocationUsable()).isTrue();
         assertThat(result.getLocationSettingsStates().isLocationPresent()).isTrue();
         assertThat(result.getLocationSettingsStates().isLocationUsable()).isTrue();
         assertThat(result.getLocationSettingsStates().isBlePresent()).isTrue();
-        assertThat(result.getLocationSettingsStates().isBleUsable()).isFalse();
+        assertThat(result.getLocationSettingsStates().isBleUsable()).isTrue();
       }
     });
   }
 
-  @Test public void setResultCallback_shouldReturnBleUsableIfBleEnabled() {
-    when(bluetoothAdapter.isEnabled()).thenReturn(true);
+  @Test public void setResultCallback_shouldReturnBleUsableIfNetworkEnabled() {
+    when(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK)).thenReturn(true);
     when(pm.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)).thenReturn(true);
@@ -402,9 +400,9 @@ import static org.mockito.Mockito.when;
         assertThat(result.getLocationSettingsStates().isGpsPresent()).isTrue();
         assertThat(result.getLocationSettingsStates().isGpsUsable()).isFalse();
         assertThat(result.getLocationSettingsStates().isNetworkLocationPresent()).isTrue();
-        assertThat(result.getLocationSettingsStates().isNetworkLocationUsable()).isFalse();
+        assertThat(result.getLocationSettingsStates().isNetworkLocationUsable()).isTrue();
         assertThat(result.getLocationSettingsStates().isLocationPresent()).isTrue();
-        assertThat(result.getLocationSettingsStates().isLocationUsable()).isFalse();
+        assertThat(result.getLocationSettingsStates().isLocationUsable()).isTrue();
         assertThat(result.getLocationSettingsStates().isBlePresent()).isTrue();
         assertThat(result.getLocationSettingsStates().isBleUsable()).isTrue();
       }
@@ -429,7 +427,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(false)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(context, bluetoothAdapter, generator, settingsRequest);
+        new LocationSettingsResultRequest(context, generator, settingsRequest);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
       @Override public void onResult(@NonNull LocationSettingsResult result) {
@@ -456,7 +454,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(true)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(context, bluetoothAdapter, generator, settingsRequest);
+        new LocationSettingsResultRequest(context, generator, settingsRequest);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
       @Override public void onResult(@NonNull LocationSettingsResult result) {
@@ -483,7 +481,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(false)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(context, bluetoothAdapter, generator, settingsRequest);
+        new LocationSettingsResultRequest(context, generator, settingsRequest);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
       @Override public void onResult(@NonNull LocationSettingsResult result) {
@@ -506,7 +504,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(false)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(context, bluetoothAdapter, generator, settingsRequest);
+        new LocationSettingsResultRequest(context, generator, settingsRequest);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
       @Override public void onResult(@NonNull LocationSettingsResult result) {
@@ -529,7 +527,7 @@ import static org.mockito.Mockito.when;
             .setNeedBle(true)
             .build();
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(context, bluetoothAdapter, generator, settingsRequest);
+        new LocationSettingsResultRequest(context, generator, settingsRequest);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
       @Override public void onResult(@NonNull LocationSettingsResult result) {
@@ -545,7 +543,7 @@ import static org.mockito.Mockito.when;
 
     DelayTestPendingIntentGenerator delayedGenerator = new DelayTestPendingIntentGenerator(context);
     LocationSettingsResultRequest settingsResultRequest =
-        new LocationSettingsResultRequest(context, bluetoothAdapter, delayedGenerator, request);
+        new LocationSettingsResultRequest(context, delayedGenerator, request);
 
     settingsResultRequest.setResultCallback(new ResultCallback<LocationSettingsResult>() {
       @Override public void onResult(@NonNull LocationSettingsResult result) {

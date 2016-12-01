@@ -8,9 +8,7 @@ import com.mapzen.android.lost.api.PendingResult;
 import com.mapzen.android.lost.api.ResultCallback;
 import com.mapzen.android.lost.api.Status;
 
-import android.Manifest;
 import android.app.PendingIntent;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
@@ -33,8 +31,6 @@ import static com.mapzen.android.lost.api.Status.TIMEOUT;
 
 public class LocationSettingsResultRequest extends PendingResult<LocationSettingsResult> {
 
-  private final Context context;
-  private final BluetoothAdapter bluetoothAdapter;
   private final PackageManager packageManager;
   private final LocationManager locationManager;
   private final PendingIntentGenerator pendingIntentGenerator;
@@ -43,12 +39,10 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
 
   Future<LocationSettingsResult> future;
 
-  public LocationSettingsResultRequest(Context context, BluetoothAdapter btAdapter,
-      PendingIntentGenerator generator, LocationSettingsRequest request) {
-    this.context = context;
+  public LocationSettingsResultRequest(Context context, PendingIntentGenerator generator,
+      LocationSettingsRequest request) {
     packageManager = context.getPackageManager();
     locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-    bluetoothAdapter = btAdapter;
     pendingIntentGenerator = generator;
     settingsRequest = request;
   }
@@ -114,12 +108,7 @@ public class LocationSettingsResultRequest extends PendingResult<LocationSetting
     boolean networkPresent =
         packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_NETWORK);
 
-
-    String pkgName = context.getPackageName();
-    boolean hasBtPermission = packageManager.checkPermission(
-        Manifest.permission.BLUETOOTH, pkgName) == PackageManager.PERMISSION_GRANTED;
-    boolean bleUsable = hasBtPermission && bluetoothAdapter != null
-        && bluetoothAdapter.isEnabled();
+    boolean bleUsable = networkUsable;
     boolean blePresent = packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
 
     boolean hasGpsResolution = needGps && gpsPresent && !gpsUsable;
