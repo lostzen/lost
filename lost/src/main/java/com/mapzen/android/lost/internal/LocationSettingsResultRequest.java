@@ -123,7 +123,7 @@ class LocationSettingsResultRequest extends PendingResult<LocationSettingsResult
 
     final Status status;
     if (hasResolution) {
-      PendingIntent pendingIntent = pendingIntentGenerator.generatePendingIntent(hasBleResolution);
+      PendingIntent pendingIntent = pendingIntentGenerator.generatePendingIntent();
       status = new Status(RESOLUTION_REQUIRED, pendingIntent);
     } else if (resolutionUnavailable) {
       status = new Status(SETTINGS_CHANGE_UNAVAILABLE);

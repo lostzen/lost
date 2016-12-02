@@ -13,7 +13,7 @@ class PendingIntentGenerator {
     this.context = context;
   }
 
-  public PendingIntent generatePendingIntent(boolean hasBleResolution) {
+  PendingIntent generatePendingIntent() {
     final Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
     return PendingIntent.getActivity(context, 0, intent, 0);
   }
