@@ -142,7 +142,7 @@ public class LostClientManagerTest {
     ArrayList<Location> locations = new ArrayList<>();
     locations.add(location);
     LocationResult result = LocationResult.create(locations);
-    manager.reportLocationResult(result);
+    manager.reportLocationResult(location, result);
     assertThat(callback.getResult()).isEqualTo(result);
   }
 

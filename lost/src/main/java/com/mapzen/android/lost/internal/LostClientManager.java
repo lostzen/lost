@@ -38,14 +38,26 @@ public class LostClientManager implements ClientManager {
   private Map<LostApiClient, Set<LocationCallback>> clientToLocationCallbacks;
   private Map<LostApiClient, Map<LocationCallback, Looper>> clientCallbackToLoopers;
 
+  private Map<LocationListener, LocationRequest> listenerToLocationRequests;
+  private Map<PendingIntent, LocationRequest> intentToLocationRequests;
+  private Map<LocationCallback, LocationRequest> callbackToLocationRequests;
+  private Map<LocationRequest, Long> requestToLastReportedTime;
+  private Map<LocationRequest, Location> requestToLastReportedLocation;
 
-  private LostClientManager() {
+  public LostClientManager() {
     clients = new HashSet<>();
 
     clientToListeners = new HashMap<>();
     clientToPendingIntents = new HashMap<>();
     clientToLocationCallbacks = new HashMap<>();
     clientCallbackToLoopers = new HashMap<>();
+
+    listenerToLocationRequests = new HashMap<>();
+    intentToLocationRequests = new HashMap<>();
+    callbackToLocationRequests = new HashMap<>();
+    requestToLastReportedTime = new HashMap<>();
+    requestToLastReportedLocation = new HashMap<>();
+
   }
 
   public static LostClientManager shared() {
@@ -83,6 +95,7 @@ public class LostClientManager implements ClientManager {
     }
     listeners.add(listener);
     clientToListeners.put(client, listeners);
+    listenerToLocationRequests.put(listener, request);
   }
 
   public void addPendingIntent(LostApiClient client, LocationRequest request,
@@ -93,6 +106,7 @@ public class LostClientManager implements ClientManager {
     }
     intents.add(callbackIntent);
     clientToPendingIntents.put(client, intents);
+    intentToLocationRequests.put(callbackIntent, request);
   }
 
   public void addLocationCallback(LostApiClient client, LocationRequest request,
@@ -110,6 +124,7 @@ public class LostClientManager implements ClientManager {
     }
     looperMap.put(callback, looper);
     clientCallbackToLoopers.put(client, looperMap);
+    callbackToLocationRequests.put(callback, request);
   }
 
   public boolean removeListener(LostApiClient client, LocationListener listener) {
@@ -124,7 +139,7 @@ public class LostClientManager implements ClientManager {
         clientToListeners.remove(client);
       }
     }
-
+    listenerToLocationRequests.remove(listener);
     return removedListener;
   }
 
@@ -140,6 +155,7 @@ public class LostClientManager implements ClientManager {
         clientToPendingIntents.remove(client);
       }
     }
+    intentToLocationRequests.remove(callbackIntent);
     return removedPendingIntent;
   }
 
@@ -163,51 +179,61 @@ public class LostClientManager implements ClientManager {
         clientCallbackToLoopers.remove(client);
       }
     }
+    callbackToLocationRequests.remove(callback);
     return removedCallback;
   }
 
-  public void reportLocationChanged(Location location) {
-    for (LostApiClient client : clientToListeners.keySet()) {
-      if (clientToListeners.get(client) != null) {
-        for (LocationListener listener : clientToListeners.get(client)) {
-          listener.onLocationChanged(location);
-        }
-      }
-    }
-  }
-
-  public void sendPendingIntent(Context context, Location location,
-      LocationAvailability availability, LocationResult result) {
-    for (LostApiClient client : clientToPendingIntents.keySet()) {
-      if (clientToPendingIntents.get(client) != null) {
-        for (PendingIntent intent : clientToPendingIntents.get(client)) {
-          try {
-            Intent toSend = new Intent().putExtra(KEY_LOCATION_CHANGED, location);
-            toSend.putExtra(LocationAvailability.EXTRA_LOCATION_AVAILABILITY, availability);
-            toSend.putExtra(LocationResult.EXTRA_LOCATION_RESULT, result);
-            intent.send(context, 0, toSend);
-          } catch (PendingIntent.CanceledException e) {
-            Log.e(TAG, "Unable to send pending intent: " + intent);
+  /**
+   * Reports location changed for all listeners respecting their corresponding
+   * {@link LocationRequest#getFastestInterval()} and
+   * {@link LocationRequest#getSmallestDisplacement()} values. Returns a map of the updated
+   * last reported times so that {@code LostClientManager#requestToLastReportedTime} after
+   * all reporting (including pending intents and location callbacks) has been done.
+   * @param location
+   * @return
+   */
+  public ReportedChanges reportLocationChanged(final Location location) {
+    return iterateAndNotify(location,
+        clientToListeners, listenerToLocationRequests, new Notifier<LocationListener>() {
+          @Override void notify(LostApiClient client, LocationListener listener) {
+            listener.onLocationChanged(location);
           }
-        }
-      }
-    }
+        });
   }
 
-  public void reportLocationResult(final LocationResult result) {
-    for (LostApiClient client : clientToLocationCallbacks.keySet()) {
-      if (clientToLocationCallbacks.get(client) != null) {
-        for (final LocationCallback callback : clientToLocationCallbacks.get(client)) {
-          Looper looper = clientCallbackToLoopers.get(client).get(callback);
-          Handler handler = new Handler(looper);
-          handler.post(new Runnable() {
-            @Override public void run() {
-              callback.onLocationResult(result);
-            }
-          });
-        }
-      }
-    }
+  /**
+   * Fires intent for all pending intents respecting their corresponding
+   * {@link LocationRequest#getFastestInterval()} and
+   * {@link LocationRequest#getSmallestDisplacement()} values. Returns a map of the updated
+   * last reported times so that {@code LostClientManager#requestToLastReportedTime} after
+   * all reporting (including pending intents and location callbacks) has been done.
+   * @param location
+   * @return
+   */
+  public ReportedChanges sendPendingIntent(final Context context,
+      final Location location, final LocationAvailability availability,
+      final LocationResult result) {
+    return iterateAndNotify(location,
+        clientToPendingIntents, intentToLocationRequests, new Notifier<PendingIntent>() {
+          @Override void notify(LostApiClient client, PendingIntent pendingIntent) {
+            fireIntent(context, pendingIntent, location, availability, result);
+          }
+        });
+  }
+
+  public ReportedChanges reportLocationResult(Location location,
+      final LocationResult result) {
+    return iterateAndNotify(location,
+        clientToLocationCallbacks, callbackToLocationRequests, new Notifier<LocationCallback>() {
+          @Override void notify(LostApiClient client, LocationCallback callback) {
+            notifyCallback(client, callback, result);
+          }
+        });
+  }
+
+  public void updateReportedValues(ReportedChanges changes) {
+    requestToLastReportedTime.putAll(changes.timeChanges());
+    requestToLastReportedLocation.putAll(changes.locationChanges());
   }
 
   public void reportProviderEnabled(String provider) {
@@ -234,13 +260,7 @@ public class LostClientManager implements ClientManager {
     for (LostApiClient client : clientToLocationCallbacks.keySet()) {
       if (clientToLocationCallbacks.get(client) != null) {
         for (final LocationCallback callback : clientToLocationCallbacks.get(client)) {
-          Looper looper = clientCallbackToLoopers.get(client).get(callback);
-          Handler handler = new Handler(looper);
-          handler.post(new Runnable() {
-            @Override public void run() {
-              callback.onLocationAvailability(availability);
-            }
-          });
+          notifyAvailability(client, callback, availability);
         }
       }
     }
@@ -268,5 +288,76 @@ public class LostClientManager implements ClientManager {
 
   public Map<LostApiClient, Set<LocationCallback>> getLocationCallbacks() {
     return clientToLocationCallbacks;
+  }
+
+  private void fireIntent(Context context, PendingIntent intent, Location location,
+      LocationAvailability availability, LocationResult result) {
+    try {
+      Intent toSend = new Intent().putExtra(KEY_LOCATION_CHANGED, location);
+      toSend.putExtra(LocationAvailability.EXTRA_LOCATION_AVAILABILITY, availability);
+      toSend.putExtra(LocationResult.EXTRA_LOCATION_RESULT, result);
+      intent.send(context, 0, toSend);
+    } catch (PendingIntent.CanceledException e) {
+      Log.e(TAG, "Unable to send pending intent: " + intent);
+    }
+  }
+
+  private void notifyCallback(LostApiClient client, final LocationCallback callback,
+      final LocationResult result) {
+    Looper looper = clientCallbackToLoopers.get(client).get(callback);
+    Handler handler = new Handler(looper);
+    handler.post(new Runnable() {
+      @Override public void run() {
+        callback.onLocationResult(result);
+      }
+    });
+  }
+
+  private void notifyAvailability(LostApiClient client, final LocationCallback callback,
+      final LocationAvailability availability) {
+    Looper looper = clientCallbackToLoopers.get(client).get(callback);
+    Handler handler = new Handler(looper);
+    handler.post(new Runnable() {
+      @Override public void run() {
+        callback.onLocationAvailability(availability);
+      }
+    });
+  }
+
+  private <T> ReportedChanges iterateAndNotify(Location location,
+      Map<LostApiClient, Set<T>> clientToObj, Map<T, LocationRequest> objToLocationRequest,
+      Notifier notifier) {
+    Map<LocationRequest, Long> updatedRequestToReportedTime = new HashMap<>();
+    Map<LocationRequest, Location> updatedRequestToReportedLocation = new HashMap<>();
+    for (LostApiClient client : clientToObj.keySet()) {
+      if (clientToObj.get(client) != null) {
+        for (final T obj : clientToObj.get(client)) {
+          LocationRequest request = objToLocationRequest.get(obj);
+          Long lastReportedTime = requestToLastReportedTime.get(request);
+          Location lastReportedLocation = requestToLastReportedLocation.get(request);
+          if (lastReportedTime == null && lastReportedLocation == null) {
+            updatedRequestToReportedTime.put(request, System.currentTimeMillis());
+            updatedRequestToReportedLocation.put(request, location);
+            notifier.notify(client, obj);
+          } else {
+            long intervalSinceLastReport = System.currentTimeMillis() - lastReportedTime;
+            long fastestInterval = request.getFastestInterval();
+            float smallestDisplacement = request.getSmallestDisplacement();
+            float displacementSinceLastReport = location.distanceTo(lastReportedLocation);
+            if (intervalSinceLastReport >= fastestInterval &&
+                displacementSinceLastReport >= smallestDisplacement) {
+              updatedRequestToReportedTime.put(request, System.currentTimeMillis());
+              updatedRequestToReportedLocation.put(request, location);
+              notifier.notify(client, obj);
+            }
+          }
+        }
+      }
+    }
+    return new ReportedChanges(updatedRequestToReportedTime, updatedRequestToReportedLocation);
+  }
+
+  abstract class Notifier<T> {
+    abstract void notify(LostApiClient client, T obj);
   }
 }
