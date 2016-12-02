@@ -35,8 +35,8 @@ public interface ClientManager {
   boolean removePendingIntent(LostApiClient client, PendingIntent callbackIntent);
   boolean removeLocationCallback(LostApiClient client, LocationCallback callback);
   ReportedChanges reportLocationChanged(Location location);
-  ReportedChanges sendPendingIntent(Context context, Location location, LocationAvailability availability,
-      LocationResult result);
+  ReportedChanges sendPendingIntent(Context context, Location location,
+      LocationAvailability availability, LocationResult result);
   ReportedChanges reportLocationResult(Location location, final LocationResult result);
   void updateReportedValues(ReportedChanges changes);
   void reportProviderEnabled(String provider);

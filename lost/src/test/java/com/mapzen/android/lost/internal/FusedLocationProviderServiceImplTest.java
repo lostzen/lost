@@ -976,7 +976,7 @@ public class FusedLocationProviderServiceImplTest {
     assertThat(ShadowApplication.getInstance().getNextStartedService()).isNull();
   }
 
-  @Test public void reportLocation_pendingIntent_shouldRespectLargestIntervalAndSmallestDisplacement()
+  @Test public void reportLocation_pendingIntent_shouldRespectLargestIntervalSmallestDisplacement()
       throws InterruptedException {
     Intent intent = new Intent(application, TestService.class);
     PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);

@@ -4,7 +4,6 @@ import com.mapzen.android.lost.api.LocationRequest;
 
 import android.location.Location;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
