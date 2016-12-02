@@ -5,13 +5,13 @@ import org.mockito.Mockito;
 import android.app.PendingIntent;
 import android.content.Context;
 
-public class TestPendingIntentGenerator extends PendingIntentGenerator {
+class TestPendingIntentGenerator extends PendingIntentGenerator {
 
-  public TestPendingIntentGenerator(Context context) {
+  TestPendingIntentGenerator(Context context) {
     super(context);
   }
 
-  @Override public PendingIntent generatePendingIntent(boolean hasBleResolution) {
+  @Override public PendingIntent generatePendingIntent() {
     return Mockito.mock(PendingIntent.class);
   }
 }
