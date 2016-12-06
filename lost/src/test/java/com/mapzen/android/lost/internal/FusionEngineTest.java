@@ -287,6 +287,39 @@ public class FusionEngineTest {
     assertThat(callback.location).isEqualTo(networkLocation);
   }
 
+  @Test public void onLocationChanged_gps_shouldReportLastKnownLocation() throws Exception {
+    Location gpsLocation = new Location(GPS_PROVIDER);
+    shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, gpsLocation);
+
+    LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
+    fusionEngine.setRequest(request);
+
+    assertThat(callback.location).isEqualTo(gpsLocation);
+  }
+
+  @Test public void onLocationChanged_network_shouldReportLastKnownLocation() throws Exception {
+    Location networkLocation = new Location(NETWORK_PROVIDER);
+    shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, networkLocation);
+
+    LocationRequest request = LocationRequest.create().setPriority(
+        PRIORITY_BALANCED_POWER_ACCURACY);
+    fusionEngine.setRequest(request);
+
+    assertThat(callback.location).isEqualTo(networkLocation);
+  }
+
+  @Test public void onLocationChanged_gpsNetwork_shouldReportLastKnownLocation() throws Exception {
+    Location gpsLocation = new Location(GPS_PROVIDER);
+    shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, gpsLocation);
+    Location networkLocation = new Location(NETWORK_PROVIDER);
+    shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, networkLocation);
+
+    LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
+    fusionEngine.setRequest(request);
+
+    assertThat(callback.location).isEqualTo(networkLocation);
+  }
+
   @Test public void isBetterThan_shouldReturnFalseIfLocationAIsNull() throws Exception {
     Location locationA = null;
     Location locationB = new Location("test");

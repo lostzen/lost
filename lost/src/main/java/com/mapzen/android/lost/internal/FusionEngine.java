@@ -105,12 +105,15 @@ public class FusionEngine extends LocationEngine implements LocationListener {
 
     if (networkInterval < Long.MAX_VALUE) {
       enableNetwork(networkInterval);
+      checkLastKnownNetwork();
     }
     if (gpsInterval < Long.MAX_VALUE) {
       enableGps(gpsInterval);
+      checkLastKnownGps();
     }
     if (passiveInterval < Long.MAX_VALUE) {
       enablePassive(passiveInterval);
+      checkLastKnownPassive();
     }
   }
 
@@ -141,6 +144,25 @@ public class FusionEngine extends LocationEngine implements LocationListener {
       locationManager.requestLocationUpdates(PASSIVE_PROVIDER, interval, 0, this);
     } catch (IllegalArgumentException e) {
       Log.e(TAG, "Unable to register for passive updates.", e);
+    }
+  }
+
+  private void checkLastKnownGps() {
+    checkLastKnownAndNotify(GPS_PROVIDER);
+  }
+
+  private void checkLastKnownNetwork() {
+    checkLastKnownAndNotify(NETWORK_PROVIDER);
+  }
+
+  private void checkLastKnownPassive() {
+    checkLastKnownAndNotify(PASSIVE_PROVIDER);
+  }
+
+  private void checkLastKnownAndNotify(String provider) {
+    Location location = locationManager.getLastKnownLocation(provider);
+    if (location != null) {
+      onLocationChanged(location);
     }
   }
 
