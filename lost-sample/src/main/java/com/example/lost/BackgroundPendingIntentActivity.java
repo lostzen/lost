@@ -60,8 +60,8 @@ public class BackgroundPendingIntentActivity extends LostApiClientActivity {
         request.setInterval(100);
 
         Intent intent = new Intent(PendingIntentService.ACTION);
-        PendingIntent pendingIntent = PendingIntent.getService(BackgroundPendingIntentActivity.this, 1,
-            intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getService(BackgroundPendingIntentActivity.this,
+            1, intent, 0);
         LocationServices.FusedLocationApi.requestLocationUpdates(client, request, pendingIntent);
         return null;
       }
