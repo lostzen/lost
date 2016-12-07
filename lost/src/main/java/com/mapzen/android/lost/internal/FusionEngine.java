@@ -103,13 +103,31 @@ public class FusionEngine extends LocationEngine implements LocationListener {
       }
     }
 
-    if (networkInterval < Long.MAX_VALUE) {
-      enableNetwork(networkInterval);
-      checkLastKnownNetwork();
-    }
+    boolean checkGps = false;
     if (gpsInterval < Long.MAX_VALUE) {
       enableGps(gpsInterval);
-      checkLastKnownGps();
+      checkGps = true;
+    }
+    if (networkInterval < Long.MAX_VALUE) {
+      enableNetwork(networkInterval);
+      if (checkGps) {
+        Location lastGps = locationManager.getLastKnownLocation(GPS_PROVIDER);
+        Location lastNetwork = locationManager.getLastKnownLocation(NETWORK_PROVIDER);
+        if (lastGps != null && lastNetwork != null) {
+          boolean useGps = isBetterThan(lastGps, lastNetwork);
+          if (useGps) {
+            checkLastKnownGps();
+          } else {
+            checkLastKnownNetwork();
+          }
+        } else if (lastGps != null) {
+          checkLastKnownGps();
+        } else {
+          checkLastKnownNetwork();
+        }
+      } else {
+        checkLastKnownNetwork();
+      }
     }
     if (passiveInterval < Long.MAX_VALUE) {
       enablePassive(passiveInterval);
