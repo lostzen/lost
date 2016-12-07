@@ -7,6 +7,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 
 import java.util.List;
@@ -74,6 +75,11 @@ public class FusionEngine extends LocationEngine implements LocationListener {
   }
 
   @Override protected void enable() {
+    boolean prepLooper = Looper.myLooper() == null;
+    if (prepLooper) {
+      Looper.prepare();
+    }
+
     long networkInterval = Long.MAX_VALUE;
     long gpsInterval = Long.MAX_VALUE;
     long passiveInterval = Long.MAX_VALUE;
@@ -111,6 +117,10 @@ public class FusionEngine extends LocationEngine implements LocationListener {
     }
     if (passiveInterval < Long.MAX_VALUE) {
       enablePassive(passiveInterval);
+    }
+
+    if (prepLooper) {
+      Looper.loop();
     }
   }
 
