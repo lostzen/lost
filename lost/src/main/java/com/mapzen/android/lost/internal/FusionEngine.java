@@ -103,14 +103,35 @@ public class FusionEngine extends LocationEngine implements LocationListener {
       }
     }
 
-    if (networkInterval < Long.MAX_VALUE) {
-      enableNetwork(networkInterval);
-    }
+    boolean checkGps = false;
     if (gpsInterval < Long.MAX_VALUE) {
       enableGps(gpsInterval);
+      checkGps = true;
+    }
+    if (networkInterval < Long.MAX_VALUE) {
+      enableNetwork(networkInterval);
+      if (checkGps) {
+        Location lastGps = locationManager.getLastKnownLocation(GPS_PROVIDER);
+        Location lastNetwork = locationManager.getLastKnownLocation(NETWORK_PROVIDER);
+        if (lastGps != null && lastNetwork != null) {
+          boolean useGps = isBetterThan(lastGps, lastNetwork);
+          if (useGps) {
+            checkLastKnownGps();
+          } else {
+            checkLastKnownNetwork();
+          }
+        } else if (lastGps != null) {
+          checkLastKnownGps();
+        } else {
+          checkLastKnownNetwork();
+        }
+      } else {
+        checkLastKnownNetwork();
+      }
     }
     if (passiveInterval < Long.MAX_VALUE) {
       enablePassive(passiveInterval);
+      checkLastKnownPassive();
     }
   }
 
@@ -141,6 +162,25 @@ public class FusionEngine extends LocationEngine implements LocationListener {
       locationManager.requestLocationUpdates(PASSIVE_PROVIDER, interval, 0, this);
     } catch (IllegalArgumentException e) {
       Log.e(TAG, "Unable to register for passive updates.", e);
+    }
+  }
+
+  private void checkLastKnownGps() {
+    checkLastKnownAndNotify(GPS_PROVIDER);
+  }
+
+  private void checkLastKnownNetwork() {
+    checkLastKnownAndNotify(NETWORK_PROVIDER);
+  }
+
+  private void checkLastKnownPassive() {
+    checkLastKnownAndNotify(PASSIVE_PROVIDER);
+  }
+
+  private void checkLastKnownAndNotify(String provider) {
+    Location location = locationManager.getLastKnownLocation(provider);
+    if (location != null) {
+      onLocationChanged(location);
     }
   }
 
