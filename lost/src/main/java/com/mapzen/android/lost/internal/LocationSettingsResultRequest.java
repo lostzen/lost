@@ -37,6 +37,7 @@ class LocationSettingsResultRequest extends PendingResult<LocationSettingsResult
   private final LocationSettingsRequest settingsRequest;
   private ResultCallback<? super LocationSettingsResult> resultCallback;
   private Future<LocationSettingsResult> future;
+  private SettingsDialogDisplayer dialogDisplayer = new SettingsDialogDisplayer();
 
   LocationSettingsResultRequest(Context context, PendingIntentGenerator generator,
       LocationSettingsRequest request) {
@@ -124,11 +125,11 @@ class LocationSettingsResultRequest extends PendingResult<LocationSettingsResult
     final Status status;
     if (hasResolution) {
       PendingIntent pendingIntent = pendingIntentGenerator.generatePendingIntent();
-      status = new Status(RESOLUTION_REQUIRED, pendingIntent);
+      status = new Status(RESOLUTION_REQUIRED, dialogDisplayer, pendingIntent);
     } else if (resolutionUnavailable) {
-      status = new Status(SETTINGS_CHANGE_UNAVAILABLE);
+      status = new Status(SETTINGS_CHANGE_UNAVAILABLE, dialogDisplayer);
     } else {
-      status = new Status(SUCCESS);
+      status = new Status(SUCCESS, dialogDisplayer);
     }
     final LocationSettingsStates states =
         new LocationSettingsStates(gpsUsable, networkUsable, bleUsable, gpsPresent, networkPresent,
@@ -159,7 +160,7 @@ class LocationSettingsResultRequest extends PendingResult<LocationSettingsResult
   }
 
   private LocationSettingsResult createResultForStatus(int statusType) {
-    Status status = new Status(statusType);
+    Status status = new Status(statusType, dialogDisplayer);
     return new LocationSettingsResult(status, null);
   }
 }
