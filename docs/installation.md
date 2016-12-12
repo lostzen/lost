@@ -5,7 +5,7 @@
 Include dependency using Gradle.
 
 ```groovy
-compile 'com.mapzen.android:lost:2.1.1'
+compile 'com.mapzen.android:lost:2.1.2'
 ```
 
 **Maven**
@@ -16,7 +16,7 @@ Include dependency using Maven.
 <dependency>
   <groupId>com.mapzen.android</groupId>
   <artifactId>lost</artifactId>
-  <version>2.1.1</version>
+  <version>2.1.2</version>
 </dependency>
 ```
 
@@ -24,4 +24,4 @@ Include dependency using Maven.
 
 Download the [latest JAR][1].
 
-[1]: http://search.maven.org/remotecontent?filepath=com/mapzen/android/lost/2.1.1/lost-2.1.1.jar
+[1]: http://search.maven.org/remotecontent?filepath=com/mapzen/android/lost/2.1.2/lost-2.1.2.jar
