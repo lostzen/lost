@@ -46,7 +46,7 @@ Status status = locationSettingsResult.getStatus();
     }
 ```
 
-If the status code is `RESOLUTION_REQUIRED`, the client can call `startResolutionForResult(Activity, int)` to bring up an `Activity`, asking for user's permission to modify the location settings to satisfy those requests. The result of the `Activity` will be returned via `onActivityResult(int, int, Intent)`.
+If the status code is `RESOLUTION_REQUIRED`, the client can call `startResolutionForResult(Activity, int)` to bring up an `Activity`, asking for user's permission to modify the location settings to satisfy those requests. The result of the `Activity` will be returned via `onActivityResult(int, int, Intent)`. You should not rely on the `resultCode` but instead check that the `requestCode` is that of your calling activity before resuming normal application flow
 ```java
 @Override  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     switch (requestCode) {
