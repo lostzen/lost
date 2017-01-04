@@ -1,17 +1,5 @@
 package com.mapzen.android.lost.internal;
 
-import android.app.IntentService;
-import android.app.PendingIntent;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.location.Location;
-import android.location.LocationManager;
-import android.os.Environment;
-import android.os.Looper;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
 import com.mapzen.android.lost.api.LocationAvailability;
 import com.mapzen.android.lost.api.LocationCallback;
 import com.mapzen.android.lost.api.LocationListener;
@@ -23,16 +11,29 @@ import com.mapzen.android.lost.api.Status;
 import com.mapzen.android.lost.shadows.LostShadowLocationManager;
 import com.mapzen.lost.BuildConfig;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.internal.ShadowExtractor;
 import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowEnvironment;
 import org.robolectric.shadows.ShadowLooper;
+
+import android.app.IntentService;
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
+import android.location.LocationManager;
+import android.os.Environment;
+import android.os.Looper;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -51,7 +52,7 @@ import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 import static org.robolectric.Shadows.shadowOf;
 
-@RunWith(RobolectricGradleTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @SuppressWarnings("MissingPermission")
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE, shadows = {
         LostShadowLocationManager.class})
@@ -676,7 +677,7 @@ public class FusedLocationProviderServiceImplTest {
     otherClient.connect();
 
     assertThat(api.getLocationListeners().get(client).size()).isEqualTo(1);
-    assertThat(api.getLocationListeners().get(otherClient)).isNull();
+    assertThat(api.getLocationListeners().get(otherClient)).isEmpty();
   }
 
   @Test public void requestLocationUpdates_shouldModifyOnlyClientPendingIntents() {
@@ -687,7 +688,7 @@ public class FusedLocationProviderServiceImplTest {
     otherClient.connect();
 
     assertThat(api.getPendingIntents().get(client).size()).isEqualTo(1);
-    assertThat(api.getPendingIntents().get(otherClient)).isNull();
+    assertThat(api.getPendingIntents().get(otherClient)).isEmpty();
   }
 
   @Test public void requestLocationUpdates_shouldModifyOnlyClientLocationListeners() {
@@ -698,7 +699,7 @@ public class FusedLocationProviderServiceImplTest {
     otherClient.connect();
 
     assertThat(api.getLocationCallbacks().get(client).size()).isEqualTo(1);
-    assertThat(api.getLocationCallbacks().get(otherClient)).isNull();
+    assertThat(api.getLocationCallbacks().get(otherClient)).isEmpty();
   }
 
   @Test public void removeLocationUpdates_shouldModifyOnlyClientListeners() {
@@ -714,7 +715,7 @@ public class FusedLocationProviderServiceImplTest {
 
     api.removeLocationUpdates(client, listener);
 
-    assertThat(api.getLocationListeners().get(client)).isNull();
+    assertThat(api.getLocationListeners().get(client)).isEmpty();
     assertThat(api.getLocationListeners().get(otherClient).size()).isEqualTo(1);
   }
 
@@ -731,7 +732,7 @@ public class FusedLocationProviderServiceImplTest {
 
     api.removeLocationUpdates(client, pendingIntent);
 
-    assertThat(api.getPendingIntents().get(client)).isNull();
+    assertThat(api.getPendingIntents().get(client)).isEmpty();
     assertThat(api.getPendingIntents().get(otherClient).size()).isEqualTo(1);
   }
 
@@ -748,7 +749,7 @@ public class FusedLocationProviderServiceImplTest {
 
     api.removeLocationUpdates(client, callback);
 
-    assertThat(api.getLocationCallbacks().get(client)).isNull();
+    assertThat(api.getLocationCallbacks().get(client)).isEmpty();
     assertThat(api.getLocationCallbacks().get(otherClient).size()).isEqualTo(1);
   }
 
