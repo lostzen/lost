@@ -35,6 +35,8 @@
     <activity android:name=".LocationListenerActivity"/>
     <activity android:name=".PendingIntentActivity"/>
     <activity android:name=".LocationAvailabilityActivity"/>
+    <activity android:name=".MultipleLocationListenerMultipleClientsActivity"/>
+    <activity android:name=".MultipleLocationListenerSingleClientActivity"/>
 
     <service
         android:name=".GeofenceIntentService"
