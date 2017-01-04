@@ -41,8 +41,7 @@ public class LostClientManager implements ClientManager {
   private Map<LocationListener, LocationRequest> listenerToLocationRequests;
   private Map<PendingIntent, LocationRequest> intentToLocationRequests;
   private Map<LocationCallback, LocationRequest> callbackToLocationRequests;
-  private Map<LocationRequest, Long> requestToLastReportedTime;
-  private Map<LocationRequest, Location> requestToLastReportedLocation;
+  private ReportedChanges reportedChanges;
 
   public LostClientManager() {
     clients = new HashSet<>();
@@ -55,9 +54,9 @@ public class LostClientManager implements ClientManager {
     listenerToLocationRequests = new HashMap<>();
     intentToLocationRequests = new HashMap<>();
     callbackToLocationRequests = new HashMap<>();
-    requestToLastReportedTime = new HashMap<>();
-    requestToLastReportedLocation = new HashMap<>();
 
+    reportedChanges = new ReportedChanges(new HashMap<LocationRequest, Long>(),
+        new HashMap<LocationRequest, Location>());
   }
 
   public static LostClientManager shared() {
@@ -232,8 +231,7 @@ public class LostClientManager implements ClientManager {
   }
 
   public void updateReportedValues(ReportedChanges changes) {
-    requestToLastReportedTime.putAll(changes.timeChanges());
-    requestToLastReportedLocation.putAll(changes.locationChanges());
+    reportedChanges.putAll(changes);
   }
 
   public void reportProviderEnabled(String provider) {
@@ -333,8 +331,8 @@ public class LostClientManager implements ClientManager {
       if (clientToObj.get(client) != null) {
         for (final T obj : clientToObj.get(client)) {
           LocationRequest request = objToLocationRequest.get(obj);
-          Long lastReportedTime = requestToLastReportedTime.get(request);
-          Location lastReportedLocation = requestToLastReportedLocation.get(request);
+          Long lastReportedTime = reportedChanges.timeChanges().get(request);
+          Location lastReportedLocation = reportedChanges.locationChanges().get(request);
           if (lastReportedTime == null && lastReportedLocation == null) {
             updatedRequestToReportedTime.put(request, System.currentTimeMillis());
             updatedRequestToReportedLocation.put(request, location);
