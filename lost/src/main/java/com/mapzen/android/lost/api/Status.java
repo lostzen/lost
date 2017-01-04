@@ -66,7 +66,11 @@ public class Status implements Result {
    * If the status code is {@link Status#RESOLUTION_REQUIRED}, then this method can be called to
    * start the resolution. For example, it will launch the Settings {@link Activity} so that the
    * user can update location settings when used with {@link SettingsApi#checkLocationSettings(
-   * LostApiClient, LocationSettingsRequest)}
+   * LostApiClient, LocationSettingsRequest)}. This activity will finish with
+   * {@link Activity#onActivityResult(int, int, android.content.Intent)} but the resultCode will
+   * never be {@code Activity#RESULT_OK}. You should instead rely on the requestCode to determine
+   * application flow and assume that the result is {@code Activity#RESULT_OK}.
+   *
    * @param activity to launch for resolution.
    * @param requestCode associated with activity.
    * @throws IntentSender.SendIntentException
