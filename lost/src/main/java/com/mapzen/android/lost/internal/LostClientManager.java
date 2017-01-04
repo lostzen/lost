@@ -192,9 +192,9 @@ public class LostClientManager implements ClientManager {
    * @return
    */
   public ReportedChanges reportLocationChanged(final Location location) {
-    return iterateAndNotify(location,
-        clientToListeners, listenerToLocationRequests, new Notifier<LocationListener>() {
-          @Override void notify(LostApiClient client, LocationListener listener) {
+    return iterateAndNotify(location, clientToListeners, listenerToLocationRequests,
+        new Notifier<LocationListener>() {
+          @Override public void notify(LostApiClient client, LocationListener listener) {
             listener.onLocationChanged(location);
           }
         });
@@ -214,7 +214,7 @@ public class LostClientManager implements ClientManager {
       final LocationResult result) {
     return iterateAndNotify(location,
         clientToPendingIntents, intentToLocationRequests, new Notifier<PendingIntent>() {
-          @Override void notify(LostApiClient client, PendingIntent pendingIntent) {
+          @Override public void notify(LostApiClient client, PendingIntent pendingIntent) {
             fireIntent(context, pendingIntent, location, availability, result);
           }
         });
@@ -224,7 +224,7 @@ public class LostClientManager implements ClientManager {
       final LocationResult result) {
     return iterateAndNotify(location,
         clientToLocationCallbacks, callbackToLocationRequests, new Notifier<LocationCallback>() {
-          @Override void notify(LostApiClient client, LocationCallback callback) {
+          @Override public void notify(LostApiClient client, LocationCallback callback) {
             notifyCallback(client, callback, result);
           }
         });
@@ -355,7 +355,7 @@ public class LostClientManager implements ClientManager {
     return new ReportedChanges(updatedRequestToReportedTime, updatedRequestToReportedLocation);
   }
 
-  abstract class Notifier<T> {
-    abstract void notify(LostApiClient client, T obj);
+  interface Notifier<T> {
+    void notify(LostApiClient client, T obj);
   }
 }
