@@ -1,5 +1,7 @@
 package com.mapzen.android.lost.api;
 
+import com.mapzen.android.lost.internal.DialogDisplayer;
+
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.IntentSender;
@@ -19,13 +21,14 @@ public class Status implements Result {
 
   private final int statusCode;
   private final String statusMessage;
-  private final PendingIntent mPendingIntent;
+  private final PendingIntent pendingIntent;
+  private final DialogDisplayer dialogDisplayer;
 
-  public Status(int statusCode) {
-    this(statusCode, null);
+  public Status(int statusCode, DialogDisplayer dialogDisplayer) {
+    this(statusCode, dialogDisplayer, null);
   }
 
-  public Status(int statusCode, PendingIntent pendingIntent) {
+  public Status(int statusCode, DialogDisplayer dialogDisplayer, PendingIntent pendingIntent) {
     String statusMessage;
     switch (statusCode) {
       case SUCCESS:
@@ -55,23 +58,27 @@ public class Status implements Result {
     }
     this.statusCode = statusCode;
     this.statusMessage = statusMessage;
-    this.mPendingIntent = pendingIntent;
+    this.pendingIntent = pendingIntent;
+    this.dialogDisplayer = dialogDisplayer;
   }
 
   /**
    * If the status code is {@link Status#RESOLUTION_REQUIRED}, then this method can be called to
    * start the resolution. For example, it will launch the Settings {@link Activity} so that the
    * user can update location settings when used with {@link SettingsApi#checkLocationSettings(
-   * LostApiClient, LocationSettingsRequest)}
+   * LostApiClient, LocationSettingsRequest)}. This activity will finish with
+   * {@link Activity#onActivityResult(int, int, android.content.Intent)} but the resultCode will
+   * never be {@code Activity#RESULT_OK}. You should instead rely on the requestCode to determine
+   * application flow and assume that the result is {@code Activity#RESULT_OK}.
+   *
    * @param activity to launch for resolution.
    * @param requestCode associated with activity.
    * @throws IntentSender.SendIntentException
    */
-  public void startResolutionForResult(Activity activity, int requestCode)
+  public void startResolutionForResult(final Activity activity, final int requestCode)
       throws IntentSender.SendIntentException {
     if (this.hasResolution()) {
-      activity.startIntentSenderForResult(this.mPendingIntent.getIntentSender(), requestCode, null,
-          0, 0, 0);
+      dialogDisplayer.displayDialog(activity, requestCode, pendingIntent);
     }
   }
 
@@ -88,7 +95,7 @@ public class Status implements Result {
    * @return whether or not there is a resolution.
    */
   public boolean hasResolution() {
-    return this.mPendingIntent != null;
+    return this.pendingIntent != null;
   }
 
   /**
@@ -128,7 +135,7 @@ public class Status implements Result {
    * @return the {@link PendingIntent}.
    */
   public PendingIntent getResolution() {
-    return this.mPendingIntent;
+    return this.pendingIntent;
   }
 
   @Override public Status getStatus() {

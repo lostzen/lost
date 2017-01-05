@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 public class SimplePendingResult extends PendingResult<Status> {
 
   private boolean hasResult = false;
+  private SettingsDialogDisplayer dialogDisplayer = new SettingsDialogDisplayer();
 
   public SimplePendingResult(boolean hasResult) {
     this.hasResult = hasResult;
@@ -47,7 +48,7 @@ public class SimplePendingResult extends PendingResult<Status> {
   }
 
   private Status generateStatus() {
-    return new Status(Status.SUCCESS);
+    return new Status(Status.SUCCESS, dialogDisplayer);
   }
 
   private Result generateResult() {
