@@ -25,12 +25,11 @@ public class MultipleLocationListenerSingleClientActivity extends ListActivity {
   private static final int LOCATION_PERMISSION_REQUEST = 1;
 
   LostApiClient lostApiClient;
-  LostApiClient otherLostApiClient;
   List<Item> items = new ArrayList<>();
 
   LocationListener listener = new LocationListener() {
     @Override public void onLocationChanged(Location location) {
-      addItem("Client");
+      addItem("Listener");
     }
 
     @Override public void onProviderDisabled(String provider) {
@@ -44,7 +43,7 @@ public class MultipleLocationListenerSingleClientActivity extends ListActivity {
 
   LocationListener otherListener = new LocationListener() {
     @Override public void onLocationChanged(Location location) {
-      addItem("Other Client");
+      addItem("Other Listener");
     }
 
     @Override public void onProviderDisabled(String provider) {
@@ -79,31 +78,18 @@ public class MultipleLocationListenerSingleClientActivity extends ListActivity {
 
           }
         }).build();
-
-    otherLostApiClient = new LostApiClient.Builder(this).addConnectionCallbacks(
-        new LostApiClient.ConnectionCallbacks() {
-          @Override
-          public void onConnected() {
-            initOtherLocationTracking();
-          }
-
-          @Override
-          public void onConnectionSuspended() { }
-        }).build();
   }
 
   @Override public void onStart() {
     super.onStart();
     lostApiClient.connect();
-    otherLostApiClient.connect();
   }
 
   @Override public void onStop() {
     super.onStop();
     LocationServices.FusedLocationApi.removeLocationUpdates(lostApiClient, listener);
+    LocationServices.FusedLocationApi.removeLocationUpdates(lostApiClient, otherListener);
     lostApiClient.disconnect();
-    LocationServices.FusedLocationApi.removeLocationUpdates(otherLostApiClient, otherListener);
-    otherLostApiClient.disconnect();
   }
 
   private void initLocationTracking() {
@@ -122,25 +108,14 @@ public class MultipleLocationListenerSingleClientActivity extends ListActivity {
         .setInterval(interval);
 
     LocationServices.FusedLocationApi.requestLocationUpdates(lostApiClient, request, listener);
-  }
 
-  private void initOtherLocationTracking() {
-    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-        != PackageManager.PERMISSION_GRANTED) {
-      ActivityCompat.requestPermissions(
-          this, new String[]{ Manifest.permission.ACCESS_FINE_LOCATION },
-          LOCATION_PERMISSION_REQUEST);
-      return;
-    }
-
-    long interval = 30 * 1000; // 30 seconds
-    LocationRequest request = LocationRequest.create()
+    interval = 30 * 1000; // 30 seconds
+    request = LocationRequest.create()
         .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
         .setFastestInterval(interval)
         .setInterval(interval);
 
-    LocationServices.FusedLocationApi.requestLocationUpdates(otherLostApiClient, request,
-        otherListener);
+    LocationServices.FusedLocationApi.requestLocationUpdates(lostApiClient, request, otherListener);
   }
 
   public void addItem(String title) {
