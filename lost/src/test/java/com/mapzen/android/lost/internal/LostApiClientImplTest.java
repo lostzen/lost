@@ -32,7 +32,7 @@ public class LostApiClientImplTest {
 
   @Before public void setUp() throws Exception {
     callbacks = new TestConnectionCallbacks();
-    client = new LostApiClientImpl(application, callbacks, new TestClientManager());
+    client = new LostApiClientImpl(application, callbacks, new LostClientManager());
 
     FusedLocationProviderService.FusedLocationProviderBinder stubBinder =
         mock(FusedLocationProviderService.FusedLocationProviderBinder.class);
@@ -75,7 +75,7 @@ public class LostApiClientImplTest {
     client.connect();
     TestConnectionCallbacks callbacks = new TestConnectionCallbacks();
     LostApiClient anotherClient =
-        new LostApiClientImpl(application, callbacks, new TestClientManager());
+        new LostApiClientImpl(application, callbacks, new LostClientManager());
     callbacks.setLostClient(anotherClient);
     anotherClient.connect();
     assertThat(callbacks.isClientConnectedOnConnect()).isTrue();
@@ -143,7 +143,7 @@ public class LostApiClientImplTest {
   @Test public void disconnect_multipleClients_shouldNotRemoveFusedLocationProviderApiImpl()
       throws Exception {
     LostApiClient anotherClient =
-        new LostApiClientImpl(application, callbacks, new TestClientManager());
+        new LostApiClientImpl(application, callbacks, new LostClientManager());
     anotherClient.connect();
     client.connect();
     client.disconnect();
@@ -152,7 +152,7 @@ public class LostApiClientImplTest {
 
   @Test public void disconnect_multipleClients_shouldNotRemoveGeofencingApiImpl() throws Exception {
     LostApiClient anotherClient =
-        new LostApiClientImpl(application, callbacks, new TestClientManager());
+        new LostApiClientImpl(application, callbacks, new LostClientManager());
     anotherClient.connect();
     client.connect();
     client.disconnect();
@@ -161,7 +161,7 @@ public class LostApiClientImplTest {
 
   @Test public void disconnect_multipleClients_shouldNotRemoveSettingsApiImpl() throws Exception {
     LostApiClient anotherClient =
-        new LostApiClientImpl(application, callbacks, new TestClientManager());
+        new LostApiClientImpl(application, callbacks, new LostClientManager());
     anotherClient.connect();
     client.connect();
     client.disconnect();
@@ -196,7 +196,7 @@ public class LostApiClientImplTest {
   @Test public void isConnected_multipleClients_shouldReturnFalseAfterDisconnected()
       throws Exception {
     LostApiClient anotherClient =
-        new LostApiClientImpl(application, callbacks, new TestClientManager());
+        new LostApiClientImpl(application, callbacks, new LostClientManager());
     anotherClient.connect();
     client.connect();
     client.disconnect();

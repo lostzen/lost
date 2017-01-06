@@ -123,16 +123,21 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   public void reportLocation(Location location) {
-    clientManager.reportLocationChanged(location);
+    ReportedChanges changes = clientManager.reportLocationChanged(location);
 
     LocationAvailability availability = locationEngine.createLocationAvailability();
     ArrayList<Location> locations = new ArrayList<>();
     locations.add(location);
     final LocationResult result = LocationResult.create(locations);
-    clientManager.sendPendingIntent(context, location, availability, result);
+    ReportedChanges pendingIntentChanges = clientManager.sendPendingIntent(
+        context, location, availability, result);
 
+    ReportedChanges callbackChanges = clientManager.reportLocationResult(
+        location, result);
 
-    clientManager.reportLocationResult(result);
+    changes.putAll(pendingIntentChanges);
+    changes.putAll(callbackChanges);
+    clientManager.updateReportedValues(changes);
   }
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})

@@ -24,4 +24,8 @@ public class TestLocationCallback implements LocationCallback {
   public LocationResult getResult() {
     return result;
   }
+
+  public void setResult(LocationResult result) {
+    this.result = result;
+  }
 }

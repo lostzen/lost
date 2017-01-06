@@ -810,6 +810,309 @@ public class FusedLocationProviderServiceImplTest {
     assertThat(otherCallback.getAvailability()).isNull();
   }
 
+  @Test public void reportLocation_shouldNotifyBothListeners() {
+    TestLocationListener listener = new TestLocationListener();
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(), listener);
+
+    TestLocationListener otherListener = new TestLocationListener();
+    otherClient.connect();
+    LocationRequest otherRequest = LocationRequest.create();
+    api.requestLocationUpdates(otherClient, otherRequest, otherListener);
+
+    Location location = new Location("test");
+    api.reportLocation(location);
+    assertThat(listener.getAllLocations()).contains(location);
+    assertThat(otherListener.getAllLocations()).contains(location);
+  }
+
+  @Test public void reportLocation_listener_shouldRespectFastestInterval() {
+    TestLocationListener listener = new TestLocationListener();
+    client.connect();
+    LocationRequest request = LocationRequest.create();
+    request.setFastestInterval(1000);
+    api.requestLocationUpdates(client, request, listener);
+
+    TestLocationListener otherListener = new TestLocationListener();
+    otherClient.connect();
+    LocationRequest otherRequest = LocationRequest.create();
+    otherRequest.setFastestInterval(0);
+    api.requestLocationUpdates(otherClient, otherRequest, otherListener);
+
+    api.reportLocation(new Location("test"));
+    listener.getAllLocations().clear();
+    otherListener.getAllLocations().clear();
+
+    Location location = new Location("test");
+    api.reportLocation(location);
+    assertThat(listener.getAllLocations()).isEmpty();
+    assertThat(otherListener.getAllLocations().size()).isEqualTo(1);
+  }
+
+  @Test public void reportLocation_listener_shouldRespectSmallestDisplacement() {
+    TestLocationListener listener = new TestLocationListener();
+    client.connect();
+    LocationRequest request = LocationRequest.create();
+    request.setSmallestDisplacement(10);
+    api.requestLocationUpdates(client, request, listener);
+
+    TestLocationListener otherListener = new TestLocationListener();
+    otherClient.connect();
+    LocationRequest otherRequest = LocationRequest.create();
+    otherRequest.setFastestInterval(0);
+    api.requestLocationUpdates(otherClient, otherRequest, otherListener);
+
+    api.reportLocation(new Location("test"));
+    listener.getAllLocations().clear();
+    otherListener.getAllLocations().clear();
+
+    Location location = new Location("test");
+    api.reportLocation(location);
+    assertThat(listener.getAllLocations()).isEmpty();
+    assertThat(otherListener.getAllLocations().size()).isEqualTo(1);
+  }
+
+  @Test public void reportLocation_listener_shouldRespectLargestIntervalAndSmallestDisplacement()
+      throws InterruptedException {
+    TestLocationListener listener = new TestLocationListener();
+    client.connect();
+    LocationRequest request = LocationRequest.create();
+    request.setFastestInterval(1000);
+    request.setSmallestDisplacement(10);
+    api.requestLocationUpdates(client, request, listener);
+
+    TestLocationListener otherListener = new TestLocationListener();
+    otherClient.connect();
+    LocationRequest otherRequest = LocationRequest.create();
+    otherRequest.setFastestInterval(0);
+    api.requestLocationUpdates(otherClient, otherRequest, otherListener);
+
+    api.reportLocation(new Location("test"));
+    listener.getAllLocations().clear();
+    otherListener.getAllLocations().clear();
+
+    Location location = new Location("test");
+    location.setLatitude(70.0);
+    location.setLongitude(40.0);
+    api.reportLocation(location);
+    assertThat(listener.getAllLocations()).isEmpty();
+    assertThat(otherListener.getAllLocations().size()).isEqualTo(1);
+
+    api.reportLocation(new Location("test"));
+    assertThat(listener.getAllLocations()).isEmpty();
+    assertThat(otherListener.getAllLocations().size()).isEqualTo(2);
+
+    Thread.sleep(1000);
+    api.reportLocation(location);
+    assertThat(listener.getAllLocations().size()).isEqualTo(1);
+    assertThat(otherListener.getAllLocations().size()).isEqualTo(3);
+  }
+
+  @Test public void reportLocation_shouldNotifyBothPendingIntents() {
+    Intent intent = new Intent(application, TestService.class);
+    PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(), pendingIntent);
+
+    Intent otherIntent = new Intent(application, TestService.class);
+    PendingIntent otherPendingIntent = PendingIntent.getService(application, 0, otherIntent, 0);
+    otherClient.connect();
+    LocationRequest otherRequest = LocationRequest.create();
+    api.requestLocationUpdates(otherClient, otherRequest, otherPendingIntent);
+
+    Location location = new Location("test");
+    api.reportLocation(location);
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+  }
+
+  @Test public void reportLocation_pendingIntent_shouldRespectFastestInterval() {
+    Intent intent = new Intent(application, TestService.class);
+    PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
+    client.connect();
+    LocationRequest request = LocationRequest.create();
+    request.setFastestInterval(1000);
+    api.requestLocationUpdates(client, request, pendingIntent);
+
+    Intent otherIntent = new Intent(application, TestService.class);
+    PendingIntent otherPendingIntent = PendingIntent.getService(application, 0, otherIntent, 0);
+    otherClient.connect();
+    LocationRequest otherRequest = LocationRequest.create();
+    otherRequest.setFastestInterval(0);
+    api.requestLocationUpdates(otherClient, otherRequest, otherPendingIntent);
+
+    api.reportLocation(new Location("test"));
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+
+    Location location = new Location("test");
+    api.reportLocation(location);
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNull();
+  }
+
+  @Test public void reportLocation_pendingIntent_shouldRespectSmallestDisplacement() {
+    Intent intent = new Intent(application, TestService.class);
+    PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
+    client.connect();
+    LocationRequest request = LocationRequest.create();
+    request.setFastestInterval(1000);
+    api.requestLocationUpdates(client, request, pendingIntent);
+
+    Intent otherIntent = new Intent(application, TestService.class);
+    PendingIntent otherPendingIntent = PendingIntent.getService(application, 0, otherIntent, 0);
+    otherClient.connect();
+    LocationRequest otherRequest = LocationRequest.create();
+    otherRequest.setFastestInterval(0);
+    api.requestLocationUpdates(otherClient, otherRequest, otherPendingIntent);
+
+    api.reportLocation(new Location("test"));
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+
+    Location location = new Location("test");
+    api.reportLocation(location);
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNull();
+  }
+
+  @Test public void reportLocation_pendingIntent_shouldRespectLargestIntervalSmallestDisplacement()
+      throws InterruptedException {
+    Intent intent = new Intent(application, TestService.class);
+    PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
+    client.connect();
+    LocationRequest request = LocationRequest.create();
+    request.setFastestInterval(1000);
+    request.setSmallestDisplacement(10);
+    api.requestLocationUpdates(client, request, pendingIntent);
+
+    Intent otherIntent = new Intent(application, TestService.class);
+    PendingIntent otherPendingIntent = PendingIntent.getService(application, 0, otherIntent, 0);
+    otherClient.connect();
+    LocationRequest otherRequest = LocationRequest.create();
+    otherRequest.setFastestInterval(0);
+    api.requestLocationUpdates(otherClient, otherRequest, otherPendingIntent);
+
+
+    api.reportLocation(new Location("test"));
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+
+    Location location = new Location("test");
+    location.setLatitude(70.0);
+    location.setLongitude(40.0);
+    api.reportLocation(location);
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNull();
+
+    api.reportLocation(new Location("test"));
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNull();
+
+    Thread.sleep(1000);
+    api.reportLocation(location);
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+  }
+
+  @Test public void reportLocation_shouldNotifyBothCallbacks() {
+    TestLocationCallback callback = new TestLocationCallback();
+    client.connect();
+    api.requestLocationUpdates(client, LocationRequest.create(), callback, Looper.myLooper());
+
+    TestLocationCallback otherCallback = new TestLocationCallback();
+    otherClient.connect();
+    LocationRequest otherRequest = LocationRequest.create();
+    api.requestLocationUpdates(otherClient, otherRequest, otherCallback, Looper.myLooper());
+
+    Location location = new Location("test");
+    api.reportLocation(location);
+    assertThat(callback.getResult()).isNotNull();
+    assertThat(otherCallback.getResult()).isNotNull();
+  }
+
+  @Test public void reportLocation_callback_shouldRespectFastestInterval() {
+    TestLocationCallback callback = new TestLocationCallback();
+    client.connect();
+    LocationRequest request = LocationRequest.create();
+    request.setFastestInterval(1000);
+    api.requestLocationUpdates(client, request, callback, Looper.myLooper());
+
+    TestLocationCallback otherCallback = new TestLocationCallback();
+    otherClient.connect();
+    LocationRequest otherRequest = LocationRequest.create();
+    otherRequest.setFastestInterval(0);
+    api.requestLocationUpdates(otherClient, otherRequest, otherCallback, Looper.myLooper());
+
+    api.reportLocation(new Location("test"));
+    callback.setResult(null);
+    otherCallback.setResult(null);
+
+    Location location = new Location("test");
+    api.reportLocation(location);
+    assertThat(callback.getResult()).isNull();
+    assertThat(otherCallback.getResult()).isNotNull();
+  }
+
+  @Test public void reportLocation_callback_shouldRespectSmallestDisplacement() {
+    TestLocationCallback callback = new TestLocationCallback();
+    client.connect();
+    LocationRequest request = LocationRequest.create();
+    request.setSmallestDisplacement(10);
+    api.requestLocationUpdates(client, request, callback, Looper.myLooper());
+
+    TestLocationCallback otherCallback = new TestLocationCallback();
+    otherClient.connect();
+    LocationRequest otherRequest = LocationRequest.create();
+    otherRequest.setFastestInterval(0);
+    api.requestLocationUpdates(otherClient, otherRequest, otherCallback, Looper.myLooper());
+
+    api.reportLocation(new Location("test"));
+    callback.setResult(null);
+    otherCallback.setResult(null);
+
+    Location location = new Location("test");
+    api.reportLocation(location);
+    assertThat(callback.getResult()).isNull();
+    assertThat(otherCallback.getResult()).isNotNull();
+  }
+
+  @Test public void reportLocation_callback_shouldRespectLargestIntervalAndSmallestDisplacement()
+      throws InterruptedException {
+    TestLocationCallback callback = new TestLocationCallback();
+    client.connect();
+    LocationRequest request = LocationRequest.create();
+    request.setFastestInterval(1000);
+    request.setSmallestDisplacement(10);
+    api.requestLocationUpdates(client, request, callback, Looper.myLooper());
+
+    TestLocationCallback otherCallback = new TestLocationCallback();
+    otherClient.connect();
+    LocationRequest otherRequest = LocationRequest.create();
+    otherRequest.setFastestInterval(0);
+    api.requestLocationUpdates(otherClient, otherRequest, otherCallback, Looper.myLooper());
+
+    api.reportLocation(new Location("test"));
+    callback.setResult(null);
+    otherCallback.setResult(null);
+
+    Location location = new Location("test");
+    location.setLatitude(70.0);
+    location.setLongitude(40.0);
+    api.reportLocation(location);
+    assertThat(callback.getResult()).isNull();
+    assertThat(otherCallback.getResult()).isNotNull();
+
+    api.reportLocation(new Location("test"));
+    assertThat(callback.getResult()).isNull();
+    assertThat(otherCallback.getResult()).isNotNull();
+
+    Thread.sleep(1000);
+    api.reportLocation(location);
+    assertThat(callback.getResult()).isNotNull();
+    assertThat(otherCallback.getResult()).isNotNull();
+  }
+
   @Test public void requestLocationUpdates_listener_shouldReturnFusedLocationPendingResult() {
     TestLocationListener listener = new TestLocationListener();
     PendingResult<Status> result = api.requestLocationUpdates(client, LocationRequest.create(),
