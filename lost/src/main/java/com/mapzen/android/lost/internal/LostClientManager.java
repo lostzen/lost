@@ -16,7 +16,6 @@ import android.os.Looper;
 import android.util.Log;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,25 +30,15 @@ public class LostClientManager implements ClientManager {
   private static final String TAG = ClientManager.class.getSimpleName();
 
   private static LostClientManager instance;
-  private HashSet<LostApiClient> clients;
-
-  private Map<LostApiClient, Set<LocationListener>> clientToListeners;
-  private Map<LostApiClient, Set<PendingIntent>> clientToPendingIntents;
-  private Map<LostApiClient, Set<LocationCallback>> clientToLocationCallbacks;
-  private Map<LostApiClient, Map<LocationCallback, Looper>> clientCallbackToLoopers;
+  private HashMap<LostApiClient, LostClientWrapper> clients;
 
   private Map<LocationListener, LocationRequest> listenerToLocationRequests;
   private Map<PendingIntent, LocationRequest> intentToLocationRequests;
   private Map<LocationCallback, LocationRequest> callbackToLocationRequests;
   private ReportedChanges reportedChanges;
 
-  public LostClientManager() {
-    clients = new HashSet<>();
-
-    clientToListeners = new HashMap<>();
-    clientToPendingIntents = new HashMap<>();
-    clientToLocationCallbacks = new HashMap<>();
-    clientCallbackToLoopers = new HashMap<>();
+  LostClientManager() {
+    clients = new HashMap<>();
 
     listenerToLocationRequests = new HashMap<>();
     intentToLocationRequests = new HashMap<>();
@@ -67,19 +56,15 @@ public class LostClientManager implements ClientManager {
   }
 
   public void addClient(LostApiClient client) {
-    clients.add(client);
+    clients.put(client, new LostClientWrapper(client));
   }
 
   public void removeClient(LostApiClient client) {
     clients.remove(client);
-    clientToListeners.remove(client);
-    clientToPendingIntents.remove(client);
-    clientToLocationCallbacks.remove(client);
-    clientCallbackToLoopers.remove(client);
   }
 
   public boolean containsClient(LostApiClient client) {
-    return clients.contains(client);
+    return clients.containsKey(client);
   }
 
   public int numberOfClients() {
@@ -88,98 +73,70 @@ public class LostClientManager implements ClientManager {
 
   public void addListener(LostApiClient client, LocationRequest request,
       LocationListener listener) {
-    Set<LocationListener> listeners = clientToListeners.get(client);
-    if (listeners == null) {
-      listeners = new HashSet<>();
-    }
-    listeners.add(listener);
-    clientToListeners.put(client, listeners);
+    throwIfClientNotAdded(client);
+    clients.get(client).locationListeners().add(listener);
     listenerToLocationRequests.put(listener, request);
   }
 
   public void addPendingIntent(LostApiClient client, LocationRequest request,
       PendingIntent callbackIntent) {
-    Set<PendingIntent> intents = clientToPendingIntents.get(client);
-    if (intents == null) {
-      intents = new HashSet<>();
-    }
-    intents.add(callbackIntent);
-    clientToPendingIntents.put(client, intents);
+    throwIfClientNotAdded(client);
+    clients.get(client).pendingIntents().add(callbackIntent);
     intentToLocationRequests.put(callbackIntent, request);
   }
 
   public void addLocationCallback(LostApiClient client, LocationRequest request,
       LocationCallback callback, Looper looper) {
-    Set<LocationCallback> callbacks = clientToLocationCallbacks.get(client);
-    if (callbacks == null) {
-      callbacks = new HashSet<>();
-    }
-    callbacks.add(callback);
-    clientToLocationCallbacks.put(client, callbacks);
-
-    Map<LocationCallback, Looper> looperMap = clientCallbackToLoopers.get(client);
-    if (looperMap == null) {
-      looperMap = new HashMap<>();
-    }
-    looperMap.put(callback, looper);
-    clientCallbackToLoopers.put(client, looperMap);
+    throwIfClientNotAdded(client);
+    clients.get(client).locationCallbacks().add(callback);
+    clients.get(client).looperMap().put(callback, looper);
     callbackToLocationRequests.put(callback, request);
   }
 
+  private void throwIfClientNotAdded(LostApiClient client) {
+    if (clients.get(client) == null) {
+      throw new IllegalArgumentException("Client must be added before requesting location updates");
+    }
+  }
+
   public boolean removeListener(LostApiClient client, LocationListener listener) {
-    boolean removedListener = false;
-    if (clientToListeners.get(client) != null) {
-      removedListener = clientToListeners.get(client).contains(listener);
-    }
-    Set<LocationListener> listeners = clientToListeners.get(client);
-    if (listeners != null) {
+    final Set<LocationListener> listeners = clients.get(client).locationListeners();
+    boolean removed = false;
+
+    if (listeners.contains(listener)) {
       listeners.remove(listener);
-      if (listeners.isEmpty()) {
-        clientToListeners.remove(client);
-      }
+      removed = true;
     }
+
     listenerToLocationRequests.remove(listener);
-    return removedListener;
+    return removed;
   }
 
   public boolean removePendingIntent(LostApiClient client, PendingIntent callbackIntent) {
-    boolean removedPendingIntent = false;
-    if (clientToPendingIntents.get(client) != null) {
-      removedPendingIntent = clientToPendingIntents.get(client).contains(callbackIntent);
+    final Set<PendingIntent> pendingIntents = clients.get(client).pendingIntents();
+    boolean removed = false;
+
+    if (pendingIntents.contains(callbackIntent)) {
+      pendingIntents.remove(callbackIntent);
+      removed = true;
     }
-    Set<PendingIntent> intents = clientToPendingIntents.get(client);
-    if (intents != null) {
-      intents.remove(callbackIntent);
-      if (intents.isEmpty()) {
-        clientToPendingIntents.remove(client);
-      }
-    }
+
     intentToLocationRequests.remove(callbackIntent);
-    return removedPendingIntent;
+    return removed;
   }
 
   public boolean removeLocationCallback(LostApiClient client, LocationCallback callback) {
-    boolean removedCallback = false;
-    if (clientToLocationCallbacks.get(client) != null) {
-      removedCallback = clientToLocationCallbacks.get(client).contains(callback);
-    }
-    Set<LocationCallback> callbacks = clientToLocationCallbacks.get(client);
-    if (callbacks != null) {
+    final Set<LocationCallback> callbacks = clients.get(client).locationCallbacks();
+    boolean removed = false;
+
+    if (callbacks.contains(callback)) {
       callbacks.remove(callback);
-      if (callbacks.isEmpty()) {
-        clientToLocationCallbacks.remove(client);
-      }
+      removed = true;
     }
 
-    Map<LocationCallback, Looper> looperMap = clientCallbackToLoopers.get(client);
-    if (looperMap != null) {
-      looperMap.remove(callback);
-      if (looperMap.isEmpty()) {
-        clientCallbackToLoopers.remove(client);
-      }
-    }
+    clients.get(client).looperMap().remove(callback);
     callbackToLocationRequests.remove(callback);
-    return removedCallback;
+    return removed;
   }
 
   /**
@@ -192,7 +149,7 @@ public class LostClientManager implements ClientManager {
    * @return
    */
   public ReportedChanges reportLocationChanged(final Location location) {
-    return iterateAndNotify(location, clientToListeners, listenerToLocationRequests,
+    return iterateAndNotify(location, getLocationListeners(), listenerToLocationRequests,
         new Notifier<LocationListener>() {
           @Override public void notify(LostApiClient client, LocationListener listener) {
             listener.onLocationChanged(location);
@@ -213,7 +170,7 @@ public class LostClientManager implements ClientManager {
       final Location location, final LocationAvailability availability,
       final LocationResult result) {
     return iterateAndNotify(location,
-        clientToPendingIntents, intentToLocationRequests, new Notifier<PendingIntent>() {
+        getPendingIntents(), intentToLocationRequests, new Notifier<PendingIntent>() {
           @Override public void notify(LostApiClient client, PendingIntent pendingIntent) {
             fireIntent(context, pendingIntent, location, availability, result);
           }
@@ -223,7 +180,7 @@ public class LostClientManager implements ClientManager {
   public ReportedChanges reportLocationResult(Location location,
       final LocationResult result) {
     return iterateAndNotify(location,
-        clientToLocationCallbacks, callbackToLocationRequests, new Notifier<LocationCallback>() {
+        getLocationCallbacks(), callbackToLocationRequests, new Notifier<LocationCallback>() {
           @Override public void notify(LostApiClient client, LocationCallback callback) {
             notifyCallback(client, callback, result);
           }
@@ -235,56 +192,68 @@ public class LostClientManager implements ClientManager {
   }
 
   public void reportProviderEnabled(String provider) {
-    for (LostApiClient client : clientToListeners.keySet()) {
-      if (clientToListeners.get(client) != null) {
-        for (LocationListener listener : clientToListeners.get(client)) {
-          listener.onProviderEnabled(provider);
-        }
+    for (LostClientWrapper wrapper : clients.values()) {
+      for (LocationListener listener : wrapper.locationListeners()) {
+        listener.onProviderEnabled(provider);
       }
     }
   }
 
   public void reportProviderDisabled(String provider) {
-    for (LostApiClient client : clientToListeners.keySet()) {
-      if (clientToListeners.get(client) != null) {
-        for (LocationListener listener : clientToListeners.get(client)) {
-          listener.onProviderDisabled(provider);
-        }
+    for (LostClientWrapper wrapper : clients.values()) {
+      for (LocationListener listener : wrapper.locationListeners()) {
+        listener.onProviderDisabled(provider);
       }
     }
   }
 
   public void notifyLocationAvailability(final LocationAvailability availability) {
-    for (LostApiClient client : clientToLocationCallbacks.keySet()) {
-      if (clientToLocationCallbacks.get(client) != null) {
-        for (final LocationCallback callback : clientToLocationCallbacks.get(client)) {
-          notifyAvailability(client, callback, availability);
-        }
+    for (LostClientWrapper wrapper : clients.values()) {
+      for (LocationCallback callback : wrapper.locationCallbacks()) {
+        notifyAvailability(wrapper.client(), callback, availability);
       }
     }
   }
 
   public boolean hasNoListeners() {
-    return clientToListeners.isEmpty() && clientToPendingIntents.isEmpty() &&
-        clientToLocationCallbacks.isEmpty();
+    for (LostClientWrapper wrapper : clients.values()) {
+      if (!wrapper.locationListeners().isEmpty()
+          || !wrapper.pendingIntents().isEmpty()
+          || !wrapper.locationCallbacks().isEmpty()) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   public void shutdown() {
-    clientToListeners.clear();
-    clientToPendingIntents.clear();
-    clientToLocationCallbacks.clear();
-    clientCallbackToLoopers.clear();
+    clients.clear();
   }
 
   public Map<LostApiClient, Set<LocationListener>> getLocationListeners() {
+    final Map<LostApiClient, Set<LocationListener>> clientToListeners = new HashMap<>();
+    for (LostApiClient client : clients.keySet()) {
+      clientToListeners.put(client, clients.get(client).locationListeners());
+    }
+
     return clientToListeners;
   }
 
   public Map<LostApiClient, Set<PendingIntent>> getPendingIntents() {
+    final Map<LostApiClient, Set<PendingIntent>> clientToPendingIntents = new HashMap<>();
+    for (LostApiClient client : clients.keySet()) {
+      clientToPendingIntents.put(client, clients.get(client).pendingIntents());
+    }
+
     return clientToPendingIntents;
   }
 
   public Map<LostApiClient, Set<LocationCallback>> getLocationCallbacks() {
+    final Map<LostApiClient, Set<LocationCallback>> clientToLocationCallbacks = new HashMap<>();
+    for (LostApiClient client : clients.keySet()) {
+      clientToLocationCallbacks.put(client, clients.get(client).locationCallbacks());
+    }
     return clientToLocationCallbacks;
   }
 
@@ -302,8 +271,8 @@ public class LostClientManager implements ClientManager {
 
   private void notifyCallback(LostApiClient client, final LocationCallback callback,
       final LocationResult result) {
-    Looper looper = clientCallbackToLoopers.get(client).get(callback);
-    Handler handler = new Handler(looper);
+    final Looper looper = clients.get(client).looperMap().get(callback);
+    final Handler handler = new Handler(looper);
     handler.post(new Runnable() {
       @Override public void run() {
         callback.onLocationResult(result);
@@ -313,8 +282,8 @@ public class LostClientManager implements ClientManager {
 
   private void notifyAvailability(LostApiClient client, final LocationCallback callback,
       final LocationAvailability availability) {
-    Looper looper = clientCallbackToLoopers.get(client).get(callback);
-    Handler handler = new Handler(looper);
+    final Looper looper = clients.get(client).looperMap().get(callback);
+    final Handler handler = new Handler(looper);
     handler.post(new Runnable() {
       @Override public void run() {
         callback.onLocationAvailability(availability);

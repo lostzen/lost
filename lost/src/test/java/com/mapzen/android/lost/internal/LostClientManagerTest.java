@@ -9,7 +9,7 @@ import com.mapzen.lost.BuildConfig;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowApplication;
 
@@ -26,7 +26,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.robolectric.RuntimeEnvironment.application;
 
-@RunWith(RobolectricGradleTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
 public class LostClientManagerTest {
 
@@ -58,7 +58,24 @@ public class LostClientManagerTest {
     manager.removeClient(anotherClient);
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void addListener_shouldThrowExceptionIfClientWasNotAdded() throws Exception {
+    manager.addListener(client, LocationRequest.create(), new TestLocationListener());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void addPendingIntent_shouldThrowExceptionIfClientWasNotAdded() throws Exception {
+    manager.addPendingIntent(client, LocationRequest.create(), mock(PendingIntent.class));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void addLocationCallback_shouldThrowExceptionIfClientWasNotAdded() throws Exception {
+    manager.addLocationCallback(client, LocationRequest.create(), new TestLocationCallback(),
+        mock(Looper.class));
+  }
+
   @Test public void addListener_shouldAddListenerForClient() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     TestLocationListener listener = new TestLocationListener();
     manager.addListener(client, request, listener);
@@ -66,6 +83,7 @@ public class LostClientManagerTest {
   }
 
   @Test public void addPendingIntent_shouldAddPendingIntentForClient() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     PendingIntent pendingIntent = mock(PendingIntent.class);
     manager.addPendingIntent(client, request, pendingIntent);
@@ -73,6 +91,7 @@ public class LostClientManagerTest {
   }
 
   @Test public void addLocationCallback_shouldAddLocationCallbackForClient() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     TestLocationCallback callback = new TestLocationCallback();
     Looper looper = mock(Looper.class);
@@ -81,31 +100,35 @@ public class LostClientManagerTest {
   }
 
   @Test public void removeListener_shouldRemoveListenerForClient() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     TestLocationListener listener = new TestLocationListener();
     manager.addListener(client, request, listener);
     manager.removeListener(client, listener);
-    assertThat(manager.getLocationListeners().get(client)).isNull();
+    assertThat(manager.getLocationListeners().get(client)).isEmpty();
   }
 
   @Test public void removePendingIntent_shouldRemovePendingIntentForClient() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     PendingIntent pendingIntent = mock(PendingIntent.class);
     manager.addPendingIntent(client, request, pendingIntent);
     manager.removePendingIntent(client, pendingIntent);
-    assertThat(manager.getPendingIntents().get(client)).isNull();
+    assertThat(manager.getPendingIntents().get(client)).isEmpty();
   }
 
   @Test public void removeLocationCallback_shouldRemoveLocationCallbackForClient() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     TestLocationCallback callback = new TestLocationCallback();
     Looper looper = mock(Looper.class);
     manager.addLocationCallback(client, request, callback, looper);
     manager.removeLocationCallback(client, callback);
-    assertThat(manager.getLocationCallbacks().get(client)).isNull();
+    assertThat(manager.getLocationCallbacks().get(client)).isEmpty();
   }
 
   @Test public void reportLocationChanged_shouldNotifyListener() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     TestLocationListener listener = new TestLocationListener();
     manager.addListener(client, request, listener);
@@ -115,6 +138,7 @@ public class LostClientManagerTest {
   }
 
   @Test public void sendPendingIntent_shouldFireIntent() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     Intent intent = new Intent(application, FusedLocationProviderServiceImplTest.TestService.class);
     PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
@@ -134,6 +158,7 @@ public class LostClientManagerTest {
   }
 
   @Test public void reportLocationResult_shouldNotifyCallback() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     TestLocationCallback callback = new TestLocationCallback();
     Looper looper = Looper.myLooper();
@@ -147,6 +172,7 @@ public class LostClientManagerTest {
   }
 
   @Test public void reportProviderEnabled_shouldNotifyListeners() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     TestLocationListener listener = new TestLocationListener();
     manager.addListener(client, request, listener);
@@ -155,6 +181,7 @@ public class LostClientManagerTest {
   }
 
   @Test public void reportProviderDisabled_shouldNotifyListeners() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     TestLocationListener listener = new TestLocationListener();
     manager.addListener(client, request, listener);
@@ -163,6 +190,7 @@ public class LostClientManagerTest {
   }
 
   @Test public void notifyLocationAvailability_shouldNotifyCallback() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     TestLocationCallback callback = new TestLocationCallback();
     Looper looper = Looper.myLooper();
@@ -173,10 +201,12 @@ public class LostClientManagerTest {
   }
 
   @Test public void hasNoListeners_shouldReturnTrue() {
+    manager.addClient(client);
     assertThat(manager.hasNoListeners()).isTrue();
   }
 
   @Test public void hasNoListeners_shouldReturnFalseWhenListenerAdded() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     TestLocationListener listener = new TestLocationListener();
     manager.addListener(client, request, listener);
@@ -184,6 +214,7 @@ public class LostClientManagerTest {
   }
 
   @Test public void hasNoListeners_shouldReturnFalseWhenPendingIntentAdded() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     PendingIntent pendingIntent = mock(PendingIntent.class);
     manager.addPendingIntent(client, request, pendingIntent);
@@ -191,6 +222,7 @@ public class LostClientManagerTest {
   }
 
   @Test public void hasNoListeners_shouldReturnFalseWhenCallbackAdded() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     TestLocationCallback callback = new TestLocationCallback();
     Looper looper = mock(Looper.class);
@@ -199,6 +231,7 @@ public class LostClientManagerTest {
   }
 
   @Test public void removeClient_shouldRemoveListenersForClient() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     TestLocationListener listener = new TestLocationListener();
     manager.addListener(client, request, listener);
@@ -207,6 +240,7 @@ public class LostClientManagerTest {
   }
 
   @Test public void removeClient_shouldRemovePendingIntentsForClient() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     PendingIntent pendingIntent = mock(PendingIntent.class);
     manager.addPendingIntent(client, request, pendingIntent);
@@ -215,6 +249,7 @@ public class LostClientManagerTest {
   }
 
   @Test public void removeClient_shouldRemoveCallbacksForClient() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     TestLocationCallback callback = new TestLocationCallback();
     Looper looper = mock(Looper.class);
@@ -224,6 +259,7 @@ public class LostClientManagerTest {
   }
 
   @Test public void shutdown_shouldClearAllMaps() {
+    manager.addClient(client);
     LocationRequest request = LocationRequest.create();
     TestLocationListener listener = new TestLocationListener();
     manager.addListener(client, request, listener);
@@ -240,5 +276,4 @@ public class LostClientManagerTest {
     assertThat(manager.getPendingIntents()).isEmpty();
     assertThat(manager.getLocationCallbacks()).isEmpty();
   }
-
 }
