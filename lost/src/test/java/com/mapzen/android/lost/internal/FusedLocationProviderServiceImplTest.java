@@ -521,9 +521,10 @@ public class FusedLocationProviderServiceImplTest {
 
   @Test public void requestLocationUpdates_shouldNotNotifyRemovedPendingIntent() throws Exception {
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
-    Intent intent = new Intent(application, TestService.class);
-    PendingIntent pendingIntent1 = PendingIntent.getService(application, 0, intent, 0);
-    PendingIntent pendingIntent2 = PendingIntent.getService(application, 0, intent, 0);
+    Intent intent1 = new Intent(application, TestService.class);
+    Intent intent2 = new Intent(application, OtherTestService.class);
+    PendingIntent pendingIntent1 = PendingIntent.getService(application, 0, intent1, 0);
+    PendingIntent pendingIntent2 = PendingIntent.getService(application, 0, intent2, 0);
     api.requestLocationUpdates(client, request, pendingIntent1);
     api.requestLocationUpdates(client, request, pendingIntent2);
 
@@ -1300,11 +1301,19 @@ public class FusedLocationProviderServiceImplTest {
 
   public class TestService extends IntentService {
     public TestService() {
-      super("test");
+      super("test service");
     }
 
     @Override protected void onHandleIntent(Intent intent) {
     }
   }
 
+  public class OtherTestService extends IntentService {
+    public OtherTestService() {
+      super("other test service");
+    }
+
+    @Override protected void onHandleIntent(Intent intent) {
+    }
+  }
 }
