@@ -5,11 +5,13 @@ import com.mapzen.android.lost.internal.DialogDisplayer;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.IntentSender;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Represents the result of a {@link LocationServices} API call.
  */
-public class Status implements Result {
+public class Status implements Result, Parcelable {
 
   public static final int SUCCESS = 0;
   public static final int RESOLUTION_REQUIRED = 6;
@@ -61,6 +63,23 @@ public class Status implements Result {
     this.pendingIntent = pendingIntent;
     this.dialogDisplayer = dialogDisplayer;
   }
+
+  protected Status(Parcel in) {
+    statusCode = in.readInt();
+    statusMessage = in.readString();
+    pendingIntent = in.readParcelable(PendingIntent.class.getClassLoader());
+    dialogDisplayer = in.readParcelable(DialogDisplayer.class.getClassLoader());
+  }
+
+  public static final Creator<Status> CREATOR = new Creator<Status>() {
+    @Override public Status createFromParcel(Parcel in) {
+      return new Status(in);
+    }
+
+    @Override public Status[] newArray(int size) {
+      return new Status[size];
+    }
+  };
 
   /**
    * If the status code is {@link Status#RESOLUTION_REQUIRED}, then this method can be called to
@@ -140,5 +159,17 @@ public class Status implements Result {
 
   @Override public Status getStatus() {
     return this;
+  }
+
+
+  @Override public int describeContents() {
+    return 0;
+  }
+
+  @Override public void writeToParcel(Parcel parcel, int i) {
+    parcel.writeInt(statusCode);
+    parcel.writeString(statusMessage);
+    parcel.writeParcelable(pendingIntent, i);
+    parcel.writeParcelable(dialogDisplayer, i);
   }
 }
