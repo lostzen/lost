@@ -10,4 +10,5 @@
 
     <suppress checks="ConstantName" files="src/main/java/com/mapzen/android/lost/api/LocationServices.java"/>
     <suppress checks="VisibilityModifier" files="src/main/java/com/mapzen/android/lost/api/LocationServices.java" />
+    <suppress checks="[a-zA-Z0-9]*" files="src/test/java/com/mapzen/android/lost/shadows/LostShadowLocationManager.java"/>
 </suppressions>
