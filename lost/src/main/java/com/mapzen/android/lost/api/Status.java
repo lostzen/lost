@@ -26,6 +26,10 @@ public class Status implements Result, Parcelable {
   private final PendingIntent pendingIntent;
   private final DialogDisplayer dialogDisplayer;
 
+  public Status(int statusCode) {
+    this(statusCode, null, null);
+  }
+
   public Status(int statusCode, DialogDisplayer dialogDisplayer) {
     this(statusCode, dialogDisplayer, null);
   }
@@ -114,7 +118,7 @@ public class Status implements Result, Parcelable {
    * @return whether or not there is a resolution.
    */
   public boolean hasResolution() {
-    return this.pendingIntent != null;
+    return this.pendingIntent != null && dialogDisplayer != null;
   }
 
   /**
