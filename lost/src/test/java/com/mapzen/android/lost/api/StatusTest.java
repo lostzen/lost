@@ -41,4 +41,9 @@ public class StatusTest {
     s.startResolutionForResult(mock(Activity.class), 1);
     assertThat(dialogDisplayer.isDisplayed()).isTrue();
   }
+
+  @Test public void shouldNotHaveResolution() {
+    Status s = new Status(Status.RESOLUTION_REQUIRED);
+    assertThat(s.hasResolution()).isFalse();
+  }
 }
