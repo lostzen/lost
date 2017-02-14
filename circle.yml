@@ -18,7 +18,7 @@ deployment:
     commands:
       - ./gradlew uploadArchives -PsonatypeUsername=$SONATYPE_NEXUS_SNAPSHOTS_USERNAME -PsonatypePassword=$SONATYPE_NEXUS_SNAPSHOTS_PASSWORD
   release:
-     tag: /lost-[0-9]+(\.[0-9]+)*/
-     owner: mapzen
-     commands:
+    tag: /lost-[0-9]+(\.[0-9]+)*/
+    owner: mapzen
+    commands:
       - scripts/deploy-staging.sh
