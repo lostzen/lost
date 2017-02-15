@@ -14,7 +14,7 @@ dependencies:
 
 test:
   override:
-    - ./gradlew --refresh-dependencies
+    - ./gradlew
 
 deployment:
   master:
