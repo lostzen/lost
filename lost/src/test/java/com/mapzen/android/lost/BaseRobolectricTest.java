@@ -9,12 +9,17 @@ import android.view.View;
 
 import java.util.ArrayList;
 
+import static org.robolectric.Robolectric.flushBackgroundThreadScheduler;
+import static org.robolectric.Robolectric.flushForegroundThreadScheduler;
+import static org.robolectric.shadows.ShadowApplication.runBackgroundTasks;
+import static org.robolectric.shadows.ShadowLooper.runUiThreadTasksIncludingDelayedTasks;
+
 /**
- * Base test class to cleanup Robolectric window manager memory leak.
- *
- * https://github.com/robolectric/robolectric/issues/2068
+ * Base test class to cleanup Robolectric window manager memory leak and finish background threads.
  */
 public class BaseRobolectricTest {
+
+  // https://github.com/robolectric/robolectric/issues/2068
   @After @SuppressLint("NewApi") public void resetWindowManager() {
     try {
       Class clazz = ReflectionHelpers.loadClass(getClass().getClassLoader(),
@@ -43,6 +48,30 @@ public class BaseRobolectricTest {
       dyingViews.clear();
     } catch (Exception e) {
       // Catch ClassNotFoundException for API levels where WindowManagerGlobal doesn't exits.
+    }
+  }
+
+  @After public void finishThreads() {
+    runBackgroundTasks();
+    flushForegroundThreadScheduler();
+    flushBackgroundThreadScheduler();
+    runUiThreadTasksIncludingDelayedTasks();
+    resetBackgroundThread();
+  }
+
+  // https://github.com/robolectric/robolectric/pull/1741
+  private void resetBackgroundThread() {
+    try {
+      final Class<?> btclass = Class.forName("com.android.internal.os.BackgroundThread");
+      final Object backgroundThreadSingleton = ReflectionHelpers.getStaticField(btclass,
+          "sInstance");
+      if (backgroundThreadSingleton != null) {
+        btclass.getMethod("quit").invoke(backgroundThreadSingleton);
+        ReflectionHelpers.setStaticField(btclass, "sInstance", null);
+        ReflectionHelpers.setStaticField(btclass, "sHandler", null);
+      }
+    } catch (Exception e) {
+      // Catch ClassNotFoundException for API levels where BackgroundThread doesn't exits.
     }
   }
 }
