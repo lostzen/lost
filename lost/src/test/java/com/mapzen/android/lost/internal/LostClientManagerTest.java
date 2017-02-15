@@ -1,5 +1,6 @@
 package com.mapzen.android.lost.internal;
 
+import com.mapzen.android.lost.BaseRobolectricTest;
 import com.mapzen.android.lost.api.LocationAvailability;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationResult;
@@ -28,7 +29,7 @@ import static org.robolectric.RuntimeEnvironment.application;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
-public class LostClientManagerTest {
+public class LostClientManagerTest extends BaseRobolectricTest {
 
   ClientManager manager = LostClientManager.shared();
   Context context = mock(Context.class);

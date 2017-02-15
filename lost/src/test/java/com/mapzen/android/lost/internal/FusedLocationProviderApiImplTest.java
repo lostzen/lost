@@ -1,5 +1,6 @@
 package com.mapzen.android.lost.internal;
 
+import com.mapzen.android.lost.BaseRobolectricTest;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LostApiClient;
@@ -35,7 +36,7 @@ import static org.robolectric.Shadows.shadowOf;
 @RunWith(RobolectricTestRunner.class)
 @SuppressWarnings("MissingPermission")
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
-public class FusedLocationProviderApiImplTest {
+public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
 
   private LostApiClient client;
   private LostApiClient secondClient;

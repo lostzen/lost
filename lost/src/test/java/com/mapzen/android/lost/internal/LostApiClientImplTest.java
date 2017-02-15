@@ -1,5 +1,6 @@
 package com.mapzen.android.lost.internal;
 
+import com.mapzen.android.lost.BaseRobolectricTest;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationServices;
@@ -26,7 +27,7 @@ import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
-public class LostApiClientImplTest {
+public class LostApiClientImplTest extends BaseRobolectricTest {
   private LostApiClient client;
   private TestConnectionCallbacks callbacks;
 

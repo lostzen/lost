@@ -1,5 +1,6 @@
 package com.mapzen.android.lost.internal;
 
+import com.mapzen.android.lost.BaseRobolectricTest;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.lost.BuildConfig;
 
@@ -26,7 +27,7 @@ import static org.robolectric.RuntimeEnvironment.application;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
-public class MockEngineTest {
+public class MockEngineTest extends BaseRobolectricTest {
   private MockEngine mockEngine;
   private TestCallback callback;
   private TestTraceThreadFactory traceThreadFactory;

@@ -1,5 +1,6 @@
 package com.mapzen.android.lost.internal;
 
+import com.mapzen.android.lost.BaseRobolectricTest;
 import com.mapzen.android.lost.api.Geofence;
 import com.mapzen.android.lost.api.GeofencingApi;
 import com.mapzen.android.lost.api.GeofencingIntentSender;
@@ -27,7 +28,7 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("MissingPermission")
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
-public class GeofencingIntentSenderTest {
+public class GeofencingIntentSenderTest extends BaseRobolectricTest {
 
   GeofencingIntentSender intentSender;
   GeofencingApiImpl geofencingApi;

@@ -1,5 +1,6 @@
 package com.mapzen.android.lost.internal;
 
+import com.mapzen.android.lost.BaseRobolectricTest;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.lost.BuildConfig;
 
@@ -38,7 +39,7 @@ import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
-public class FusionEngineTest {
+public class FusionEngineTest extends BaseRobolectricTest {
   private FusionEngine fusionEngine;
   private TestCallback callback;
   private LocationManager locationManager;
