@@ -1,8 +1,12 @@
 package com.mapzen.android.lost.api;
 
+import com.mapzen.android.lost.BaseRobolectricTest;
+import com.mapzen.lost.BuildConfig;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import android.content.Intent;
 import android.location.Location;
@@ -15,7 +19,9 @@ import static org.fest.assertions.api.Assertions.assertThat;
 /**
  * {@link LocationResult} test class.
  */
-@RunWith(RobolectricTestRunner.class) public class LocationResultTest {
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
+public class LocationResultTest extends BaseRobolectricTest {
 
   @Test public void shouldNotBeNull() throws Exception {
     assertThat(LocationResult.create(null)).isNotNull();

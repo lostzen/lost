@@ -1,5 +1,6 @@
 package com.mapzen.android.lost.api;
 
+import com.mapzen.android.lost.BaseRobolectricTest;
 import com.mapzen.android.lost.internal.FusedLocationProviderApiImpl;
 import com.mapzen.android.lost.internal.GeofencingApiImpl;
 import com.mapzen.android.lost.internal.SettingsApiImpl;
@@ -14,7 +15,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
-public class LocationServicesTest {
+public class LocationServicesTest extends BaseRobolectricTest {
 
   @Test public void shouldCreateFusedLocationProviderApiImpl() throws Exception {
     assertThat(LocationServices.FusedLocationApi).isInstanceOf(FusedLocationProviderApiImpl.class);
