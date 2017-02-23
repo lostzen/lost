@@ -80,7 +80,8 @@ public class FusedLocationServiceConnectionManager {
       }
 
       if (!connectionCallbacks.isEmpty()) {
-        for (LostApiClient.ConnectionCallbacks callbacks : connectionCallbacks) {
+        final Set<ConnectionCallbacks> copy = new HashSet<>(connectionCallbacks);
+        for (LostApiClient.ConnectionCallbacks callbacks : copy) {
           callbacks.onConnected();
         }
       }
@@ -91,7 +92,8 @@ public class FusedLocationServiceConnectionManager {
     if (connectState != ConnectState.IDLE) {
       connectState = ConnectState.IDLE;
       if (!connectionCallbacks.isEmpty()) {
-        for (LostApiClient.ConnectionCallbacks callbacks : connectionCallbacks) {
+        final Set<ConnectionCallbacks> copy = new HashSet<>(connectionCallbacks);
+        for (LostApiClient.ConnectionCallbacks callbacks : copy) {
           callbacks.onConnectionSuspended();
         }
       }
