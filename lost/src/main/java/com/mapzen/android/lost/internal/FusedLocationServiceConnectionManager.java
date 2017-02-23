@@ -6,6 +6,7 @@ import com.mapzen.android.lost.api.LostApiClient.ConnectionCallbacks;
 import android.content.Context;
 import android.os.IBinder;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -80,7 +81,7 @@ public class FusedLocationServiceConnectionManager {
       }
 
       if (!connectionCallbacks.isEmpty()) {
-        final Set<ConnectionCallbacks> copy = new HashSet<>(connectionCallbacks);
+        final ArrayList<ConnectionCallbacks> copy = new ArrayList<>(connectionCallbacks);
         for (LostApiClient.ConnectionCallbacks callbacks : copy) {
           callbacks.onConnected();
         }
@@ -92,7 +93,7 @@ public class FusedLocationServiceConnectionManager {
     if (connectState != ConnectState.IDLE) {
       connectState = ConnectState.IDLE;
       if (!connectionCallbacks.isEmpty()) {
-        final Set<ConnectionCallbacks> copy = new HashSet<>(connectionCallbacks);
+        final ArrayList<ConnectionCallbacks> copy = new ArrayList<>(connectionCallbacks);
         for (LostApiClient.ConnectionCallbacks callbacks : copy) {
           callbacks.onConnectionSuspended();
         }
