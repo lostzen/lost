@@ -277,21 +277,63 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
         }).build().connect();
   }
 
-  @Test public void setMockMode_shouldCallService() {
+  @Test(expected = IllegalStateException.class)
+  public void setMockMode_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
     api.setMockMode(client, true);
-    verify(service).setMockMode(client, true);
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void setMockLocation_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
+    api.setMockLocation(client, new Location("test"));
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void setMockTrace_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
+    api.setMockTrace(client, new File("path", "name"));
+  }
+
+  @Test public void setMockMode_shouldCallService() {
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            api.setMockMode(client, true);
+            verify(service).setMockMode(client, true);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
   }
 
   @Test public void setMockLocation_shouldCallService() {
-    Location location = new Location("test");
-    api.setMockLocation(client, location);
-    verify(service).setMockLocation(client, location);
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            Location location = new Location("test");
+            api.setMockLocation(client, location);
+            verify(service).setMockLocation(client, location);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
   }
 
   @Test public void setMockTrace_shouldCallService() {
-    File file = new File("path", "name");
-    api.setMockTrace(client, file);
-    verify(service).setMockTrace(client, file);
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            File file = new File("path", "name");
+            api.setMockTrace(client, file);
+            verify(service).setMockTrace(client, file);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
   }
 
   @Test public void isProviderEnabled_shouldCallService() {

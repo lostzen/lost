@@ -174,6 +174,7 @@ public interface FusedLocationProviderApi {
    * @param client Connected client.
    * @param isMockMode Whether mock mode should be enabled or not.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   PendingResult<Status> setMockMode(LostApiClient client, boolean isMockMode);
 
@@ -185,6 +186,7 @@ public interface FusedLocationProviderApi {
    * @param client Connected client.
    * @param mockLocation Location to be set for the location provider.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   PendingResult<Status> setMockLocation(LostApiClient client, Location mockLocation);
 
@@ -196,6 +198,7 @@ public interface FusedLocationProviderApi {
    * @param client Connected client.
    * @param file GPX file to be used to report location.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   PendingResult<Status> setMockTrace(LostApiClient client, final File file);
 
