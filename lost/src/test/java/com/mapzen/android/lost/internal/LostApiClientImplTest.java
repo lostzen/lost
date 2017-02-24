@@ -44,6 +44,10 @@ public class LostApiClientImplTest extends BaseRobolectricTest {
 
   @After public void tearDown() throws Exception {
     client.disconnect();
+    ((FusedLocationProviderApiImpl) LocationServices.FusedLocationApi)
+        .getServiceConnectionManager()
+        .getConnectionCallbacks()
+        .clear();
   }
 
   @Test public void connect_shouldConnectFusedLocationProviderApiImpl() throws Exception {
