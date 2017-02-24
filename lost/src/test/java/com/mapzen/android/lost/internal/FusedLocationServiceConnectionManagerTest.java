@@ -165,6 +165,15 @@ public class FusedLocationServiceConnectionManagerTest {
     assertThat(eventCallbacks.connectedOnServiceConnected).isTrue();
   }
 
+  @Test public void onServiceConnected_shouldHandleCallbacksRemovedOnConnect() throws Exception {
+    LostApiClient.ConnectionCallbacks connectionCallbacks1 = new RemoveOnConnected();
+    LostApiClient.ConnectionCallbacks connectionCallbacks2 = new RemoveOnConnected();
+    connectionManager.connect(null, connectionCallbacks1);
+    connectionManager.addCallbacks(connectionCallbacks2);
+    connectionManager.onServiceConnected(null);
+    assertThat(connectionManager.getConnectionCallbacks()).isEmpty();
+  }
+
   @Test public void onServiceDisconnected_shouldCallConnectionCallback() {
     TestConnectionCallbacks connectionCallbacks = new TestConnectionCallbacks();
     connectionManager.connect(null, connectionCallbacks);
@@ -192,6 +201,15 @@ public class FusedLocationServiceConnectionManagerTest {
     connectionCallbacks.onConnected();
     connectionManager.onServiceDisconnected();
     assertThat(connectionCallbacks.isConnected()).isTrue();
+  }
+
+  @Test public void onServiceDisconnected_shouldHandleCallbacksRemovedOnSuspend() throws Exception {
+    LostApiClient.ConnectionCallbacks connectionCallbacks1 = new RemoveOnSuspended();
+    LostApiClient.ConnectionCallbacks connectionCallbacks2 = new RemoveOnSuspended();
+    connectionManager.connect(null, connectionCallbacks1);
+    connectionManager.addCallbacks(connectionCallbacks2);
+    connectionManager.onServiceDisconnected();
+    assertThat(connectionManager.getConnectionCallbacks()).isEmpty();
   }
 
   class TestEventCallbacks implements FusedLocationServiceConnectionManager.EventCallbacks {
@@ -229,6 +247,24 @@ public class FusedLocationServiceConnectionManagerTest {
     public void onDisconnect() {
       connected = false;
       idleOnDisconnect = !connectionManager.isConnected() && !connectionManager.isConnecting();
+    }
+  }
+
+  private class RemoveOnConnected implements LostApiClient.ConnectionCallbacks {
+    @Override public void onConnected() {
+      connectionManager.removeCallbacks(this);
+    }
+
+    @Override public void onConnectionSuspended() {
+    }
+  }
+
+  private class RemoveOnSuspended implements LostApiClient.ConnectionCallbacks {
+    @Override public void onConnected() {
+    }
+
+    @Override public void onConnectionSuspended() {
+      connectionManager.removeCallbacks(this);
     }
   }
 }
