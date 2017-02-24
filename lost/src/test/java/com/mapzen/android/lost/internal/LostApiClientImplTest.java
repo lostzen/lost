@@ -82,6 +82,26 @@ public class LostApiClientImplTest extends BaseRobolectricTest {
     assertThat(callbacks.isClientConnectedOnConnect()).isTrue();
   }
 
+  @Test public void connect_shouldAddConnectionCallbacks() throws Exception {
+    // Connect first Lost client with connection callbacks.
+    new LostApiClientImpl(application, new LostApiClient.ConnectionCallbacks() {
+      @Override public void onConnected() {
+        // Connect second Lost client with new connection callbacks once the service has connected.
+        new LostApiClientImpl(application,  new TestConnectionCallbacks(),
+            new LostClientManager()).connect();
+      }
+
+      @Override public void onConnectionSuspended() {
+      }
+    }, new LostClientManager()).connect();
+
+    FusedLocationProviderApiImpl api =
+        (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
+
+    // Verify both sets of connection callbacks have been stored in the service connection manager.
+    assertThat(api.getServiceConnectionManager().getConnectionCallbacks()).hasSize(2);
+  }
+
   @Test public void disconnect_shouldNotRemoveFusedLocationProviderApiImpl() throws Exception {
     client.connect();
     client.disconnect();
