@@ -154,7 +154,7 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
   @Test(expected = IllegalStateException.class)
   public void requestLocationUpdates_pendingIntent_shouldThrowIfNotConnected() throws Exception {
     client.disconnect();
-    api.requestLocationUpdates(client, LocationRequest.create(),mock(PendingIntent.class));
+    api.requestLocationUpdates(client, LocationRequest.create(), mock(PendingIntent.class));
   }
 
   @Test(expected = IllegalStateException.class)
