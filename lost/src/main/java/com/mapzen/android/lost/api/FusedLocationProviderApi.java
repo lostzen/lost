@@ -127,27 +127,33 @@ public interface FusedLocationProviderApi {
   /**
    * Removes location updates for the {@link LocationListener}
    *
-   * @param client Client which registered the listener.
+   * @param client Client which registered the listener. The client must be connected at the time
+   * of this call.
    * @param listener Listener to remove updates for.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   PendingResult<Status> removeLocationUpdates(LostApiClient client, LocationListener listener);
 
   /**
    * Removes location updates for the {@link PendingIntent}
    *
-   * @param client Client which registered the listener.
+   * @param client Client which registered the pending intent. The client must be connected at the
+   * time of this call.
    * @param callbackIntent Intent to remove updates for.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   PendingResult<Status> removeLocationUpdates(LostApiClient client, PendingIntent callbackIntent);
 
   /**
    * Remove location updates for the {@link LocationCallback}
    *
-   * @param client Client which registered the listener.
+   * @param client Client which registered the location callback. The client must be connected at
+   * the time of this call.
    * @param callback Callback to remove updates for.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   PendingResult<Status> removeLocationUpdates(LostApiClient client, LocationCallback callback);
 

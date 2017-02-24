@@ -127,16 +127,25 @@ public class FusedLocationProviderApiImpl
 
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       LocationListener listener) {
+    if (!client.isConnected()) {
+      throw new IllegalStateException("LostApiClient is not connected.");
+    }
     return service.removeLocationUpdates(client, listener);
   }
 
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       PendingIntent callbackIntent) {
+    if (!client.isConnected()) {
+      throw new IllegalStateException("LostApiClient is not connected.");
+    }
     return service.removeLocationUpdates(client, callbackIntent);
   }
 
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       LocationCallback callback) {
+    if (!client.isConnected()) {
+      throw new IllegalStateException("LostApiClient is not connected.");
+    }
     return service.removeLocationUpdates(client, callback);
   }
 
