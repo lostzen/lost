@@ -106,6 +106,7 @@ public class FusedLocationProviderApiImpl
 
   @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
       LocationRequest request, LocationListener listener) {
+    throwIfNotConnected(client);
     return service.requestLocationUpdates(client, request, listener);
   }
 
@@ -116,36 +117,32 @@ public class FusedLocationProviderApiImpl
 
   @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
       LocationRequest request, LocationCallback callback, Looper looper) {
+    throwIfNotConnected(client);
     return service.requestLocationUpdates(client, request, callback, looper);
   }
 
   @Override
   public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
       PendingIntent callbackIntent) {
+    throwIfNotConnected(client);
     return service.requestLocationUpdates(client, request, callbackIntent);
   }
 
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       LocationListener listener) {
-    if (!client.isConnected()) {
-      throw new IllegalStateException("LostApiClient is not connected.");
-    }
+    throwIfNotConnected(client);
     return service.removeLocationUpdates(client, listener);
   }
 
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       PendingIntent callbackIntent) {
-    if (!client.isConnected()) {
-      throw new IllegalStateException("LostApiClient is not connected.");
-    }
+    throwIfNotConnected(client);
     return service.removeLocationUpdates(client, callbackIntent);
   }
 
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       LocationCallback callback) {
-    if (!client.isConnected()) {
-      throw new IllegalStateException("LostApiClient is not connected.");
-    }
+    throwIfNotConnected(client);
     return service.removeLocationUpdates(client, callback);
   }
 
@@ -180,5 +177,11 @@ public class FusedLocationProviderApiImpl
 
   FusedLocationServiceConnectionManager getServiceConnectionManager() {
     return serviceConnectionManager;
+  }
+
+  private void throwIfNotConnected(LostApiClient client) {
+    if (!client.isConnected()) {
+      throw new IllegalStateException("LostApiClient is not connected.");
+    }
   }
 }

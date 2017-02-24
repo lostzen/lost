@@ -57,6 +57,7 @@ public interface FusedLocationProviderApi {
    * @param request Specifies desired location accuracy, update interval, etc.
    * @param listener Listener to make calls on when location becomes available.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
@@ -76,6 +77,7 @@ public interface FusedLocationProviderApi {
    * @param listener Listener to make calls on when location becomes available.
    * @param looper Looper to implement the listener callbacks on.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
@@ -95,6 +97,7 @@ public interface FusedLocationProviderApi {
    * @param callback Callback to make calls on when location becomes available.
    * @param looper Looper to implement the listener callbacks on.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
@@ -119,6 +122,7 @@ public interface FusedLocationProviderApi {
    * @param request Specifies desired location accuracy, update interval, etc.
    * @param callbackIntent Intent to be sent for each location update.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,

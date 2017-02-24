@@ -117,26 +117,76 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
     verify(service).getLocationAvailability(client);
   }
 
-  @Test public void requestLocationUpdates_listener_shouldCallService() {
-    LocationRequest request = LocationRequest.create();
-    LocationListener listener = new TestLocationListener();
-    api.requestLocationUpdates(client, request, listener);
-    verify(service).requestLocationUpdates(client, request, listener);
+  @Test(expected = IllegalStateException.class)
+  public void requestLocationUpdates_listener_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
+    api.requestLocationUpdates(client, LocationRequest.create(), new TestLocationListener());
   }
 
-  @Test(expected = RuntimeException.class)
-  public void requestLocationUpdates_shouldThrowException() {
-    LocationRequest request = LocationRequest.create();
-    TestLocationListener listener = new TestLocationListener();
-    api.requestLocationUpdates(client, request, listener, null);
+  @Test(expected = IllegalStateException.class)
+  public void requestLocationUpdates_pendingIntent_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
+    api.requestLocationUpdates(client, LocationRequest.create(),mock(PendingIntent.class));
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void requestLocationUpdates_callback_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
+    api.requestLocationUpdates(client, LocationRequest.create(), new TestLocationCallback(),
+        Looper.myLooper());
+  }
+
+  @Test public void requestLocationUpdates_listener_shouldCallService() {
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            LocationRequest request = LocationRequest.create();
+            LocationListener listener = new TestLocationListener();
+            api.requestLocationUpdates(client, request, listener);
+            verify(service).requestLocationUpdates(client, request, listener);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
+  }
+
+  @Test public void requestLocationUpdates_pendingIntent_shouldCallService() {
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            LocationRequest request = LocationRequest.create();
+            PendingIntent pendingIntent = mock(PendingIntent.class);
+            api.requestLocationUpdates(client, request, pendingIntent);
+            verify(service).requestLocationUpdates(client, request, pendingIntent);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
   }
 
   @Test public void requestLocationUpdates_callback_shouldCallService() {
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            LocationRequest request = LocationRequest.create();
+            TestLocationCallback callback = new TestLocationCallback();
+            Looper looper = Looper.myLooper();
+            api.requestLocationUpdates(client, request, callback, looper);
+            verify(service).requestLocationUpdates(client, request, callback, looper);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void requestLocationUpdates_listenerWithLooper_shouldThrowExceptionIfNotYetImplemented() {
     LocationRequest request = LocationRequest.create();
-    TestLocationCallback callback = new TestLocationCallback();
-    Looper looper = Looper.myLooper();
-    api.requestLocationUpdates(client, request, callback, looper);
-    verify(service).requestLocationUpdates(client, request, callback, looper);
+    TestLocationListener listener = new TestLocationListener();
+    api.requestLocationUpdates(client, request, listener, null);
   }
 
   @Test(expected = IllegalStateException.class)
