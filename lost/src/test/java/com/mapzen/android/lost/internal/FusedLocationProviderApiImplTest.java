@@ -107,14 +107,42 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
     verify(connectionManager).isConnected();
   }
 
-  @Test public void getLastLocation_shouldCallService() {
+  @Test(expected = IllegalStateException.class)
+  public void getLastLocation_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
     api.getLastLocation(client);
-    verify(service).getLastLocation(client);
+  }
+
+  @Test public void getLastLocation_shouldCallService() {
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            api.getLastLocation(client);
+            verify(service).getLastLocation(client);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void getLocationAvailability_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
+    api.getLocationAvailability(client);
   }
 
   @Test public void getLocationAvailability_shouldCallService() {
-    api.getLocationAvailability(client);
-    verify(service).getLocationAvailability(client);
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            api.getLocationAvailability(client);
+            verify(service).getLocationAvailability(client);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
   }
 
   @Test(expected = IllegalStateException.class)

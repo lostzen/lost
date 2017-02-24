@@ -25,6 +25,7 @@ public interface FusedLocationProviderApi {
    * The best accuracy available while respecting the location permissions will be returned.
    * @param client The client to return location for.
    * @return The best, most recent location available.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   Location getLastLocation(LostApiClient client);
@@ -40,6 +41,7 @@ public interface FusedLocationProviderApi {
    *
    * @param client The client to return availability for.
    * @return The availability of location data.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   LocationAvailability getLocationAvailability(LostApiClient client);
