@@ -107,71 +107,233 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
     verify(connectionManager).isConnected();
   }
 
-  @Test public void getLastLocation_shouldCallService() {
+  @Test(expected = IllegalStateException.class)
+  public void getLastLocation_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
     api.getLastLocation(client);
-    verify(service).getLastLocation(client);
+  }
+
+  @Test public void getLastLocation_shouldCallService() {
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            api.getLastLocation(client);
+            verify(service).getLastLocation(client);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void getLocationAvailability_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
+    api.getLocationAvailability(client);
   }
 
   @Test public void getLocationAvailability_shouldCallService() {
-    api.getLocationAvailability(client);
-    verify(service).getLocationAvailability(client);
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            api.getLocationAvailability(client);
+            verify(service).getLocationAvailability(client);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void requestLocationUpdates_listener_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
+    api.requestLocationUpdates(client, LocationRequest.create(), new TestLocationListener());
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void requestLocationUpdates_pendingIntent_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
+    api.requestLocationUpdates(client, LocationRequest.create(), mock(PendingIntent.class));
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void requestLocationUpdates_callback_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
+    api.requestLocationUpdates(client, LocationRequest.create(), new TestLocationCallback(),
+        Looper.myLooper());
   }
 
   @Test public void requestLocationUpdates_listener_shouldCallService() {
-    LocationRequest request = LocationRequest.create();
-    LocationListener listener = new TestLocationListener();
-    api.requestLocationUpdates(client, request, listener);
-    verify(service).requestLocationUpdates(client, request, listener);
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            LocationRequest request = LocationRequest.create();
+            LocationListener listener = new TestLocationListener();
+            api.requestLocationUpdates(client, request, listener);
+            verify(service).requestLocationUpdates(client, request, listener);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
+  }
+
+  @Test public void requestLocationUpdates_pendingIntent_shouldCallService() {
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            LocationRequest request = LocationRequest.create();
+            PendingIntent pendingIntent = mock(PendingIntent.class);
+            api.requestLocationUpdates(client, request, pendingIntent);
+            verify(service).requestLocationUpdates(client, request, pendingIntent);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
+  }
+
+  @Test public void requestLocationUpdates_callback_shouldCallService() {
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            LocationRequest request = LocationRequest.create();
+            TestLocationCallback callback = new TestLocationCallback();
+            Looper looper = Looper.myLooper();
+            api.requestLocationUpdates(client, request, callback, looper);
+            verify(service).requestLocationUpdates(client, request, callback, looper);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
   }
 
   @Test(expected = RuntimeException.class)
-  public void requestLocationUpdates_shouldThrowException() {
+  public void requestLocationUpdates_listenerWithLooper_shouldThrowExceptionIfNotYetImplemented() {
     LocationRequest request = LocationRequest.create();
     TestLocationListener listener = new TestLocationListener();
     api.requestLocationUpdates(client, request, listener, null);
   }
 
-  @Test public void requestLocationUpdates_callback_shouldCallService() {
-    LocationRequest request = LocationRequest.create();
-    TestLocationCallback callback = new TestLocationCallback();
-    Looper looper = Looper.myLooper();
-    api.requestLocationUpdates(client, request, callback, looper);
-    verify(service).requestLocationUpdates(client, request, callback, looper);
+  @Test(expected = IllegalStateException.class)
+  public void removeLocationUpdates_listener_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
+    api.removeLocationUpdates(client, new TestLocationListener());
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void removeLocationUpdates_pendingIntent_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
+    api.removeLocationUpdates(client, mock(PendingIntent.class));
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void removeLocationUpdates_callback_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
+    api.removeLocationUpdates(client, new TestLocationCallback());
   }
 
   @Test public void removeLocationUpdates_listener_shouldCallService() {
-    LocationListener listener = new TestLocationListener();
-    api.removeLocationUpdates(client, listener);
-    verify(service).removeLocationUpdates(client, listener);
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            LocationListener listener = new TestLocationListener();
+            api.removeLocationUpdates(client, listener);
+            verify(service).removeLocationUpdates(client, listener);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
   }
 
   @Test public void removeLocationUpdates_pendingIntent_shouldCallService() {
-    PendingIntent callbackIntent = mock(PendingIntent.class);
-    api.removeLocationUpdates(client, callbackIntent);
-    verify(service).removeLocationUpdates(client, callbackIntent);
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            PendingIntent callbackIntent = mock(PendingIntent.class);
+            api.removeLocationUpdates(client, callbackIntent);
+            verify(service).removeLocationUpdates(client, callbackIntent);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
   }
 
   @Test public void removeLocationUpdates_callback_shouldCallService() {
-    TestLocationCallback callback = new TestLocationCallback();
-    service.removeLocationUpdates(client, callback);
-    verify(service).removeLocationUpdates(client, callback);
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            TestLocationCallback callback = new TestLocationCallback();
+            api.removeLocationUpdates(client, callback);
+            verify(service).removeLocationUpdates(client, callback);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void setMockMode_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
+    api.setMockMode(client, true);
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void setMockLocation_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
+    api.setMockLocation(client, new Location("test"));
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void setMockTrace_shouldThrowIfNotConnected() throws Exception {
+    client.disconnect();
+    api.setMockTrace(client, new File("path", "name"));
   }
 
   @Test public void setMockMode_shouldCallService() {
-    api.setMockMode(client, true);
-    verify(service).setMockMode(client, true);
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            api.setMockMode(client, true);
+            verify(service).setMockMode(client, true);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
   }
 
   @Test public void setMockLocation_shouldCallService() {
-    Location location = new Location("test");
-    api.setMockLocation(client, location);
-    verify(service).setMockLocation(client, location);
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            Location location = new Location("test");
+            api.setMockLocation(client, location);
+            verify(service).setMockLocation(client, location);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
   }
 
   @Test public void setMockTrace_shouldCallService() {
-    File file = new File("path", "name");
-    api.setMockTrace(client, file);
-    verify(service).setMockTrace(client, file);
+    new LostApiClient.Builder(mock(Context.class))
+        .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
+          @Override public void onConnected() {
+            File file = new File("path", "name");
+            api.setMockTrace(client, file);
+            verify(service).setMockTrace(client, file);
+          }
+
+          @Override public void onConnectionSuspended() {
+          }
+        }).build().connect();
   }
 
   @Test public void isProviderEnabled_shouldCallService() {

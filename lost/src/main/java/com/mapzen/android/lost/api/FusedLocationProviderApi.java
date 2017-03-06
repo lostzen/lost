@@ -25,6 +25,7 @@ public interface FusedLocationProviderApi {
    * The best accuracy available while respecting the location permissions will be returned.
    * @param client The client to return location for.
    * @return The best, most recent location available.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   Location getLastLocation(LostApiClient client);
@@ -40,6 +41,7 @@ public interface FusedLocationProviderApi {
    *
    * @param client The client to return availability for.
    * @return The availability of location data.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   LocationAvailability getLocationAvailability(LostApiClient client);
@@ -57,6 +59,7 @@ public interface FusedLocationProviderApi {
    * @param request Specifies desired location accuracy, update interval, etc.
    * @param listener Listener to make calls on when location becomes available.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
@@ -76,6 +79,7 @@ public interface FusedLocationProviderApi {
    * @param listener Listener to make calls on when location becomes available.
    * @param looper Looper to implement the listener callbacks on.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
@@ -95,6 +99,7 @@ public interface FusedLocationProviderApi {
    * @param callback Callback to make calls on when location becomes available.
    * @param looper Looper to implement the listener callbacks on.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
@@ -119,6 +124,7 @@ public interface FusedLocationProviderApi {
    * @param request Specifies desired location accuracy, update interval, etc.
    * @param callbackIntent Intent to be sent for each location update.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
@@ -127,27 +133,33 @@ public interface FusedLocationProviderApi {
   /**
    * Removes location updates for the {@link LocationListener}
    *
-   * @param client Client which registered the listener.
+   * @param client Client which registered the listener. The client must be connected at the time
+   * of this call.
    * @param listener Listener to remove updates for.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   PendingResult<Status> removeLocationUpdates(LostApiClient client, LocationListener listener);
 
   /**
    * Removes location updates for the {@link PendingIntent}
    *
-   * @param client Client which registered the listener.
+   * @param client Client which registered the pending intent. The client must be connected at the
+   * time of this call.
    * @param callbackIntent Intent to remove updates for.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   PendingResult<Status> removeLocationUpdates(LostApiClient client, PendingIntent callbackIntent);
 
   /**
    * Remove location updates for the {@link LocationCallback}
    *
-   * @param client Client which registered the listener.
+   * @param client Client which registered the location callback. The client must be connected at
+   * the time of this call.
    * @param callback Callback to remove updates for.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   PendingResult<Status> removeLocationUpdates(LostApiClient client, LocationCallback callback);
 
@@ -162,6 +174,7 @@ public interface FusedLocationProviderApi {
    * @param client Connected client.
    * @param isMockMode Whether mock mode should be enabled or not.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   PendingResult<Status> setMockMode(LostApiClient client, boolean isMockMode);
 
@@ -173,6 +186,7 @@ public interface FusedLocationProviderApi {
    * @param client Connected client.
    * @param mockLocation Location to be set for the location provider.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   PendingResult<Status> setMockLocation(LostApiClient client, Location mockLocation);
 
@@ -184,6 +198,7 @@ public interface FusedLocationProviderApi {
    * @param client Connected client.
    * @param file GPX file to be used to report location.
    * @return a {@link PendingResult} for the call to check whether call was successful.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   PendingResult<Status> setMockTrace(LostApiClient client, final File file);
 

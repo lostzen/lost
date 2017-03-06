@@ -73,7 +73,6 @@ public class MultipleLocationListenerMultipleClientsActivity extends ListActivit
     super.onStop();
     LocationServices.FusedLocationApi.removeLocationUpdates(lostApiClient,
         MultipleLocationListenerMultipleClientsActivity.this);
-    fragment.removeLocationUpdates();
     lostApiClient.disconnect();
   }
 
@@ -145,12 +144,9 @@ public class MultipleLocationListenerMultipleClientsActivity extends ListActivit
       fragmentClient.connect();
     }
 
-    public void removeLocationUpdates() {
-      LocationServices.FusedLocationApi.removeLocationUpdates(fragmentClient, this);
-    }
-
     @Override public void onStop() {
       super.onStop();
+      LocationServices.FusedLocationApi.removeLocationUpdates(fragmentClient, this);
       fragmentClient.disconnect();
     }
 
