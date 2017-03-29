@@ -1,4 +1,4 @@
-#Location Settings
+# Location Settings
 
 Location and bluetooth settings can be checked to see if the requirements are satisfied for a `LocationRequest`. In addition, a mechanism for resolving unsatisfied settings is provided.
 
