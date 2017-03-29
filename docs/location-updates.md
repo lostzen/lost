@@ -1,4 +1,4 @@
-#Requesting Location Updates
+# Requesting Location Updates
 
 Lost provides the ability to request ongoing location updates. You can specify the update interval, minimum displacement, and priority. The priority determines which location providers will be activated.
 
