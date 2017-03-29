@@ -1,4 +1,4 @@
-#Getting the Last Known Location
+# Getting the Last Known Location
 
 Once the `LostApiClient` is connected you can request the last known location.
 
