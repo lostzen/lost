@@ -50,11 +50,6 @@ public class FusedLocationProviderService extends Service {
     serviceImpl = new FusedLocationProviderServiceImpl(this, LostClientManager.shared());
   }
 
-  @Override public void onDestroy() {
-    super.onDestroy();
-    serviceImpl.shutdown();
-  }
-
   public Location getLastLocation(LostApiClient client) {
     return serviceImpl.getLastLocation(client);
   }

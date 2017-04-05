@@ -80,7 +80,6 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
   @After public void tearDown() {
     client.disconnect();
     otherClient.disconnect();
-    clientManager.shutdown();
   }
 
   private void mockService() {
@@ -647,28 +646,6 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     api.requestLocationUpdates(client, request, callback, looper);
     api.removeLocationUpdates(client, callback);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
-  }
-
-  @Test public void shutdown_shouldUnregisterLocationUpdateListeners() throws Exception {
-    api.requestLocationUpdates(client, LocationRequest.create(),
-        new TestLocationListener());
-
-    api.shutdown();
-    assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
-  }
-
-  @Test public void shutdown_shouldClearListeners() {
-    api.requestLocationUpdates(client, LocationRequest.create(),
-        new TestLocationListener());
-    api.shutdown();
-    assertThat(api.getLocationListeners()).isEmpty();
-  }
-
-  @Test public void shutdown_shouldClearPendingIntents() {
-    api.requestLocationUpdates(client, LocationRequest.create(),
-        mock(PendingIntent.class));
-    api.shutdown();
-    assertThat(api.getPendingIntents()).isEmpty();
   }
 
   @Test public void requestLocationUpdates_shouldModifyOnlyClientListeners() {
