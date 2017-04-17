@@ -137,7 +137,7 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
         .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
           @Override public void onConnected() {
             api.getLocationAvailability(client);
-            verify(service).getLocationAvailability(client);
+            verify(service).getLocationAvailability();
           }
 
           @Override public void onConnectionSuspended() {

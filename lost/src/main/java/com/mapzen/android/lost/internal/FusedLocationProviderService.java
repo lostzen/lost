@@ -55,8 +55,8 @@ public class FusedLocationProviderService extends Service {
   }
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  public LocationAvailability getLocationAvailability(LostApiClient client) {
-    return serviceImpl.getLocationAvailability(client);
+  public LocationAvailability getLocationAvailability() {
+    return serviceImpl.getLocationAvailability();
   }
 
   public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,

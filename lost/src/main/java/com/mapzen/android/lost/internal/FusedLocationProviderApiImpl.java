@@ -103,7 +103,7 @@ public class FusedLocationProviderApiImpl
 
   @Override public LocationAvailability getLocationAvailability(LostApiClient client) {
     throwIfNotConnected(client);
-    return service.getLocationAvailability(client);
+    return service.getLocationAvailability();
   }
 
   @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
