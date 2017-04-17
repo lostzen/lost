@@ -270,16 +270,16 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     api.requestLocationUpdates(client, request, listener);
-    api.setMockMode(client, true);
+    api.setMockMode(true);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 
   @Test public void setMockMode_shouldNotRegisterDuplicateListeners() throws Exception {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
-    api.setMockMode(client, true);
+    api.setMockMode(true);
     api.requestLocationUpdates(client, request, listener);
-    api.setMockMode(client, false);
+    api.setMockMode(false);
     api.requestLocationUpdates(client, request, listener);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(2);
   }
@@ -288,7 +288,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     api.requestLocationUpdates(client, request, listener);
-    api.setMockMode(client, true);
+    api.setMockMode(true);
     TestLocationListener listener2 = new TestLocationListener();
     LocationRequest request2 = LocationRequest.create();
     api.requestLocationUpdates(client, request2, listener2);
@@ -297,7 +297,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
 
   @Test public void requestLocationUpdates_shouldNotRegisterListenersWithMockModeOn()
       throws Exception {
-    api.setMockMode(client, true);
+    api.setMockMode(true);
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     api.requestLocationUpdates(client, request, listener);
@@ -306,25 +306,25 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
 
   @Test public void setMockLocation_shouldReturnMockLastLocation() throws Exception {
     Location mockLocation = new Location("mock");
-    api.setMockMode(client, true);
-    api.setMockLocation(client, mockLocation);
+    api.setMockMode(true);
+    api.setMockLocation(mockLocation);
     assertThat(api.getLastLocation()).isEqualTo(mockLocation);
   }
 
   @Test public void setMockLocation_shouldInvokeListenerOnce() throws Exception {
     Location mockLocation = new Location("mock");
-    api.setMockMode(client, true);
+    api.setMockMode(true);
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     api.requestLocationUpdates(client, request, listener);
-    api.setMockLocation(client, mockLocation);
+    api.setMockLocation(mockLocation);
     assertThat(listener.getAllLocations()).hasSize(1);
     assertThat(listener.getMostRecentLocation()).isEqualTo(mockLocation);
   }
 
   public void setMockTrace_shouldInvokeListenerForEachLocation() throws Exception {
-    api.setMockMode(client, true);
-    api.setMockTrace(client, getTestGpxTrace());
+    api.setMockMode(true);
+    api.setMockTrace(getTestGpxTrace());
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     request.setFastestInterval(0);
@@ -341,8 +341,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
   }
 
   public void setMockTrace_shouldBroadcastSpeedWithLocation() throws Exception {
-    api.setMockMode(client, true);
-    api.setMockTrace(client, getTestGpxTrace());
+    api.setMockMode(true);
+    api.setMockTrace(getTestGpxTrace());
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     request.setFastestInterval(0);
@@ -355,8 +355,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
   }
 
   public void setMockTrace_shouldRespectFastestInterval() throws Exception {
-    api.setMockMode(client, true);
-    api.setMockTrace(client, getTestGpxTrace());
+    api.setMockMode(true);
+    api.setMockTrace(getTestGpxTrace());
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     request.setInterval(100);
@@ -1200,7 +1200,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
   }
 
   @Test public void setMockMode_shouldReturnFusedLocationPendingResult() {
-    PendingResult<Status> result = api.setMockMode(client, true);
+    PendingResult<Status> result = api.setMockMode(true);
     assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
     assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
         Status.SUCCESS);
@@ -1214,7 +1214,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
   }
 
   @Test public void setMockLocation_shouldReturnFusedLocationPendingResult() {
-    PendingResult<Status> result = api.setMockLocation(client, new Location("test"));
+    PendingResult<Status> result = api.setMockLocation(new Location("test"));
     assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
     assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
         Status.SUCCESS);
@@ -1228,7 +1228,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
   }
 
   @Test public void setMockTrace_shouldReturnFusedLocationPendingResult() {
-    PendingResult<Status> result = api.setMockTrace(client, new File("test"));
+    PendingResult<Status> result = api.setMockTrace(new File("test"));
     assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
     assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
         Status.SUCCESS);

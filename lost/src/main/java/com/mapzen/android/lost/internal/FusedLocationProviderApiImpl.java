@@ -150,18 +150,18 @@ public class FusedLocationProviderApiImpl
 
   @Override public PendingResult<Status> setMockMode(LostApiClient client, boolean isMockMode) {
     throwIfNotConnected(client);
-    return service.setMockMode(client, isMockMode);
+    return service.setMockMode(isMockMode);
   }
 
   @Override public PendingResult<Status> setMockLocation(LostApiClient client,
       Location mockLocation) {
     throwIfNotConnected(client);
-    return service.setMockLocation(client, mockLocation);
+    return service.setMockLocation(mockLocation);
   }
 
   @Override public PendingResult<Status> setMockTrace(LostApiClient client, File file) {
     throwIfNotConnected(client);
-    return service.setMockTrace(client, file);
+    return service.setMockTrace(file);
   }
 
   @Override public boolean isProviderEnabled(LostApiClient client, String provider) {

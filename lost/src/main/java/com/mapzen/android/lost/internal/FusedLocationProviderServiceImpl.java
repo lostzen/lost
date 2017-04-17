@@ -91,21 +91,21 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     return new SimplePendingResult(hasResult);
   }
 
-  public PendingResult<Status> setMockMode(LostApiClient client, boolean isMockMode) {
+  public PendingResult<Status> setMockMode(boolean isMockMode) {
     if (mockMode != isMockMode) {
       toggleMockMode();
     }
     return new SimplePendingResult(true);
   }
 
-  public PendingResult<Status> setMockLocation(LostApiClient client, Location mockLocation) {
+  public PendingResult<Status> setMockLocation(Location mockLocation) {
     if (mockMode) {
       ((MockEngine) locationEngine).setLocation(mockLocation);
     }
     return new SimplePendingResult(true);
   }
 
-  public PendingResult<Status> setMockTrace(LostApiClient client, File file) {
+  public PendingResult<Status> setMockTrace(File file) {
     if (mockMode) {
       ((MockEngine) locationEngine).setTrace(file);
     }

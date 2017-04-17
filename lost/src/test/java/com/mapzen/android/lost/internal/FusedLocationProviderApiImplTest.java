@@ -300,7 +300,7 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
         .addConnectionCallbacks(new LostApiClient.ConnectionCallbacks() {
           @Override public void onConnected() {
             api.setMockMode(client, true);
-            verify(service).setMockMode(client, true);
+            verify(service).setMockMode(true);
           }
 
           @Override public void onConnectionSuspended() {
@@ -314,7 +314,7 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
           @Override public void onConnected() {
             Location location = new Location("test");
             api.setMockLocation(client, location);
-            verify(service).setMockLocation(client, location);
+            verify(service).setMockLocation(location);
           }
 
           @Override public void onConnectionSuspended() {
@@ -328,7 +328,7 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
           @Override public void onConnected() {
             File file = new File("path", "name");
             api.setMockTrace(client, file);
-            verify(service).setMockTrace(client, file);
+            verify(service).setMockTrace(file);
           }
 
           @Override public void onConnectionSuspended() {

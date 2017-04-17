@@ -89,16 +89,16 @@ public class FusedLocationProviderService extends Service {
     return serviceImpl.removeLocationUpdates(client, callback);
   }
 
-  public PendingResult<Status> setMockMode(LostApiClient client, boolean isMockMode) {
-    return serviceImpl.setMockMode(client, isMockMode);
+  public PendingResult<Status> setMockMode(boolean isMockMode) {
+    return serviceImpl.setMockMode(isMockMode);
   }
 
-  public PendingResult<Status> setMockLocation(LostApiClient client, Location mockLocation) {
-    return serviceImpl.setMockLocation(client, mockLocation);
+  public PendingResult<Status> setMockLocation(Location mockLocation) {
+    return serviceImpl.setMockLocation(mockLocation);
   }
 
-  public PendingResult<Status> setMockTrace(LostApiClient client, File file) {
-    return serviceImpl.setMockTrace(client, file);
+  public PendingResult<Status> setMockTrace(File file) {
+    return serviceImpl.setMockTrace(file);
   }
 
   public boolean isProviderEnabled(LostApiClient client, String provider) {
