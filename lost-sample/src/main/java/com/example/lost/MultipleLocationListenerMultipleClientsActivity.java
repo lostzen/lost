@@ -85,7 +85,7 @@ public class MultipleLocationListenerMultipleClientsActivity extends ListActivit
       return;
     }
 
-    long interval = 3 * 60 * 1000; // 3 minutes
+    long interval = 30 * 1000; // 30 seconds
     LocationRequest request = LocationRequest.create()
         .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
         .setFastestInterval(interval)
@@ -158,7 +158,7 @@ public class MultipleLocationListenerMultipleClientsActivity extends ListActivit
         return;
       }
 
-      long interval = 30 * 1000; // 30 sec
+      long interval = 15 * 1000; // 15 seconds
       LocationRequest request = LocationRequest.create()
           .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
           .setFastestInterval(interval)
