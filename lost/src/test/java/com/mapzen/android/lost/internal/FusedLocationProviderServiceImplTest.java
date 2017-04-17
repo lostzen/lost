@@ -97,7 +97,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
   @Test public void getLastLocation_shouldReturnMostRecentLocation() throws Exception {
     Location location = new Location(GPS_PROVIDER);
     shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, location);
-    assertThat(api.getLastLocation(client)).isNotNull();
+    assertThat(api.getLastLocation()).isNotNull();
   }
 
   @Test public void requestLocationUpdates_shouldRegisterGpsAndNetworkListener() throws Exception {
@@ -308,7 +308,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     Location mockLocation = new Location("mock");
     api.setMockMode(client, true);
     api.setMockLocation(client, mockLocation);
-    assertThat(api.getLastLocation(client)).isEqualTo(mockLocation);
+    assertThat(api.getLastLocation()).isEqualTo(mockLocation);
   }
 
   @Test public void setMockLocation_shouldInvokeListenerOnce() throws Exception {

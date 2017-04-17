@@ -40,7 +40,7 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     locationEngine = new FusionEngine(context, this);
   }
 
-  public Location getLastLocation(LostApiClient client) {
+  public Location getLastLocation() {
     return locationEngine.getLastLocation();
   }
 

@@ -98,7 +98,7 @@ public class FusedLocationProviderApiImpl
 
   @Override public Location getLastLocation(LostApiClient client) {
     throwIfNotConnected(client);
-    return service.getLastLocation(client);
+    return service.getLastLocation();
   }
 
   @Override public LocationAvailability getLocationAvailability(LostApiClient client) {

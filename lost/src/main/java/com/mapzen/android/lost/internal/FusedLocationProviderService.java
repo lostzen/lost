@@ -50,8 +50,8 @@ public class FusedLocationProviderService extends Service {
     serviceImpl = new FusedLocationProviderServiceImpl(this, LostClientManager.shared());
   }
 
-  public Location getLastLocation(LostApiClient client) {
-    return serviceImpl.getLastLocation(client);
+  public Location getLastLocation() {
+    return serviceImpl.getLastLocation();
   }
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
