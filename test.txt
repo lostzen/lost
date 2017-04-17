@@ -1,0 +1,2 @@
+Circle CI should build pull requests from public forks.
+
