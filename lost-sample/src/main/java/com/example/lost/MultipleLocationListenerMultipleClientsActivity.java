@@ -98,14 +98,6 @@ public class MultipleLocationListenerMultipleClientsActivity extends ListActivit
     addItem("Activity");
   }
 
-  @Override public void onProviderDisabled(String provider) {
-
-  }
-
-  @Override public void onProviderEnabled(String provider) {
-
-  }
-
   public void addItem(String title) {
     Date date = new Date(System.currentTimeMillis());
     SimpleDateFormat dateformat = new SimpleDateFormat("HH:mm:ss");
@@ -172,14 +164,5 @@ public class MultipleLocationListenerMultipleClientsActivity extends ListActivit
           (MultipleLocationListenerMultipleClientsActivity) getActivity();
       a.addItem("Fragment");
     }
-
-    @Override public void onProviderDisabled(String provider) {
-
-    }
-
-    @Override public void onProviderEnabled(String provider) {
-
-    }
   }
-
 }

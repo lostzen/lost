@@ -39,8 +39,6 @@ public interface ClientManager {
       LocationAvailability availability, LocationResult result);
   ReportedChanges reportLocationResult(Location location, final LocationResult result);
   void updateReportedValues(ReportedChanges changes);
-  void reportProviderEnabled(String provider);
-  void reportProviderDisabled(String provider);
   void notifyLocationAvailability(final LocationAvailability availability);
   boolean hasNoListeners();
   Map<LostApiClient, Set<LocationListener>> getLocationListeners();

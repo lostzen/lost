@@ -49,14 +49,6 @@ public class LocationListenerActivity extends AppCompatActivity  implements
     @Override public void onLocationChanged(Location location) {
       fragment.updateLocation(location);
     }
-
-    @Override public void onProviderDisabled(String provider) {
-      Log.d(TAG, "Location provider disabled: " + provider);
-    }
-
-    @Override public void onProviderEnabled(String provider) {
-      Log.d(TAG, "Location provider enabled: " + provider);
-    }
   };
 
   @Override protected void onCreate(Bundle savedInstanceState) {

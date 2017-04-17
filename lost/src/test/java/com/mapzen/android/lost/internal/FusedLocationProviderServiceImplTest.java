@@ -384,42 +384,6 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     assertThat(api.isProviderEnabled(client, LocationManager.NETWORK_PROVIDER)).isFalse();
   }
 
-  @Test public void onProviderDisabled_shouldReportWhenGpsIsDisabled() throws Exception {
-    TestLocationListener listener = new TestLocationListener();
-    LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
-    api.requestLocationUpdates(client, request, listener);
-    listener.setIsGpsEnabled(true);
-    shadowLocationManager.setProviderEnabled(GPS_PROVIDER, false);
-    assertThat(listener.getIsGpsEnabled()).isFalse();
-  }
-
-  @Test public void onProviderDisabled_shouldReportWhenNetworkIsDisabled() throws Exception {
-    TestLocationListener listener = new TestLocationListener();
-    LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(client, request, listener);
-    listener.setIsNetworkEnabled(true);
-    shadowLocationManager.setProviderEnabled(NETWORK_PROVIDER, false);
-    assertThat(listener.getIsNetworkEnabled()).isFalse();
-  }
-
-  @Test public void onProviderEnabled_shouldReportWhenGpsIsEnabled() throws Exception {
-    TestLocationListener listener = new TestLocationListener();
-    LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
-    api.requestLocationUpdates(client, request, listener);
-    listener.setIsGpsEnabled(false);
-    shadowLocationManager.setProviderEnabled(GPS_PROVIDER, true);
-    assertThat(listener.getIsGpsEnabled()).isTrue();
-  }
-
-  @Test public void onProviderEnabled_shouldReportWhenNetworkIsEnabled() throws Exception {
-    TestLocationListener listener = new TestLocationListener();
-    LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(client, request, listener);
-    listener.setIsNetworkEnabled(false);
-    shadowLocationManager.setProviderEnabled(NETWORK_PROVIDER, true);
-    assertThat(listener.getIsNetworkEnabled()).isTrue();
-  }
-
   private static Location getTestLocation(String provider, float lat, float lng, long time) {
     Location location = new Location(provider);
     location.setLatitude(lat);

@@ -22,7 +22,6 @@ import android.os.Looper;
 
 import java.util.ArrayList;
 
-import static android.location.LocationManager.GPS_PROVIDER;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.robolectric.RuntimeEnvironment.application;
@@ -170,24 +169,6 @@ public class LostClientManagerTest extends BaseRobolectricTest {
     LocationResult result = LocationResult.create(locations);
     manager.reportLocationResult(location, result);
     assertThat(callback.getResult()).isEqualTo(result);
-  }
-
-  @Test public void reportProviderEnabled_shouldNotifyListeners() {
-    manager.addClient(client);
-    LocationRequest request = LocationRequest.create();
-    TestLocationListener listener = new TestLocationListener();
-    manager.addListener(client, request, listener);
-    manager.reportProviderEnabled(GPS_PROVIDER);
-    assertThat(listener.getIsGpsEnabled()).isTrue();
-  }
-
-  @Test public void reportProviderDisabled_shouldNotifyListeners() {
-    manager.addClient(client);
-    LocationRequest request = LocationRequest.create();
-    TestLocationListener listener = new TestLocationListener();
-    manager.addListener(client, request, listener);
-    manager.reportProviderDisabled(GPS_PROVIDER);
-    assertThat(listener.getIsGpsEnabled()).isFalse();
   }
 
   @Test public void notifyLocationAvailability_shouldNotifyCallback() {
