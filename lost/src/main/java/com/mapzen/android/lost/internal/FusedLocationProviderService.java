@@ -64,11 +64,6 @@ public class FusedLocationProviderService extends Service {
   }
 
   public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
-      PendingIntent callbackIntent) {
-    return serviceImpl.requestLocationUpdates(client, request, callbackIntent);
-  }
-
-  public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
       LocationCallback callback, Looper looper) {
     return serviceImpl.requestLocationUpdates(client, request, callback, looper);
   }

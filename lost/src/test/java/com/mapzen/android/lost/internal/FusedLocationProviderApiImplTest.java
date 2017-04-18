@@ -186,7 +186,7 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
             LocationRequest request = LocationRequest.create();
             PendingIntent pendingIntent = mock(PendingIntent.class);
             api.requestLocationUpdates(client, request, pendingIntent);
-            verify(service).requestLocationUpdates(client, request, pendingIntent);
+            verify(service).requestLocationUpdates(request);
           }
 
           @Override public void onConnectionSuspended() {
