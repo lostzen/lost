@@ -32,8 +32,9 @@ public class LostApiClientImplTest extends BaseRobolectricTest {
   private TestConnectionCallbacks callbacks;
 
   @Before public void setUp() throws Exception {
+    LostClientManager.shared().clearClients();
     callbacks = new TestConnectionCallbacks();
-    client = new LostApiClientImpl(application, callbacks, new LostClientManager());
+    client = new LostApiClientImpl(application, callbacks, LostClientManager.shared());
 
     FusedLocationProviderService.FusedLocationProviderBinder stubBinder =
         mock(FusedLocationProviderService.FusedLocationProviderBinder.class);

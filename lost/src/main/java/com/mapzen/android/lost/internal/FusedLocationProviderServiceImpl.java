@@ -49,9 +49,7 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     return locationEngine.createLocationAvailability();
   }
 
-  public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
-      LocationListener listener) {
-    clientManager.addListener(client, request, listener);
+  public PendingResult<Status> requestLocationUpdates(LocationRequest request) {
     locationEngine.setRequest(request);
     return new SimplePendingResult(true);
   }

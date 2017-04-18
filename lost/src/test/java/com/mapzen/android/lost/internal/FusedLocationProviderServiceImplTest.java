@@ -3,7 +3,6 @@ package com.mapzen.android.lost.internal;
 import com.mapzen.android.lost.BaseRobolectricTest;
 import com.mapzen.android.lost.api.LocationAvailability;
 import com.mapzen.android.lost.api.LocationCallback;
-import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationResult;
 import com.mapzen.android.lost.api.LostApiClient;
@@ -101,16 +100,15 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
   }
 
   @Test public void requestLocationUpdates_shouldRegisterGpsAndNetworkListener() throws Exception {
-    LocationListener listener = new TestLocationListener();
-    api.requestLocationUpdates(client, LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY),
-        listener);
+    api.requestLocationUpdates(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY));
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(2);
   }
 
   @Test public void requestLocationUpdates_shouldNotifyOnLocationChangedGps() throws Exception {
     TestLocationListener listener = new TestLocationListener();
-    api.requestLocationUpdates(client, LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY),
-        listener);
+    LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addListener(client, request, listener);
     Location location = new Location(GPS_PROVIDER);
     shadowLocationManager.simulateLocation(location);
     assertThat(listener.getMostRecentLocation()).isEqualTo(location);
@@ -118,7 +116,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
 
   @Test public void requestLocationUpdates_shouldNotifyOnLocationChangedNetwork() throws Exception {
     TestLocationListener listener = new TestLocationListener();
-    api.requestLocationUpdates(client, LocationRequest.create(), listener);
+    api.requestLocationUpdates(LocationRequest.create());
+    LostClientManager.shared().addListener(client, LocationRequest.create(), listener);
     Location location = new Location(NETWORK_PROVIDER);
     shadowLocationManager.simulateLocation(location);
     assertThat(listener.getMostRecentLocation()).isEqualTo(location);
@@ -129,7 +128,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
     request.setFastestInterval(5000);
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addListener(client, request, listener);
 
     final long time = System.currentTimeMillis();
     Location location1 = getTestLocation(GPS_PROVIDER, 0, 0, time);
@@ -145,7 +145,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     request.setFastestInterval(5000);
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addListener(client, request, listener);
 
     final long time = System.currentTimeMillis();
     Location location1 = getTestLocation(NETWORK_PROVIDER, 0, 0, time);
@@ -161,7 +162,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
     request.setSmallestDisplacement(200000);
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addListener(client, request, listener);
 
     final long time = System.currentTimeMillis();
     Location location1 = getTestLocation(GPS_PROVIDER, 0, 0, time);
@@ -177,7 +179,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     request.setSmallestDisplacement(200000);
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addListener(client, request, listener);
 
     final long time = System.currentTimeMillis();
     Location location1 = getTestLocation(NETWORK_PROVIDER, 0, 0, time);
@@ -194,7 +197,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
     request.setFastestInterval(0);
     request.setSmallestDisplacement(0);
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addListener(client, request, listener);
 
     final long time = System.currentTimeMillis();
     Location gpsLocation = getTestLocation(GPS_PROVIDER, 0, 0, time);
@@ -213,7 +217,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     LocationRequest request = LocationRequest.create();
     request.setFastestInterval(0);
     request.setSmallestDisplacement(0);
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addListener(client, request, listener);
 
     final long time = System.currentTimeMillis();
     Location networkLocation = getTestLocation(NETWORK_PROVIDER, 0, 0, time);
@@ -261,7 +266,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
   @Test public void removeLocationUpdates_shouldUnregisterAllListeners() throws Exception {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
     api.removeLocationUpdates(client, listener);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
@@ -269,38 +274,40 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
   @Test public void setMockMode_shouldUnregisterAllListenersWhenTrue() throws Exception {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
     api.setMockMode(true);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 
   @Test public void setMockMode_shouldNotRegisterDuplicateListeners() throws Exception {
-    TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
     api.setMockMode(true);
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
     api.setMockMode(false);
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).hasSize(2);
   }
 
   @Test public void setMockMode_shouldToggleEngines() {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addListener(client, request, listener);
+
     api.setMockMode(true);
     TestLocationListener listener2 = new TestLocationListener();
     LocationRequest request2 = LocationRequest.create();
-    api.requestLocationUpdates(client, request2, listener2);
+    api.requestLocationUpdates(request2);
+    LostClientManager.shared().addListener(client, request2, listener2);
+
     assertThat(api.getLocationListeners().get(client)).hasSize(2);
   }
 
   @Test public void requestLocationUpdates_shouldNotRegisterListenersWithMockModeOn()
       throws Exception {
     api.setMockMode(true);
-    TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 
@@ -316,7 +323,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     api.setMockMode(true);
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addListener(client, request, listener);
     api.setMockLocation(mockLocation);
     assertThat(listener.getAllLocations()).hasSize(1);
     assertThat(listener.getMostRecentLocation()).isEqualTo(mockLocation);
@@ -328,7 +336,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     request.setFastestInterval(0);
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
     Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(listener.getAllLocations()).hasSize(3);
@@ -346,7 +354,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     request.setFastestInterval(0);
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
     Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(listener.getAllLocations().get(0).getSpeed()).isEqualTo(10f);
@@ -360,7 +368,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     request.setInterval(100);
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
     Thread.sleep(100);
     ShadowLooper.runUiThreadTasks();
     assertThat(listener.getAllLocations()).hasSize(1);
@@ -407,8 +415,10 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
     TestLocationListener listener1 = new TestLocationListener();
     TestLocationListener listener2 = new TestLocationListener();
-    api.requestLocationUpdates(client, request, listener1);
-    api.requestLocationUpdates(client, request, listener2);
+    api.requestLocationUpdates(request);
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addListener(client, request, listener1);
+    LostClientManager.shared().addListener(client, request, listener2);
     Location location = new Location(GPS_PROVIDER);
     location.setLatitude(40.0);
     location.setLongitude(70.0);
@@ -421,8 +431,10 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
     TestLocationListener listener1 = new TestLocationListener();
     TestLocationListener listener2 = new TestLocationListener();
-    api.requestLocationUpdates(client, request, listener1);
-    api.requestLocationUpdates(client, request, listener2);
+    api.requestLocationUpdates(request);
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addListener(client, request, listener1);
+    LostClientManager.shared().addListener(client, request, listener2);
     api.removeLocationUpdates(client, listener2);
     Location location = new Location(GPS_PROVIDER);
     location.setLatitude(40.0);
@@ -582,7 +594,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
   @Test public void removeLocationUpdates_shouldNotKillEngineIfListenerStillActive()
       throws Exception {
     TestLocationListener listener = new TestLocationListener();
-    api.requestLocationUpdates(client, LocationRequest.create(), listener);
+    api.requestLocationUpdates(LocationRequest.create());
+    LostClientManager.shared().addListener(client, LocationRequest.create(), listener);
 
     PendingIntent pendingIntent = PendingIntent.getService(application, 0, new Intent(), 0);
     api.requestLocationUpdates(client, LocationRequest.create(), pendingIntent);
@@ -594,7 +607,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
   @Test public void removeLocationUpdates_shouldNotKillEngineIfIntentStillActive()
       throws Exception {
     TestLocationListener listener = new TestLocationListener();
-    api.requestLocationUpdates(client, LocationRequest.create(), listener);
+    api.requestLocationUpdates(LocationRequest.create());
 
     PendingIntent pendingIntent = PendingIntent.getService(application, 0, new Intent(), 0);
     api.requestLocationUpdates(client, LocationRequest.create(), pendingIntent);
@@ -614,7 +627,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
 
   @Test public void requestLocationUpdates_shouldModifyOnlyClientListeners() {
     client.connect();
-    api.requestLocationUpdates(client, LocationRequest.create(),
+    api.requestLocationUpdates(LocationRequest.create());
+    LostClientManager.shared().addListener(client, LocationRequest.create(),
         new TestLocationListener());
 
     otherClient.connect();
@@ -649,12 +663,12 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     TestLocationListener listener = new TestLocationListener();
 
     client.connect();
-    api.requestLocationUpdates(client, LocationRequest.create(),
-        listener);
+    LostClientManager.shared().addListener(client, LocationRequest.create(), listener);
+    api.requestLocationUpdates(LocationRequest.create());
 
     otherClient.connect();
-    api.requestLocationUpdates(otherClient, LocationRequest.create(),
-        new TestLocationListener());
+    LostClientManager.shared().addListener(otherClient, LocationRequest.create(), listener);
+    api.requestLocationUpdates(LocationRequest.create());
 
     api.removeLocationUpdates(client, listener);
 
@@ -696,16 +710,16 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     assertThat(api.getLocationCallbacks().get(otherClient).size()).isEqualTo(1);
   }
 
-  @Test public void reportLocation_shouldNotifiyClientListener() {
+  @Test public void reportLocation_shouldNotifyClientListener() {
     TestLocationListener listener = new TestLocationListener();
     client.connect();
-    api.requestLocationUpdates(client, LocationRequest.create(),
-        listener);
+    LostClientManager.shared().addListener(client, LocationRequest.create(), listener);
+    api.requestLocationUpdates(LocationRequest.create());
 
     TestLocationListener otherListener = new TestLocationListener();
     otherClient.connect();
-    api.requestLocationUpdates(otherClient, LocationRequest.create(),
-        otherListener);
+    LostClientManager.shared().addListener(otherClient, LocationRequest.create(), otherListener);
+    api.requestLocationUpdates(LocationRequest.create());
     api.removeLocationUpdates(otherClient, otherListener);
 
     Location location = new Location("test");
@@ -715,7 +729,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     assertThat(otherListener.getAllLocations()).isEmpty();
   }
 
-  @Test public void reportLocation_shouldNotifiyPendingIntents() {
+  @Test public void reportLocation_shouldNotifyPendingIntents() {
     Intent intent = new Intent(application, TestService.class);
     PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
 
@@ -757,12 +771,14 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
   @Test public void reportLocation_shouldNotifyBothListeners() {
     TestLocationListener listener = new TestLocationListener();
     client.connect();
-    api.requestLocationUpdates(client, LocationRequest.create(), listener);
+    api.requestLocationUpdates(LocationRequest.create());
+    LostClientManager.shared().addListener(client, LocationRequest.create(), listener);
 
     TestLocationListener otherListener = new TestLocationListener();
     otherClient.connect();
     LocationRequest otherRequest = LocationRequest.create();
-    api.requestLocationUpdates(otherClient, otherRequest, otherListener);
+    api.requestLocationUpdates(otherRequest);
+    LostClientManager.shared().addListener(otherClient, otherRequest, otherListener);
 
     Location location = new Location("test");
     api.reportLocation(location);
@@ -775,13 +791,15 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     client.connect();
     LocationRequest request = LocationRequest.create();
     request.setFastestInterval(1000);
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addListener(client, request, listener);
 
     TestLocationListener otherListener = new TestLocationListener();
     otherClient.connect();
     LocationRequest otherRequest = LocationRequest.create();
     otherRequest.setFastestInterval(0);
-    api.requestLocationUpdates(otherClient, otherRequest, otherListener);
+    api.requestLocationUpdates(otherRequest);
+    LostClientManager.shared().addListener(otherClient, otherRequest, otherListener);
 
     api.reportLocation(new Location("test"));
     listener.getAllLocations().clear();
@@ -798,13 +816,15 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     client.connect();
     LocationRequest request = LocationRequest.create();
     request.setSmallestDisplacement(10);
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addListener(client, request, listener);
 
     TestLocationListener otherListener = new TestLocationListener();
     otherClient.connect();
     LocationRequest otherRequest = LocationRequest.create();
     otherRequest.setFastestInterval(0);
-    api.requestLocationUpdates(otherClient, otherRequest, otherListener);
+    api.requestLocationUpdates(otherRequest);
+    LostClientManager.shared().addListener(otherClient, otherRequest, otherListener);
 
     api.reportLocation(new Location("test"));
     listener.getAllLocations().clear();
@@ -823,13 +843,15 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     LocationRequest request = LocationRequest.create();
     request.setFastestInterval(1000);
     request.setSmallestDisplacement(10);
-    api.requestLocationUpdates(client, request, listener);
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addListener(client, request, listener);
 
     TestLocationListener otherListener = new TestLocationListener();
     otherClient.connect();
     LocationRequest otherRequest = LocationRequest.create();
     otherRequest.setFastestInterval(0);
-    api.requestLocationUpdates(otherClient, otherRequest, otherListener);
+    api.requestLocationUpdates(otherRequest);
+    LostClientManager.shared().addListener(otherClient, otherRequest, otherListener);
 
     api.reportLocation(new Location("test"));
     listener.getAllLocations().clear();
@@ -1059,8 +1081,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
 
   @Test public void requestLocationUpdates_listener_shouldReturnFusedLocationPendingResult() {
     TestLocationListener listener = new TestLocationListener();
-    PendingResult<Status> result = api.requestLocationUpdates(client, LocationRequest.create(),
-        listener);
+    PendingResult<Status> result = api.requestLocationUpdates(LocationRequest.create()
+    );
     assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
     assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
         Status.SUCCESS);
@@ -1107,7 +1129,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
 
   @Test public void removeLocationUpdates_listener_shouldReturnFusedLocationPendingResult() {
     TestLocationListener listener = new TestLocationListener();
-    api.requestLocationUpdates(client, LocationRequest.create(), listener);
+    api.requestLocationUpdates(LocationRequest.create());
+    LostClientManager.shared().addListener(client, LocationRequest.create(), listener);
     PendingResult<Status> result = api.removeLocationUpdates(client, listener);
     assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
     assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(

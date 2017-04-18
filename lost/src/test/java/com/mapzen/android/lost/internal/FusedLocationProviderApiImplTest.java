@@ -171,7 +171,7 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
             LocationRequest request = LocationRequest.create();
             LocationListener listener = new TestLocationListener();
             api.requestLocationUpdates(client, request, listener);
-            verify(service).requestLocationUpdates(client, request, listener);
+            verify(service).requestLocationUpdates(request);
           }
 
           @Override public void onConnectionSuspended() {
