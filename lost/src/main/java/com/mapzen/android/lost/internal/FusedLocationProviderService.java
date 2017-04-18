@@ -14,7 +14,6 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
 
@@ -61,11 +60,6 @@ public class FusedLocationProviderService extends Service {
 
   public PendingResult<Status> requestLocationUpdates(LocationRequest request) {
     return serviceImpl.requestLocationUpdates(request);
-  }
-
-  public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
-      LocationCallback callback, Looper looper) {
-    return serviceImpl.requestLocationUpdates(client, request, callback, looper);
   }
 
   public PendingResult<Status> removeLocationUpdates(LostApiClient client,

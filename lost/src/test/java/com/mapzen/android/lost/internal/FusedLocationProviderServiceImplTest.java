@@ -522,7 +522,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     TestLocationCallback callback = new TestLocationCallback();
     Looper looper = Looper.myLooper();
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(client, request, callback, looper);
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addLocationCallback(client, request, callback, looper);
     Location location = getTestLocation(NETWORK_PROVIDER, 0, 0, 0);
     shadowLocationManager.simulateLocation(location);
     assertThat(callback.getResult().getLastLocation()).isEqualTo(location);
@@ -534,7 +535,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     TestLocationCallback callback = new TestLocationCallback();
     Looper looper = Looper.myLooper();
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(client, request, callback, looper);
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addLocationCallback(client, request, callback, looper);
     shadowLocationManager.setProviderEnabled(NETWORK_PROVIDER, true);
     assertThat(callback.getAvailability().isLocationAvailable()).isEqualTo(true);
   }
@@ -624,7 +626,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     TestLocationCallback callback = new TestLocationCallback();
     Looper looper = mock(Looper.class);
     LocationRequest request = LocationRequest.create();
-    api.requestLocationUpdates(client, request, callback, looper);
+    api.requestLocationUpdates(request);
     api.removeLocationUpdates(client, callback);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
@@ -655,7 +657,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
 
   @Test public void requestLocationUpdates_shouldModifyOnlyClientLocationListeners() {
     client.connect();
-    api.requestLocationUpdates(client, LocationRequest.create(),
+    api.requestLocationUpdates(LocationRequest.create());
+    LostClientManager.shared().addLocationCallback(client, LocationRequest.create(),
         new TestLocationCallback(), Looper.myLooper());
 
     otherClient.connect();
@@ -703,12 +706,14 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     TestLocationCallback callback = new TestLocationCallback();
 
     client.connect();
-    api.requestLocationUpdates(client, LocationRequest.create(),
-        callback, Looper.myLooper());
+    api.requestLocationUpdates(LocationRequest.create());
+    LostClientManager.shared().addLocationCallback(client, LocationRequest.create(), callback,
+        Looper.myLooper());
 
     otherClient.connect();
-    api.requestLocationUpdates(otherClient, LocationRequest.create(),
-        callback, Looper.myLooper());
+    api.requestLocationUpdates(LocationRequest.create());
+    LostClientManager.shared().addLocationCallback(otherClient, LocationRequest.create(), callback,
+        Looper.myLooper());
 
     api.removeLocationUpdates(client, callback);
 
@@ -757,15 +762,17 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     assertThat(ShadowApplication.getInstance().getNextStartedService()).isNull();
   }
 
-  @Test public void reportLocation_shouldNotifiyLocationCallbacks() {
+  @Test public void reportLocation_shouldNotifyLocationCallbacks() {
     TestLocationCallback callback = new TestLocationCallback();
     client.connect();
-    api.requestLocationUpdates(client, LocationRequest.create(),
-        callback, Looper.myLooper());
+    api.requestLocationUpdates(LocationRequest.create());
+    LostClientManager.shared().addLocationCallback(client, LocationRequest.create(), callback,
+        Looper.myLooper());
 
     TestLocationCallback otherCallback = new TestLocationCallback();
     otherClient.connect();
-    api.requestLocationUpdates(otherClient, LocationRequest.create(),
+    api.requestLocationUpdates(LocationRequest.create());
+    LostClientManager.shared().addLocationCallback(otherClient, LocationRequest.create(),
         otherCallback, Looper.myLooper());
     api.removeLocationUpdates(otherClient, otherCallback);
 
@@ -999,12 +1006,16 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
   @Test public void reportLocation_shouldNotifyBothCallbacks() {
     TestLocationCallback callback = new TestLocationCallback();
     client.connect();
-    api.requestLocationUpdates(client, LocationRequest.create(), callback, Looper.myLooper());
+    api.requestLocationUpdates(LocationRequest.create());
+    LostClientManager.shared().addLocationCallback(client, LocationRequest.create(), callback,
+        Looper.myLooper());
 
     TestLocationCallback otherCallback = new TestLocationCallback();
     otherClient.connect();
     LocationRequest otherRequest = LocationRequest.create();
-    api.requestLocationUpdates(otherClient, otherRequest, otherCallback, Looper.myLooper());
+    api.requestLocationUpdates(otherRequest);
+    LostClientManager.shared().addLocationCallback(otherClient, LocationRequest.create(),
+        otherCallback, Looper.myLooper());
 
     Location location = new Location("test");
     api.reportLocation(location);
@@ -1017,13 +1028,16 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     client.connect();
     LocationRequest request = LocationRequest.create();
     request.setFastestInterval(1000);
-    api.requestLocationUpdates(client, request, callback, Looper.myLooper());
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addLocationCallback(client, request, callback, Looper.myLooper());
 
     TestLocationCallback otherCallback = new TestLocationCallback();
     otherClient.connect();
     LocationRequest otherRequest = LocationRequest.create();
     otherRequest.setFastestInterval(0);
-    api.requestLocationUpdates(otherClient, otherRequest, otherCallback, Looper.myLooper());
+    api.requestLocationUpdates(otherRequest);
+    LostClientManager.shared().addLocationCallback(otherClient, otherRequest, otherCallback,
+        Looper.myLooper());
 
     api.reportLocation(new Location("test"));
     callback.setResult(null);
@@ -1040,13 +1054,16 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     client.connect();
     LocationRequest request = LocationRequest.create();
     request.setSmallestDisplacement(10);
-    api.requestLocationUpdates(client, request, callback, Looper.myLooper());
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addLocationCallback(client, request, callback, Looper.myLooper());
 
     TestLocationCallback otherCallback = new TestLocationCallback();
     otherClient.connect();
     LocationRequest otherRequest = LocationRequest.create();
     otherRequest.setFastestInterval(0);
-    api.requestLocationUpdates(otherClient, otherRequest, otherCallback, Looper.myLooper());
+    api.requestLocationUpdates(otherRequest);
+    LostClientManager.shared().addLocationCallback(otherClient, otherRequest, otherCallback,
+        Looper.myLooper());
 
     api.reportLocation(new Location("test"));
     callback.setResult(null);
@@ -1065,13 +1082,16 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     LocationRequest request = LocationRequest.create();
     request.setFastestInterval(1000);
     request.setSmallestDisplacement(10);
-    api.requestLocationUpdates(client, request, callback, Looper.myLooper());
+    api.requestLocationUpdates(request);
+    LostClientManager.shared().addLocationCallback(client, request, callback, Looper.myLooper());
 
     TestLocationCallback otherCallback = new TestLocationCallback();
     otherClient.connect();
     LocationRequest otherRequest = LocationRequest.create();
     otherRequest.setFastestInterval(0);
-    api.requestLocationUpdates(otherClient, otherRequest, otherCallback, Looper.myLooper());
+    api.requestLocationUpdates(otherRequest);
+    LostClientManager.shared().addLocationCallback(otherClient, otherRequest, otherCallback,
+        Looper.myLooper());
 
     api.reportLocation(new Location("test"));
     callback.setResult(null);
@@ -1124,8 +1144,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
 
   @Test public void requestLocationUpdates_callback_shouldReturnFusedLocationPendingResult() {
     LocationCallback locationCallback = new TestLocationCallback();
-    PendingResult<Status> result = api.requestLocationUpdates(client, LocationRequest.create(),
-        locationCallback, Looper.myLooper());
+    PendingResult<Status> result = api.requestLocationUpdates(LocationRequest.create());
     assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
     assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
         Status.SUCCESS);
@@ -1174,8 +1193,9 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
 
   @Test public void removeLocationUpdates_callback_shouldReturnFusedLocationPendingResult() {
     LocationCallback locationCallback = new TestLocationCallback();
-    api.requestLocationUpdates(client, LocationRequest.create(), locationCallback,
-        Looper.myLooper());
+    api.requestLocationUpdates(LocationRequest.create());
+    LostClientManager.shared().addLocationCallback(client, LocationRequest.create(),
+        locationCallback, Looper.myLooper());
     PendingResult<Status> result = api.removeLocationUpdates(client, locationCallback);
     assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
     assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(

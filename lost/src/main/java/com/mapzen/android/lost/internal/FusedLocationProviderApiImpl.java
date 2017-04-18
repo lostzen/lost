@@ -121,7 +121,8 @@ public class FusedLocationProviderApiImpl
   @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
       LocationRequest request, LocationCallback callback, Looper looper) {
     throwIfNotConnected(client);
-    return service.requestLocationUpdates(client, request, callback, looper);
+    LostClientManager.shared().addLocationCallback(client, request, callback, looper);
+    return service.requestLocationUpdates(request);
   }
 
   @Override

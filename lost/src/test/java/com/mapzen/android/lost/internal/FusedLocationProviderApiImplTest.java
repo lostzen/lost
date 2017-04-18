@@ -202,7 +202,7 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
             TestLocationCallback callback = new TestLocationCallback();
             Looper looper = Looper.myLooper();
             api.requestLocationUpdates(client, request, callback, looper);
-            verify(service).requestLocationUpdates(client, request, callback, looper);
+            verify(service).requestLocationUpdates(request);
           }
 
           @Override public void onConnectionSuspended() {
