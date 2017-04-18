@@ -155,20 +155,22 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
   @Test(expected = IllegalStateException.class)
   public void requestLocationUpdates_listener_shouldThrowIfNotConnected() throws Exception {
     connectedClient.disconnect();
-    api.requestLocationUpdates(connectedClient, LocationRequest.create(), new TestLocationListener());
+    api.requestLocationUpdates(connectedClient, LocationRequest.create(),
+        new TestLocationListener());
   }
 
   @Test(expected = IllegalStateException.class)
   public void requestLocationUpdates_pendingIntent_shouldThrowIfNotConnected() throws Exception {
     connectedClient.disconnect();
-    api.requestLocationUpdates(connectedClient, LocationRequest.create(), mock(PendingIntent.class));
+    api.requestLocationUpdates(connectedClient, LocationRequest.create(),
+        mock(PendingIntent.class));
   }
 
   @Test(expected = IllegalStateException.class)
   public void requestLocationUpdates_callback_shouldThrowIfNotConnected() throws Exception {
     connectedClient.disconnect();
-    api.requestLocationUpdates(connectedClient, LocationRequest.create(), new TestLocationCallback(),
-        Looper.myLooper());
+    api.requestLocationUpdates(connectedClient, LocationRequest.create(),
+        new TestLocationCallback(), Looper.myLooper());
   }
 
   @Test public void requestLocationUpdates_listener_shouldCallService() {
