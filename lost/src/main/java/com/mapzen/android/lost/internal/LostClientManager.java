@@ -192,22 +192,6 @@ public class LostClientManager implements ClientManager {
     reportedChanges.putAll(changes);
   }
 
-  @Override public void reportProviderEnabled(String provider) {
-    for (LostClientWrapper wrapper : clients.values()) {
-      for (LocationListener listener : wrapper.locationListeners()) {
-        listener.onProviderEnabled(provider);
-      }
-    }
-  }
-
-  @Override public void reportProviderDisabled(String provider) {
-    for (LostClientWrapper wrapper : clients.values()) {
-      for (LocationListener listener : wrapper.locationListeners()) {
-        listener.onProviderDisabled(provider);
-      }
-    }
-  }
-
   @Override public void notifyLocationAvailability(final LocationAvailability availability) {
     for (LostClientWrapper wrapper : clients.values()) {
       for (LocationCallback callback : wrapper.locationCallbacks()) {

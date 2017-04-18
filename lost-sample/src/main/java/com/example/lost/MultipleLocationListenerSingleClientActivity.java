@@ -31,27 +31,11 @@ public class MultipleLocationListenerSingleClientActivity extends ListActivity {
     @Override public void onLocationChanged(Location location) {
       addItem("Listener");
     }
-
-    @Override public void onProviderDisabled(String provider) {
-
-    }
-
-    @Override public void onProviderEnabled(String provider) {
-
-    }
   };
 
   LocationListener otherListener = new LocationListener() {
     @Override public void onLocationChanged(Location location) {
       addItem("Other Listener");
-    }
-
-    @Override public void onProviderDisabled(String provider) {
-
-    }
-
-    @Override public void onProviderEnabled(String provider) {
-
     }
   };
 
