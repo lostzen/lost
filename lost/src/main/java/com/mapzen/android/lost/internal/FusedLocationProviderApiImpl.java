@@ -167,10 +167,6 @@ public class FusedLocationProviderApiImpl
     return service.setMockTrace(file);
   }
 
-  @Override public boolean isProviderEnabled(LostApiClient client, String provider) {
-    return service.isProviderEnabled(client, provider);
-  }
-
   public Map<LostApiClient, Set<LocationListener>> getLocationListeners() {
     return service.getLocationListeners();
   }

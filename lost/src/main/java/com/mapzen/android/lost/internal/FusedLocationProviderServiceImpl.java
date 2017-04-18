@@ -96,10 +96,6 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     return new SimplePendingResult(true);
   }
 
-  public boolean isProviderEnabled(LostApiClient client, String provider) {
-    return locationEngine.isProviderEnabled(provider);
-  }
-
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   public void reportLocation(Location location) {
     ReportedChanges changes = clientManager.reportLocationChanged(location);

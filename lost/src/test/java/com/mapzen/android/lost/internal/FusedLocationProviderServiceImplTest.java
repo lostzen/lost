@@ -381,18 +381,6 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     assertThat(listener.getAllLocations()).hasSize(3);
   }
 
-  @Test public void isProviderEnabled_shouldReturnProviderStatus() throws Exception {
-    shadowLocationManager.setProviderEnabled(LocationManager.GPS_PROVIDER, true);
-    shadowLocationManager.setProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
-    assertThat(api.isProviderEnabled(client, LocationManager.GPS_PROVIDER)).isTrue();
-    assertThat(api.isProviderEnabled(client, LocationManager.NETWORK_PROVIDER)).isTrue();
-
-    shadowLocationManager.setProviderEnabled(LocationManager.GPS_PROVIDER, false);
-    shadowLocationManager.setProviderEnabled(LocationManager.NETWORK_PROVIDER, false);
-    assertThat(api.isProviderEnabled(client, LocationManager.GPS_PROVIDER)).isFalse();
-    assertThat(api.isProviderEnabled(client, LocationManager.NETWORK_PROVIDER)).isFalse();
-  }
-
   private static Location getTestLocation(String provider, float lat, float lng, long time) {
     Location location = new Location(provider);
     location.setLatitude(lat);

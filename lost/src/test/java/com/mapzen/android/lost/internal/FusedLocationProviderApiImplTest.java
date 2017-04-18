@@ -336,12 +336,6 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
         }).build().connect();
   }
 
-  @Test public void isProviderEnabled_shouldCallService() {
-    String provider = "provider";
-    api.isProviderEnabled(client, provider);
-    verify(service).isProviderEnabled(client, provider);
-  }
-
   @Test public void getListeners() {
     api.getLocationListeners();
     verify(service).getLocationListeners();
