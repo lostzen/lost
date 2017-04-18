@@ -2,7 +2,6 @@ package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.api.LocationAvailability;
 import com.mapzen.android.lost.api.LocationCallback;
-import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.android.lost.api.PendingResult;
@@ -18,8 +17,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
 
 import java.io.File;
-import java.util.Map;
-import java.util.Set;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -62,9 +59,8 @@ public class FusedLocationProviderService extends Service {
     return serviceImpl.requestLocationUpdates(request);
   }
 
-  public PendingResult<Status> removeLocationUpdates(LostApiClient client,
-      LocationListener listener) {
-    return serviceImpl.removeLocationUpdates(client, listener);
+  public void removeLocationUpdates() {
+    serviceImpl.removeLocationUpdates();
   }
 
   public PendingResult<Status> removeLocationUpdates(LostApiClient client,
@@ -87,9 +83,5 @@ public class FusedLocationProviderService extends Service {
 
   public PendingResult<Status> setMockTrace(File file) {
     return serviceImpl.setMockTrace(file);
-  }
-
-  public Map<LostApiClient, Set<LocationListener>> getLocationListeners() {
-    return serviceImpl.getLocationListeners();
   }
 }

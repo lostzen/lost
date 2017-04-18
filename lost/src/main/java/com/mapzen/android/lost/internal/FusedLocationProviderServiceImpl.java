@@ -2,7 +2,6 @@ package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.api.LocationAvailability;
 import com.mapzen.android.lost.api.LocationCallback;
-import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationResult;
 import com.mapzen.android.lost.api.LostApiClient;
@@ -19,8 +18,6 @@ import android.support.annotation.RequiresPermission;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -54,11 +51,8 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
     return new SimplePendingResult(true);
   }
 
-  public PendingResult<Status> removeLocationUpdates(LostApiClient client,
-      LocationListener listener) {
-    boolean hasResult = clientManager.removeListener(client, listener);
+  public void removeLocationUpdates() {
     checkAllListenersPendingIntentsAndCallbacks();
-    return new SimplePendingResult(hasResult);
   }
 
   public PendingResult<Status> removeLocationUpdates(LostApiClient client,
@@ -145,18 +139,6 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
 
       }
     }, Looper.myLooper());
-  }
-
-  public Map<LostApiClient, Set<LocationListener>> getLocationListeners() {
-    return clientManager.getLocationListeners();
-  }
-
-  public Map<LostApiClient, Set<PendingIntent>> getPendingIntents() {
-    return clientManager.getPendingIntents();
-  }
-
-  public Map<LostApiClient, Set<LocationCallback>> getLocationCallbacks() {
-    return clientManager.getLocationCallbacks();
   }
 
   /**

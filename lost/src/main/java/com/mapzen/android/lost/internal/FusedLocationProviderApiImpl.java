@@ -125,9 +125,8 @@ public class FusedLocationProviderApiImpl
     return service.requestLocationUpdates(request);
   }
 
-  @Override
-  public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
-      PendingIntent callbackIntent) {
+  @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
+      LocationRequest request, PendingIntent callbackIntent) {
     throwIfNotConnected(client);
     LostClientManager.shared().addPendingIntent(client, request, callbackIntent);
     return service.requestLocationUpdates(request);
@@ -136,7 +135,9 @@ public class FusedLocationProviderApiImpl
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       LocationListener listener) {
     throwIfNotConnected(client);
-    return service.removeLocationUpdates(client, listener);
+    boolean hasResult = LostClientManager.shared().removeListener(client, listener);
+    service.removeLocationUpdates();
+    return new SimplePendingResult(hasResult);
   }
 
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
@@ -168,7 +169,7 @@ public class FusedLocationProviderApiImpl
   }
 
   public Map<LostApiClient, Set<LocationListener>> getLocationListeners() {
-    return service.getLocationListeners();
+    return LostClientManager.shared().getLocationListeners();
   }
 
   public FusedLocationProviderService getService() {

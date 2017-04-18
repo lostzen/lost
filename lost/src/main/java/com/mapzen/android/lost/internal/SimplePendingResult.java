@@ -1,7 +1,6 @@
 package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.api.PendingResult;
-import com.mapzen.android.lost.api.Result;
 import com.mapzen.android.lost.api.ResultCallback;
 import com.mapzen.android.lost.api.Status;
 
@@ -36,26 +35,18 @@ public class SimplePendingResult extends PendingResult<Status> {
 
   @Override public void setResultCallback(@NonNull ResultCallback callback) {
     if (hasResult) {
-      callback.onResult(generateResult());
+      callback.onResult(generateStatus());
     }
   }
 
   @Override public void setResultCallback(@NonNull ResultCallback callback, long time,
       @NonNull TimeUnit timeUnit) {
     if (hasResult) {
-      callback.onResult(generateResult());
+      callback.onResult(generateStatus());
     }
   }
 
   private Status generateStatus() {
     return new Status(Status.SUCCESS, dialogDisplayer);
-  }
-
-  private Result generateResult() {
-    return new Result() {
-      @Override public Status getStatus() {
-        return generateStatus();
-      }
-    };
   }
 }
