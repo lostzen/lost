@@ -23,7 +23,7 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
  */
 public class FusedLocationProviderService extends Service {
 
-  private FusedLocationProviderServiceImpl serviceImpl;
+  private FusedLocationProviderServiceDelegate serviceImpl;
 
   private final IBinder binder = new FusedLocationProviderBinder();
 
@@ -40,7 +40,7 @@ public class FusedLocationProviderService extends Service {
 
   @Override public void onCreate() {
     super.onCreate();
-    serviceImpl = new FusedLocationProviderServiceImpl(this, LostClientManager.shared());
+    serviceImpl = new FusedLocationProviderServiceDelegate(this, LostClientManager.shared());
   }
 
   public Location getLastLocation() {

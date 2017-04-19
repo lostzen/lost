@@ -56,9 +56,9 @@ import static org.robolectric.Shadows.shadowOf;
 @SuppressWarnings("MissingPermission")
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE, shadows = {
         LostShadowLocationManager.class})
-public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
+public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTest {
   private LostApiClient client;
-  private FusedLocationProviderServiceImpl api;
+  private FusedLocationProviderServiceDelegate api;
   private LocationManager locationManager;
   private LostShadowLocationManager shadowLocationManager;
   private LostApiClient otherClient;
@@ -70,7 +70,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     client = new LostApiClient.Builder(mock(Context.class)).build();
     otherClient = new LostApiClient.Builder(mock(Context.class)).build();
     clientManager = LostClientManager.shared();
-    api = new FusedLocationProviderServiceImpl(application, clientManager);
+    api = new FusedLocationProviderServiceDelegate(application, clientManager);
     locationManager = (LocationManager) application.getSystemService(LOCATION_SERVICE);
     shadowLocationManager = (LostShadowLocationManager) ShadowExtractor.extract(locationManager);
     client.connect();

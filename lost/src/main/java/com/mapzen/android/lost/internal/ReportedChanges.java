@@ -10,7 +10,7 @@ import java.util.Map;
  * Represents changes to reported locations and times at which locations were reported for
  * different modes of notification (listeners, pending intents, and callbacks). After all types of
  * callbacks are invoked, these changes will be committed so that the next time a location is
- * reported, the {@link FusedLocationProviderServiceImpl} can properly determine if it should be
+ * reported, the {@link FusedLocationProviderServiceDelegate} can properly determine if it should be
  * reported to listeners, pending intents, and callbacks.
  */
 public class ReportedChanges {

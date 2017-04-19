@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
-public class FusedLocationProviderServiceImpl implements LocationEngine.Callback {
+public class FusedLocationProviderServiceDelegate implements LocationEngine.Callback {
 
   private Context context;
 
@@ -28,7 +28,7 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
 
   private ClientManager clientManager;
 
-  public FusedLocationProviderServiceImpl(Context context, ClientManager manager) {
+  public FusedLocationProviderServiceDelegate(Context context, ClientManager manager) {
     this.context = context;
     this.clientManager = manager;
     locationEngine = new FusionEngine(context, this);
