@@ -37,7 +37,6 @@ public class FusedLocationProviderApiImpl
   @Override public void onConnect(Context context) {
     this.context = context;
     final Intent intent = new Intent(context, FusedLocationProviderService.class);
-    context.startService(intent);
     context.bindService(intent, this, Context.BIND_AUTO_CREATE);
   }
 
@@ -56,8 +55,6 @@ public class FusedLocationProviderApiImpl
       isBound = false;
     }
 
-    Intent intent = new Intent(context, FusedLocationProviderService.class);
-    context.stopService(intent);
     service = null;
   }
 
