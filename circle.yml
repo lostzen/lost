@@ -6,7 +6,7 @@ dependencies:
   pre:
     - if [ ! -e /usr/local/android-sdk-linux/build-tools/24.0.2 ]; then echo y | android update sdk --all --no-ui --filter "build-tools-24.0.2"; fi;
     - if [ ! -e /usr/local/android-sdk-linux/platforms/android-24 ]; then echo y | android update sdk --all --no-ui --filter "android-24"; fi;
-    - if ! $(grep -q "Revision=43.0.0" /usr/local/android-sdk-linux/extras/android/m2repository/source.properties); then echo y | android update sdk --all --no-ui --filter "extra-android-m2repository"; fi;
+    - if ! $(grep -q "Revision=47.0.0" /usr/local/android-sdk-linux/extras/android/m2repository/source.properties); then echo y | android update sdk --all --no-ui --filter "extra-android-m2repository"; fi;
   cache_directories:
     - /usr/local/android-sdk-linux/build-tools/24.0.2
     - /usr/local/android-sdk-linux/platforms/android-24

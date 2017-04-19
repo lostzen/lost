@@ -1,15 +1,11 @@
 package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.api.LocationAvailability;
-import com.mapzen.android.lost.api.LocationCallback;
-import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationResult;
-import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.android.lost.api.PendingResult;
 import com.mapzen.android.lost.api.Status;
 
-import android.app.PendingIntent;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
@@ -19,13 +15,11 @@ import android.support.annotation.RequiresPermission;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
-public class FusedLocationProviderServiceImpl implements LocationEngine.Callback {
+public class FusedLocationProviderServiceDelegate implements LocationEngine.Callback {
 
   private Context context;
 
@@ -34,86 +28,49 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
 
   private ClientManager clientManager;
 
-  public FusedLocationProviderServiceImpl(Context context, ClientManager manager) {
+  public FusedLocationProviderServiceDelegate(Context context, ClientManager manager) {
     this.context = context;
     this.clientManager = manager;
     locationEngine = new FusionEngine(context, this);
   }
 
-  public Location getLastLocation(LostApiClient client) {
+  public Location getLastLocation() {
     return locationEngine.getLastLocation();
   }
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  public LocationAvailability getLocationAvailability(LostApiClient client) {
+  public LocationAvailability getLocationAvailability() {
     return locationEngine.createLocationAvailability();
   }
 
-  public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
-      LocationListener listener) {
-    clientManager.addListener(client, request, listener);
+  public PendingResult<Status> requestLocationUpdates(LocationRequest request) {
     locationEngine.setRequest(request);
     return new SimplePendingResult(true);
   }
 
-  public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
-      PendingIntent callbackIntent) {
-    clientManager.addPendingIntent(client, request, callbackIntent);
-    locationEngine.setRequest(request);
-    return new SimplePendingResult(true);
-  }
-
-  public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
-      LocationCallback callback, Looper looper) {
-    clientManager.addLocationCallback(client, request, callback, looper);
-    locationEngine.setRequest(request);
-    return new SimplePendingResult(true);
-  }
-
-  public PendingResult<Status> removeLocationUpdates(LostApiClient client,
-      LocationListener listener) {
-    boolean hasResult = clientManager.removeListener(client, listener);
+  public void removeLocationUpdates() {
     checkAllListenersPendingIntentsAndCallbacks();
-    return new SimplePendingResult(hasResult);
   }
 
-  public PendingResult<Status> removeLocationUpdates(LostApiClient client,
-      PendingIntent callbackIntent) {
-    boolean hasResult = clientManager.removePendingIntent(client, callbackIntent);
-    checkAllListenersPendingIntentsAndCallbacks();
-    return new SimplePendingResult(hasResult);
-  }
-
-  public PendingResult<Status> removeLocationUpdates(LostApiClient client,
-      LocationCallback callback) {
-    boolean hasResult = clientManager.removeLocationCallback(client, callback);
-    checkAllListenersPendingIntentsAndCallbacks();
-    return new SimplePendingResult(hasResult);
-  }
-
-  public PendingResult<Status> setMockMode(LostApiClient client, boolean isMockMode) {
+  public PendingResult<Status> setMockMode(boolean isMockMode) {
     if (mockMode != isMockMode) {
       toggleMockMode();
     }
     return new SimplePendingResult(true);
   }
 
-  public PendingResult<Status> setMockLocation(LostApiClient client, Location mockLocation) {
+  public PendingResult<Status> setMockLocation(Location mockLocation) {
     if (mockMode) {
       ((MockEngine) locationEngine).setLocation(mockLocation);
     }
     return new SimplePendingResult(true);
   }
 
-  public PendingResult<Status> setMockTrace(LostApiClient client, File file) {
+  public PendingResult<Status> setMockTrace(File file) {
     if (mockMode) {
       ((MockEngine) locationEngine).setTrace(file);
     }
     return new SimplePendingResult(true);
-  }
-
-  public boolean isProviderEnabled(LostApiClient client, String provider) {
-    return locationEngine.isProviderEnabled(provider);
   }
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
@@ -165,18 +122,6 @@ public class FusedLocationProviderServiceImpl implements LocationEngine.Callback
 
       }
     }, Looper.myLooper());
-  }
-
-  public Map<LostApiClient, Set<LocationListener>> getLocationListeners() {
-    return clientManager.getLocationListeners();
-  }
-
-  public Map<LostApiClient, Set<PendingIntent>> getPendingIntents() {
-    return clientManager.getPendingIntents();
-  }
-
-  public Map<LostApiClient, Set<LocationCallback>> getLocationCallbacks() {
-    return clientManager.getLocationCallbacks();
   }
 
   /**

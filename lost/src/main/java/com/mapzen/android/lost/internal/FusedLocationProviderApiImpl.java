@@ -37,7 +37,6 @@ public class FusedLocationProviderApiImpl
   @Override public void onConnect(Context context) {
     this.context = context;
     final Intent intent = new Intent(context, FusedLocationProviderService.class);
-    context.startService(intent);
     context.bindService(intent, this, Context.BIND_AUTO_CREATE);
   }
 
@@ -56,8 +55,6 @@ public class FusedLocationProviderApiImpl
       isBound = false;
     }
 
-    Intent intent = new Intent(context, FusedLocationProviderService.class);
-    context.stopService(intent);
     service = null;
   }
 
@@ -98,18 +95,19 @@ public class FusedLocationProviderApiImpl
 
   @Override public Location getLastLocation(LostApiClient client) {
     throwIfNotConnected(client);
-    return service.getLastLocation(client);
+    return service.getLastLocation();
   }
 
   @Override public LocationAvailability getLocationAvailability(LostApiClient client) {
     throwIfNotConnected(client);
-    return service.getLocationAvailability(client);
+    return service.getLocationAvailability();
   }
 
   @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
       LocationRequest request, LocationListener listener) {
     throwIfNotConnected(client);
-    return service.requestLocationUpdates(client, request, listener);
+    LostClientManager.shared().addListener(client, request, listener);
+    return service.requestLocationUpdates(request);
   }
 
   @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
@@ -120,56 +118,59 @@ public class FusedLocationProviderApiImpl
   @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
       LocationRequest request, LocationCallback callback, Looper looper) {
     throwIfNotConnected(client);
-    return service.requestLocationUpdates(client, request, callback, looper);
+    LostClientManager.shared().addLocationCallback(client, request, callback, looper);
+    return service.requestLocationUpdates(request);
   }
 
-  @Override
-  public PendingResult<Status> requestLocationUpdates(LostApiClient client, LocationRequest request,
-      PendingIntent callbackIntent) {
+  @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
+      LocationRequest request, PendingIntent callbackIntent) {
     throwIfNotConnected(client);
-    return service.requestLocationUpdates(client, request, callbackIntent);
+    LostClientManager.shared().addPendingIntent(client, request, callbackIntent);
+    return service.requestLocationUpdates(request);
   }
 
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       LocationListener listener) {
     throwIfNotConnected(client);
-    return service.removeLocationUpdates(client, listener);
+    boolean hasResult = LostClientManager.shared().removeListener(client, listener);
+    service.removeLocationUpdates();
+    return new SimplePendingResult(hasResult);
   }
 
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       PendingIntent callbackIntent) {
     throwIfNotConnected(client);
-    return service.removeLocationUpdates(client, callbackIntent);
+    boolean hasResult = LostClientManager.shared().removePendingIntent(client, callbackIntent);
+    service.removeLocationUpdates();
+    return new SimplePendingResult(hasResult);
   }
 
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       LocationCallback callback) {
     throwIfNotConnected(client);
-    return service.removeLocationUpdates(client, callback);
+    boolean hasResult = LostClientManager.shared().removeLocationCallback(client, callback);
+    service.removeLocationUpdates();
+    return new SimplePendingResult(hasResult);
   }
 
   @Override public PendingResult<Status> setMockMode(LostApiClient client, boolean isMockMode) {
     throwIfNotConnected(client);
-    return service.setMockMode(client, isMockMode);
+    return service.setMockMode(isMockMode);
   }
 
   @Override public PendingResult<Status> setMockLocation(LostApiClient client,
       Location mockLocation) {
     throwIfNotConnected(client);
-    return service.setMockLocation(client, mockLocation);
+    return service.setMockLocation(mockLocation);
   }
 
   @Override public PendingResult<Status> setMockTrace(LostApiClient client, File file) {
     throwIfNotConnected(client);
-    return service.setMockTrace(client, file);
-  }
-
-  @Override public boolean isProviderEnabled(LostApiClient client, String provider) {
-    return service.isProviderEnabled(client, provider);
+    return service.setMockTrace(file);
   }
 
   public Map<LostApiClient, Set<LocationListener>> getLocationListeners() {
-    return service.getLocationListeners();
+    return LostClientManager.shared().getLocationListeners();
   }
 
   public FusedLocationProviderService getService() {

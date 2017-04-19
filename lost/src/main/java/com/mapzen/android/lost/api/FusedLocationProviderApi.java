@@ -201,10 +201,4 @@ public interface FusedLocationProviderApi {
    * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   PendingResult<Status> setMockTrace(LostApiClient client, final File file);
-
-  /**
-   * @deprecated Use {@link SettingsApi#checkLocationSettings(LostApiClient,
-   * LocationSettingsRequest)}.
-   */
-  @Deprecated boolean isProviderEnabled(LostApiClient client, String provider);
 }

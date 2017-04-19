@@ -17,7 +17,7 @@ import java.util.Set;
 
 /**
  * Used by {@link LostApiClientImpl} to manage connected clients and by
- * {@link FusedLocationProviderServiceImpl} to manage client's {@link LocationListener}s,
+ * {@link FusedLocationProviderServiceDelegate} to manage client's {@link LocationListener}s,
  * {@link PendingIntent}s, and {@link LocationCallback}s.
  */
 public interface ClientManager {

@@ -140,7 +140,8 @@ public class LostClientManagerTest extends BaseRobolectricTest {
   @Test public void sendPendingIntent_shouldFireIntent() {
     manager.addClient(client);
     LocationRequest request = LocationRequest.create();
-    Intent intent = new Intent(application, FusedLocationProviderServiceImplTest.TestService.class);
+    Intent intent = new Intent(application,
+        FusedLocationProviderServiceDelegateTest.TestService.class);
     PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
     manager.addPendingIntent(client, request, pendingIntent);
     Location location = new Location("test");
