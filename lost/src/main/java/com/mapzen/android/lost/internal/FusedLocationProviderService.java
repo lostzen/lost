@@ -1,13 +1,10 @@
 package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.api.LocationAvailability;
-import com.mapzen.android.lost.api.LocationCallback;
 import com.mapzen.android.lost.api.LocationRequest;
-import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.android.lost.api.PendingResult;
 import com.mapzen.android.lost.api.Status;
 
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
@@ -61,16 +58,6 @@ public class FusedLocationProviderService extends Service {
 
   public void removeLocationUpdates() {
     serviceImpl.removeLocationUpdates();
-  }
-
-  public PendingResult<Status> removeLocationUpdates(LostApiClient client,
-      PendingIntent callbackIntent) {
-    return serviceImpl.removeLocationUpdates(client, callbackIntent);
-  }
-
-  public PendingResult<Status> removeLocationUpdates(LostApiClient client,
-      LocationCallback callback) {
-    return serviceImpl.removeLocationUpdates(client, callback);
   }
 
   public PendingResult<Status> setMockMode(boolean isMockMode) {

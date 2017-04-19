@@ -1,6 +1,7 @@
 package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.BaseRobolectricTest;
+import com.mapzen.android.lost.api.LocationCallback;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LostApiClient;
@@ -264,7 +265,7 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
           @Override public void onConnected() {
             PendingIntent callbackIntent = mock(PendingIntent.class);
             api.removeLocationUpdates(connectedClient, callbackIntent);
-            verify(service).removeLocationUpdates(connectedClient, callbackIntent);
+            verify(service).removeLocationUpdates();
           }
 
           @Override public void onConnectionSuspended() {
@@ -278,7 +279,7 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
           @Override public void onConnected() {
             TestLocationCallback callback = new TestLocationCallback();
             api.removeLocationUpdates(connectedClient, callback);
-            verify(service).removeLocationUpdates(connectedClient, callback);
+            verify(service).removeLocationUpdates();
           }
 
           @Override public void onConnectionSuspended() {
@@ -395,6 +396,41 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
     TestLocationListener listener = new TestLocationListener();
     LostClientManager.shared().removeListener(connectedClient, listener);
     PendingResult<Status> result = api.removeLocationUpdates(connectedClient, listener);
+    result.setResultCallback(callback);
+    assertThat(callback.status).isNull();
+  }
+
+  @Test public void removeLocationUpdates_shouldReturnStatusSuccessIfPendingIntentRemoved() {
+    TestResultCallback callback = new TestResultCallback();
+    PendingIntent pendingIntent = mock(PendingIntent.class);
+    api.requestLocationUpdates(connectedClient, LocationRequest.create(), pendingIntent);
+    PendingResult<Status> result = api.removeLocationUpdates(connectedClient, pendingIntent);
+    result.setResultCallback(callback);
+    assertThat(callback.status.isSuccess()).isTrue();
+  }
+
+  @Test public void removeLocationUpdates_shouldNotReturnStatusSuccessIfPendingIntentNotRemoved() {
+    TestResultCallback callback = new TestResultCallback();
+    PendingIntent pendingIntent = mock(PendingIntent.class);
+    PendingResult<Status> result = api.removeLocationUpdates(connectedClient, pendingIntent);
+    result.setResultCallback(callback);
+    assertThat(callback.status).isNull();
+  }
+
+  @Test public void removeLocationUpdates_shouldReturnStatusSuccessIfCallbackRemoved() {
+    TestResultCallback resultCallback = new TestResultCallback();
+    LocationCallback locationCallback = new TestLocationCallback();
+    api.requestLocationUpdates(connectedClient, LocationRequest.create(), locationCallback,
+        Looper.myLooper());
+    PendingResult<Status> result = api.removeLocationUpdates(connectedClient, locationCallback);
+    result.setResultCallback(resultCallback);
+    assertThat(resultCallback.status.isSuccess()).isTrue();
+  }
+
+  @Test public void removeLocationUpdates_shouldNotReturnStatusSuccessIfCallbackNotRemoved() {
+    TestResultCallback callback = new TestResultCallback();
+    LocationCallback locationCallback = new TestLocationCallback();
+    PendingResult<Status> result = api.removeLocationUpdates(connectedClient, locationCallback);
     result.setResultCallback(callback);
     assertThat(callback.status).isNull();
   }

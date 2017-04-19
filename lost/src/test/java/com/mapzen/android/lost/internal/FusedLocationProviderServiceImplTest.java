@@ -469,13 +469,10 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
 
   @Test public void removeLocationUpdates_shouldUnregisterAllPendingIntentListeners()
       throws Exception {
-    Intent intent = new Intent(application, TestService.class);
-    PendingIntent pendingIntent = PendingIntent.getService(application, 0, intent, 0);
     LocationRequest locationRequest =
         LocationRequest.create().setPriority(PRIORITY_BALANCED_POWER_ACCURACY);
     api.requestLocationUpdates(locationRequest);
-
-    api.removeLocationUpdates(client, pendingIntent);
+    api.removeLocationUpdates();
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 
@@ -490,7 +487,7 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     LostClientManager.shared().addPendingIntent(client, request, pendingIntent1);
     LostClientManager.shared().addPendingIntent(client, request, pendingIntent2);
 
-    api.removeLocationUpdates(client, pendingIntent2);
+    LostClientManager.shared().removePendingIntent(client, pendingIntent2);
     Location location = new Location(GPS_PROVIDER);
     location.setLatitude(40.0);
     location.setLongitude(70.0);
@@ -584,11 +581,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     TestLocationListener listener = new TestLocationListener();
     api.requestLocationUpdates(LocationRequest.create());
     LostClientManager.shared().addListener(client, LocationRequest.create(), listener);
-
-    PendingIntent pendingIntent = PendingIntent.getService(application, 0, new Intent(), 0);
     api.requestLocationUpdates(LocationRequest.create());
-
-    api.removeLocationUpdates(client, pendingIntent);
+    api.removeLocationUpdates();
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isNotEmpty();
   }
 
@@ -605,11 +599,9 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
   }
 
   @Test public void removeLocationUpdates_locationCallback_shouldUnregisterAllListeners() {
-    TestLocationCallback callback = new TestLocationCallback();
-    Looper looper = mock(Looper.class);
     LocationRequest request = LocationRequest.create();
     api.requestLocationUpdates(request);
-    api.removeLocationUpdates(client, callback);
+    api.removeLocationUpdates();
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 
@@ -661,7 +653,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     api.requestLocationUpdates(LocationRequest.create());
     LostClientManager.shared().addPendingIntent(otherClient, locationRequest, pendingIntent);
 
-    api.removeLocationUpdates(client, pendingIntent);
+    api.removeLocationUpdates();
+    LostClientManager.shared().removePendingIntent(client, pendingIntent);
 
     assertThat(clientManager.getPendingIntents().get(client)).isEmpty();
     assertThat(clientManager.getPendingIntents().get(otherClient).size()).isEqualTo(1);
@@ -680,7 +673,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     LostClientManager.shared().addLocationCallback(otherClient, LocationRequest.create(), callback,
         Looper.myLooper());
 
-    api.removeLocationUpdates(client, callback);
+    LostClientManager.shared().removeLocationCallback(client, callback);
+    api.removeLocationUpdates();
 
     assertThat(clientManager.getLocationCallbacks().get(client)).isEmpty();
     assertThat(clientManager.getLocationCallbacks().get(otherClient).size()).isEqualTo(1);
@@ -716,7 +710,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     api.requestLocationUpdates(LocationRequest.create());
     LostClientManager.shared().addPendingIntent(otherClient, LocationRequest.create(),
         otherPendingIntent);
-    api.removeLocationUpdates(otherClient, otherPendingIntent);
+    LostClientManager.shared().removePendingIntent(otherClient, otherPendingIntent);
+    api.removeLocationUpdates();
 
     Location location = new Location("test");
     api.reportLocation(location);
@@ -737,7 +732,8 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     api.requestLocationUpdates(LocationRequest.create());
     LostClientManager.shared().addLocationCallback(otherClient, LocationRequest.create(),
         otherCallback, Looper.myLooper());
-    api.removeLocationUpdates(otherClient, otherCallback);
+    api.removeLocationUpdates();
+    LostClientManager.shared().removeLocationCallback(otherClient, otherCallback);
 
     api.reportProviderEnabled(GPS_PROVIDER);
 
@@ -1118,71 +1114,6 @@ public class FusedLocationProviderServiceImplTest extends BaseRobolectricTest {
     TestResultCallback otherCallback = new TestResultCallback();
     result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
     assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-  }
-
-  @Test public void removeLocationUpdates_pendingIntent_shouldReturnFusedLocationPendingResult() {
-    PendingIntent pendingIntent = mock(PendingIntent.class);
-    api.requestLocationUpdates(LocationRequest.create());
-    LostClientManager.shared().addPendingIntent(client, LocationRequest.create(), pendingIntent);
-    PendingResult<Status> result = api.removeLocationUpdates(client, pendingIntent);
-    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
-        Status.SUCCESS);
-    assertThat(result.isCanceled()).isFalse();
-    TestResultCallback callback = new TestResultCallback();
-    result.setResultCallback(callback);
-    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    TestResultCallback otherCallback = new TestResultCallback();
-    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
-    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-  }
-
-  @Test public void removeLocationUpdates_callback_shouldReturnFusedLocationPendingResult() {
-    LocationCallback locationCallback = new TestLocationCallback();
-    api.requestLocationUpdates(LocationRequest.create());
-    LostClientManager.shared().addLocationCallback(client, LocationRequest.create(),
-        locationCallback, Looper.myLooper());
-    PendingResult<Status> result = api.removeLocationUpdates(client, locationCallback);
-    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
-        Status.SUCCESS);
-    assertThat(result.isCanceled()).isFalse();
-    TestResultCallback callback = new TestResultCallback();
-    result.setResultCallback(callback);
-    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    TestResultCallback otherCallback = new TestResultCallback();
-    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
-    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-  }
-
-  @Test public void removeNoLocationUpdates_pendingIntent_shouldReturnFusedLocationPendingResult() {
-    PendingIntent pendingIntent = mock(PendingIntent.class);
-    PendingResult<Status> result = api.removeLocationUpdates(client, pendingIntent);
-    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
-        Status.SUCCESS);
-    assertThat(result.isCanceled()).isFalse();
-    TestResultCallback callback = new TestResultCallback();
-    result.setResultCallback(callback);
-    assertThat(callback.getStatus()).isNull();
-    TestResultCallback otherCallback = new TestResultCallback();
-    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
-    assertThat(otherCallback.getStatus()).isNull();
-  }
-
-  @Test public void removeNoLocationUpdates_callback_shouldReturnFusedLocationPendingResult() {
-    LocationCallback locationCallback = new TestLocationCallback();
-    PendingResult<Status> result = api.removeLocationUpdates(client, locationCallback);
-    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
-        Status.SUCCESS);
-    assertThat(result.isCanceled()).isFalse();
-    TestResultCallback callback = new TestResultCallback();
-    result.setResultCallback(callback);
-    assertThat(callback.getStatus()).isNull();
-    TestResultCallback otherCallback = new TestResultCallback();
-    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
-    assertThat(otherCallback.getStatus()).isNull();
   }
 
   @Test public void setMockMode_shouldReturnFusedLocationPendingResult() {

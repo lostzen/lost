@@ -143,13 +143,17 @@ public class FusedLocationProviderApiImpl
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       PendingIntent callbackIntent) {
     throwIfNotConnected(client);
-    return service.removeLocationUpdates(client, callbackIntent);
+    boolean hasResult = LostClientManager.shared().removePendingIntent(client, callbackIntent);
+    service.removeLocationUpdates();
+    return new SimplePendingResult(hasResult);
   }
 
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       LocationCallback callback) {
     throwIfNotConnected(client);
-    return service.removeLocationUpdates(client, callback);
+    boolean hasResult = LostClientManager.shared().removeLocationCallback(client, callback);
+    service.removeLocationUpdates();
+    return new SimplePendingResult(hasResult);
   }
 
   @Override public PendingResult<Status> setMockMode(LostApiClient client, boolean isMockMode) {
