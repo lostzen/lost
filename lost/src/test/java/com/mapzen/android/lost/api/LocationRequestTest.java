@@ -9,6 +9,8 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import android.os.Parcel;
+
 import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
 import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_HIGH_ACCURACY;
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -73,5 +75,24 @@ public class LocationRequestTest extends BaseRobolectricTest {
   @Test(expected = IllegalArgumentException.class)
   public void setPriority_shouldRejectInvalidValues() throws Exception {
     locationRequest.setPriority(-1);
+  }
+
+  @Test public void shouldBeParcelable() throws Exception {
+    LocationRequest dehydrated = LocationRequest.create()
+        .setPriority(PRIORITY_HIGH_ACCURACY)
+        .setInterval(1000)
+        .setFastestInterval(500)
+        .setSmallestDisplacement(10);
+
+    Parcel parcel = Parcel.obtain();
+    dehydrated.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+
+    LocationRequest rehydrated = new LocationRequest(parcel);
+    assertThat(rehydrated.getPriority()).isEqualTo(dehydrated.getPriority());
+    assertThat(rehydrated.getInterval()).isEqualTo(dehydrated.getInterval());
+    assertThat(rehydrated.getFastestInterval()).isEqualTo(dehydrated.getFastestInterval());
+    assertThat(rehydrated.getSmallestDisplacement())
+        .isEqualTo(dehydrated.getSmallestDisplacement());
   }
 }
