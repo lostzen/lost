@@ -1,6 +1,9 @@
 package com.mapzen.android.lost.api;
 
-public final class LocationRequest {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public final class LocationRequest implements Parcelable {
   public static final int PRIORITY_HIGH_ACCURACY = 0x00000064;
   public static final int PRIORITY_BALANCED_POWER_ACCURACY = 0x00000066;
   public static final int PRIORITY_LOW_POWER = 0x00000068;
@@ -69,4 +72,33 @@ public final class LocationRequest {
     this.priority = priority;
     return this;
   }
+
+  @Override public int describeContents() {
+    return 0;
+  }
+
+  @Override public void writeToParcel(Parcel dest, int flags) {
+    dest.writeLong(this.interval);
+    dest.writeLong(this.fastestInterval);
+    dest.writeFloat(this.smallestDisplacement);
+    dest.writeInt(this.priority);
+  }
+
+  protected LocationRequest(Parcel in) {
+    this.interval = in.readLong();
+    this.fastestInterval = in.readLong();
+    this.smallestDisplacement = in.readFloat();
+    this.priority = in.readInt();
+  }
+
+  public static final Parcelable.Creator<LocationRequest> CREATOR =
+      new Parcelable.Creator<LocationRequest>() {
+        @Override public LocationRequest createFromParcel(Parcel source) {
+          return new LocationRequest(source);
+        }
+
+        @Override public LocationRequest[] newArray(int size) {
+          return new LocationRequest[size];
+        }
+      };
 }
