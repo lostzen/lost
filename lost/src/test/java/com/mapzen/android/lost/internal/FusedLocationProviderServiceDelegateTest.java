@@ -2,12 +2,9 @@ package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.BaseRobolectricTest;
 import com.mapzen.android.lost.api.LocationAvailability;
-import com.mapzen.android.lost.api.LocationCallback;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationResult;
 import com.mapzen.android.lost.api.LostApiClient;
-import com.mapzen.android.lost.api.PendingResult;
-import com.mapzen.android.lost.api.Status;
 import com.mapzen.android.lost.shadows.LostShadowLocationManager;
 import com.mapzen.lost.BuildConfig;
 
@@ -38,7 +35,6 @@ import android.os.Looper;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.LOCATION_SERVICE;
 import static android.location.LocationManager.GPS_PROVIDER;
@@ -1071,91 +1067,6 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
     api.reportLocation(location);
     assertThat(callback.getResult()).isNotNull();
     assertThat(otherCallback.getResult()).isNotNull();
-  }
-
-  @Test public void requestLocationUpdates_listener_shouldReturnFusedLocationPendingResult() {
-    PendingResult<Status> result = api.requestLocationUpdates(LocationRequest.create());
-    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
-        Status.SUCCESS);
-    assertThat(result.isCanceled()).isFalse();
-    TestResultCallback callback = new TestResultCallback();
-    result.setResultCallback(callback);
-    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    TestResultCallback otherCallback = new TestResultCallback();
-    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
-    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-  }
-
-  @Test public void requestLocationUpdates_pendingIntent_shouldReturnFusedLocationPendingResult() {
-    PendingResult<Status> result = api.requestLocationUpdates(LocationRequest.create());
-    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
-        Status.SUCCESS);
-    assertThat(result.isCanceled()).isFalse();
-    TestResultCallback callback = new TestResultCallback();
-    result.setResultCallback(callback);
-    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    TestResultCallback otherCallback = new TestResultCallback();
-    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
-    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-  }
-
-  @Test public void requestLocationUpdates_callback_shouldReturnFusedLocationPendingResult() {
-    LocationCallback locationCallback = new TestLocationCallback();
-    PendingResult<Status> result = api.requestLocationUpdates(LocationRequest.create());
-    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
-        Status.SUCCESS);
-    assertThat(result.isCanceled()).isFalse();
-    TestResultCallback callback = new TestResultCallback();
-    result.setResultCallback(callback);
-    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    TestResultCallback otherCallback = new TestResultCallback();
-    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
-    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-  }
-
-  @Test public void setMockMode_shouldReturnFusedLocationPendingResult() {
-    PendingResult<Status> result = api.setMockMode(true);
-    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
-        Status.SUCCESS);
-    assertThat(result.isCanceled()).isFalse();
-    TestResultCallback callback = new TestResultCallback();
-    result.setResultCallback(callback);
-    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    TestResultCallback otherCallback = new TestResultCallback();
-    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
-    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-  }
-
-  @Test public void setMockLocation_shouldReturnFusedLocationPendingResult() {
-    PendingResult<Status> result = api.setMockLocation(new Location("test"));
-    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
-        Status.SUCCESS);
-    assertThat(result.isCanceled()).isFalse();
-    TestResultCallback callback = new TestResultCallback();
-    result.setResultCallback(callback);
-    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    TestResultCallback otherCallback = new TestResultCallback();
-    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
-    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-  }
-
-  @Test public void setMockTrace_shouldReturnFusedLocationPendingResult() {
-    PendingResult<Status> result = api.setMockTrace(new File("test"));
-    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
-        Status.SUCCESS);
-    assertThat(result.isCanceled()).isFalse();
-    TestResultCallback callback = new TestResultCallback();
-    result.setResultCallback(callback);
-    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
-    TestResultCallback otherCallback = new TestResultCallback();
-    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
-    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
   }
 
   public class TestService extends IntentService {

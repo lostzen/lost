@@ -107,7 +107,8 @@ public class FusedLocationProviderApiImpl
       LocationRequest request, LocationListener listener) {
     throwIfNotConnected(client);
     LostClientManager.shared().addListener(client, request, listener);
-    return service.requestLocationUpdates(request);
+    service.requestLocationUpdates(request);
+    return new SimplePendingResult(true);
   }
 
   @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
@@ -119,14 +120,16 @@ public class FusedLocationProviderApiImpl
       LocationRequest request, LocationCallback callback, Looper looper) {
     throwIfNotConnected(client);
     LostClientManager.shared().addLocationCallback(client, request, callback, looper);
-    return service.requestLocationUpdates(request);
+    service.requestLocationUpdates(request);
+    return new SimplePendingResult(true);
   }
 
   @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
       LocationRequest request, PendingIntent callbackIntent) {
     throwIfNotConnected(client);
     LostClientManager.shared().addPendingIntent(client, request, callbackIntent);
-    return service.requestLocationUpdates(request);
+    service.requestLocationUpdates(request);
+    return new SimplePendingResult(true);
   }
 
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
@@ -155,18 +158,21 @@ public class FusedLocationProviderApiImpl
 
   @Override public PendingResult<Status> setMockMode(LostApiClient client, boolean isMockMode) {
     throwIfNotConnected(client);
-    return service.setMockMode(isMockMode);
+    service.setMockMode(isMockMode);
+    return new SimplePendingResult(true);
   }
 
   @Override public PendingResult<Status> setMockLocation(LostApiClient client,
       Location mockLocation) {
     throwIfNotConnected(client);
-    return service.setMockLocation(mockLocation);
+    service.setMockLocation(mockLocation);
+    return new SimplePendingResult(true);
   }
 
   @Override public PendingResult<Status> setMockTrace(LostApiClient client, File file) {
     throwIfNotConnected(client);
-    return service.setMockTrace(file);
+    service.setMockTrace(file);
+    return new SimplePendingResult(true);
   }
 
   public Map<LostApiClient, Set<LocationListener>> getLocationListeners() {

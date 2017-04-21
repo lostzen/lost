@@ -3,8 +3,6 @@ package com.mapzen.android.lost.internal;
 import com.mapzen.android.lost.api.LocationAvailability;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationResult;
-import com.mapzen.android.lost.api.PendingResult;
-import com.mapzen.android.lost.api.Status;
 
 import android.content.Context;
 import android.location.Location;
@@ -43,34 +41,30 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
     return locationEngine.createLocationAvailability();
   }
 
-  public PendingResult<Status> requestLocationUpdates(LocationRequest request) {
+  public void requestLocationUpdates(LocationRequest request) {
     locationEngine.setRequest(request);
-    return new SimplePendingResult(true);
   }
 
   public void removeLocationUpdates() {
     checkAllListenersPendingIntentsAndCallbacks();
   }
 
-  public PendingResult<Status> setMockMode(boolean isMockMode) {
+  public void setMockMode(boolean isMockMode) {
     if (mockMode != isMockMode) {
       toggleMockMode();
     }
-    return new SimplePendingResult(true);
   }
 
-  public PendingResult<Status> setMockLocation(Location mockLocation) {
+  public void setMockLocation(Location mockLocation) {
     if (mockMode) {
       ((MockEngine) locationEngine).setLocation(mockLocation);
     }
-    return new SimplePendingResult(true);
   }
 
-  public PendingResult<Status> setMockTrace(File file) {
+  public void setMockTrace(File file) {
     if (mockMode) {
       ((MockEngine) locationEngine).setTrace(file);
     }
-    return new SimplePendingResult(true);
   }
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
