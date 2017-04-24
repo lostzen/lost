@@ -27,6 +27,7 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
@@ -446,6 +447,105 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
 
     assertThat(api.getLocationListeners().get(connectedClient)).isEmpty();
     assertThat(api.getLocationListeners().get(otherClient).size()).isEqualTo(1);
+  }
+
+  @Test public void requestLocationUpdates_listener_shouldReturnFusedLocationPendingResult() {
+    PendingResult<Status> result = api.requestLocationUpdates(connectedClient,
+        LocationRequest.create(), new TestLocationListener());
+    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
+        Status.SUCCESS);
+    assertThat(result.isCanceled()).isFalse();
+    com.mapzen.android.lost.internal.TestResultCallback
+        callback = new com.mapzen.android.lost.internal.TestResultCallback();
+    result.setResultCallback(callback);
+    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    com.mapzen.android.lost.internal.TestResultCallback
+        otherCallback = new com.mapzen.android.lost.internal.TestResultCallback();
+    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
+    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+  }
+
+  @Test public void requestLocationUpdates_pendingIntent_shouldReturnFusedLocationPendingResult() {
+    PendingResult<Status> result = api.requestLocationUpdates(connectedClient,
+        LocationRequest.create(), mock(PendingIntent.class));
+    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
+        Status.SUCCESS);
+    assertThat(result.isCanceled()).isFalse();
+    com.mapzen.android.lost.internal.TestResultCallback
+        callback = new com.mapzen.android.lost.internal.TestResultCallback();
+    result.setResultCallback(callback);
+    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    com.mapzen.android.lost.internal.TestResultCallback
+        otherCallback = new com.mapzen.android.lost.internal.TestResultCallback();
+    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
+    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+  }
+
+  @Test public void requestLocationUpdates_callback_shouldReturnFusedLocationPendingResult() {
+    PendingResult<Status> result = api.requestLocationUpdates(connectedClient,
+        LocationRequest.create(), new TestLocationCallback(), Looper.myLooper());
+    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
+        Status.SUCCESS);
+    assertThat(result.isCanceled()).isFalse();
+    com.mapzen.android.lost.internal.TestResultCallback
+        callback = new com.mapzen.android.lost.internal.TestResultCallback();
+    result.setResultCallback(callback);
+    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    com.mapzen.android.lost.internal.TestResultCallback
+        otherCallback = new com.mapzen.android.lost.internal.TestResultCallback();
+    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
+    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+  }
+
+  @Test public void setMockMode_shouldReturnFusedLocationPendingResult() {
+    PendingResult<Status> result = api.setMockMode(connectedClient, true);
+    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
+        Status.SUCCESS);
+    assertThat(result.isCanceled()).isFalse();
+    com.mapzen.android.lost.internal.TestResultCallback
+        callback = new com.mapzen.android.lost.internal.TestResultCallback();
+    result.setResultCallback(callback);
+    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    com.mapzen.android.lost.internal.TestResultCallback
+        otherCallback = new com.mapzen.android.lost.internal.TestResultCallback();
+    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
+    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+  }
+
+  @Test public void setMockLocation_shouldReturnFusedLocationPendingResult() {
+    PendingResult<Status> result = api.setMockLocation(connectedClient, new Location("test"));
+    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
+        Status.SUCCESS);
+    assertThat(result.isCanceled()).isFalse();
+    com.mapzen.android.lost.internal.TestResultCallback
+        callback = new com.mapzen.android.lost.internal.TestResultCallback();
+    result.setResultCallback(callback);
+    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    com.mapzen.android.lost.internal.TestResultCallback
+        otherCallback = new com.mapzen.android.lost.internal.TestResultCallback();
+    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
+    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+  }
+
+  @Test public void setMockTrace_shouldReturnFusedLocationPendingResult() {
+    PendingResult<Status> result = api.setMockTrace(connectedClient, new File("test"));
+    assertThat(result.await().getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    assertThat(result.await(1000, TimeUnit.MILLISECONDS).getStatus().getStatusCode()).isEqualTo(
+        Status.SUCCESS);
+    assertThat(result.isCanceled()).isFalse();
+    com.mapzen.android.lost.internal.TestResultCallback
+        callback = new com.mapzen.android.lost.internal.TestResultCallback();
+    result.setResultCallback(callback);
+    assertThat(callback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
+    com.mapzen.android.lost.internal.TestResultCallback
+        otherCallback = new com.mapzen.android.lost.internal.TestResultCallback();
+    result.setResultCallback(otherCallback, 1000, TimeUnit.MILLISECONDS);
+    assertThat(otherCallback.getStatus().getStatusCode()).isEqualTo(Status.SUCCESS);
   }
 
   private class TestResultCallback implements ResultCallback<Status> {
