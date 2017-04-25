@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.location.Location;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -35,6 +36,17 @@ public class FusedLocationProviderApiImpl
 
   IFusedLocationProviderService service;
 
+  private IFusedLocationProviderCallback.Stub remoteCallback
+      = new IFusedLocationProviderCallback.Stub() {
+    public void onLocationChanged(final Location location) throws RemoteException {
+      new Handler(Looper.getMainLooper()).post(new Runnable() {
+        @Override public void run() {
+          LostClientManager.shared().reportLocationChanged(location);
+        }
+      });
+    }
+  };
+
   @Override public void onConnect(Context context) {
     this.context = context;
     final Intent intent = new Intent(context, FusedLocationProviderService.class);
@@ -42,8 +54,17 @@ public class FusedLocationProviderApiImpl
   }
 
   @Override public void onServiceConnected(IBinder binder) {
-      service = IFusedLocationProviderService.Stub.asInterface(binder);
-      isBound = true;
+    service = IFusedLocationProviderService.Stub.asInterface(binder);
+    isBound = true;
+
+    // Register remote callback
+    if (service != null) {
+      try {
+        service.init(remoteCallback);
+      } catch (RemoteException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 
   @Override public void onDisconnect() {

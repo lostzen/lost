@@ -9,6 +9,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.support.annotation.RequiresPermission;
 
 import java.io.File;
@@ -25,11 +26,16 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
   private LocationEngine locationEngine;
 
   private ClientManager clientManager;
+  private IFusedLocationProviderCallback callback;
 
   public FusedLocationProviderServiceDelegate(Context context, ClientManager manager) {
     this.context = context;
     this.clientManager = manager;
     locationEngine = new FusionEngine(context, this);
+  }
+
+  public void init(IFusedLocationProviderCallback callback) {
+    this.callback = callback;
   }
 
   public Location getLastLocation() {
@@ -69,6 +75,15 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   public void reportLocation(Location location) {
+    // Notify remote AIDL callback
+    if (callback != null) {
+      try {
+        callback.onLocationChanged(location);
+      } catch (RemoteException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
     ReportedChanges changes = clientManager.reportLocationChanged(location);
 
     LocationAvailability availability = locationEngine.createLocationAvailability();
