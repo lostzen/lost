@@ -32,7 +32,8 @@
 
     <activity android:name=".GeofencingApiActivity"/>
     <activity android:name=".SettingsApiActivity"/>
-    <activity android:name=".LocationListenerActivity"/>
+    <activity android:name=".LocationListenerActivity"
+        android:process=":foo"/>
     <activity android:name=".PendingIntentActivity"/>
     <activity android:name=".LocationAvailabilityActivity"/>
     <activity android:name=".MultipleLocationListenerMultipleClientsActivity"/>
@@ -47,6 +48,7 @@
         <action android:name="com.mapzen.lost.intent.action.PENDING_INTENT_SERVICE"/>
       </intent-filter>
     </service>
+
 
   </application>
 </manifest>

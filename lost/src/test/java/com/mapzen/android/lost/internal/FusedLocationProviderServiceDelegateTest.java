@@ -24,7 +24,6 @@ import org.robolectric.shadows.ShadowLooper;
 
 import android.app.IntentService;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -44,9 +43,7 @@ import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_BALANCED_POWE
 import static com.mapzen.android.lost.api.LocationRequest.PRIORITY_HIGH_ACCURACY;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
-import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricTestRunner.class)
 @SuppressWarnings("MissingPermission")
@@ -61,8 +58,6 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
   private ClientManager clientManager;
 
   @Before public void setUp() throws Exception {
-
-    mockService();
     client = new LostApiClient.Builder(mock(Context.class)).build();
     otherClient = new LostApiClient.Builder(mock(Context.class)).build();
     clientManager = LostClientManager.shared();
@@ -75,14 +70,6 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
   @After public void tearDown() {
     client.disconnect();
     otherClient.disconnect();
-  }
-
-  private void mockService() {
-    FusedLocationProviderService.FusedLocationProviderBinder stubBinder =
-        mock(FusedLocationProviderService.FusedLocationProviderBinder.class);
-    when(stubBinder.getService()).thenReturn(mock(FusedLocationProviderService.class));
-    shadowOf(application).setComponentNameAndServiceForBindService(
-        new ComponentName("com.mapzen.lost", "FusedLocationProviderService"), stubBinder);
   }
 
   @Test public void shouldNotBeNull() throws Exception {
@@ -326,8 +313,9 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
   }
 
   public void setMockTrace_shouldInvokeListenerForEachLocation() throws Exception {
+    initTestGpxTrace();
     api.setMockMode(true);
-    api.setMockTrace(getTestGpxTrace());
+    api.setMockTrace(Environment.getExternalStorageDirectory().getPath(), "lost.gpx");
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     request.setFastestInterval(0);
@@ -344,8 +332,9 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
   }
 
   public void setMockTrace_shouldBroadcastSpeedWithLocation() throws Exception {
+    initTestGpxTrace();
     api.setMockMode(true);
-    api.setMockTrace(getTestGpxTrace());
+    api.setMockTrace(Environment.getExternalStorageDirectory().getPath(), "lost.gpx");
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     request.setFastestInterval(0);
@@ -358,8 +347,9 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
   }
 
   public void setMockTrace_shouldRespectFastestInterval() throws Exception {
+    initTestGpxTrace();
     api.setMockMode(true);
-    api.setMockTrace(getTestGpxTrace());
+    api.setMockTrace(Environment.getExternalStorageDirectory().getPath(), "lost.gpx");
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
     request.setInterval(100);
@@ -383,7 +373,7 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
     return location;
   }
 
-  private File getTestGpxTrace() throws IOException {
+  private void initTestGpxTrace() throws IOException {
     String contents = Files.toString(new File("src/test/resources/lost.gpx"), Charsets.UTF_8);
     ShadowEnvironment.setExternalStorageState(Environment.MEDIA_MOUNTED);
     File directory = Environment.getExternalStorageDirectory();
@@ -391,7 +381,6 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
     FileWriter fileWriter = new FileWriter(file, false);
     fileWriter.write(contents);
     fileWriter.close();
-    return file;
   }
 
   @Test public void requestLocationUpdates_shouldNotifyBothListeners() {

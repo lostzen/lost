@@ -5,8 +5,6 @@ import android.location.Location;
 import android.os.Looper;
 import android.support.annotation.RequiresPermission;
 
-import java.io.File;
-
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
@@ -169,7 +167,7 @@ public interface FusedLocationProviderApi {
    * This effects all {@link LostApiClient}s connected to the {@link FusedLocationProviderApi}.
    * Mock mode must be enabled before clients are able to call
    * {@link FusedLocationProviderApi#setMockLocation(LostApiClient, Location)} and
-   * {@link FusedLocationProviderApi#setMockTrace(LostApiClient, File)}
+   * {@link FusedLocationProviderApi#setMockTrace(LostApiClient, String, String)}
    *
    * @param client Connected client.
    * @param isMockMode Whether mock mode should be enabled or not.
@@ -196,9 +194,11 @@ public interface FusedLocationProviderApi {
    * Mock mode must be enabled before calling this method.
    *
    * @param client Connected client.
-   * @param file GPX file to be used to report location.
+   * @param path storage directory containing GPX trace to be used to report location.
+   * @param filename filename of GPX trace to be used to report location.
    * @return a {@link PendingResult} for the call to check whether call was successful.
    * @throws IllegalStateException if the client is not connected at the time of this call.
    */
-  PendingResult<Status> setMockTrace(LostApiClient client, final File file);
+  PendingResult<Status> setMockTrace(LostApiClient client, final String path,
+      final String filename);
 }

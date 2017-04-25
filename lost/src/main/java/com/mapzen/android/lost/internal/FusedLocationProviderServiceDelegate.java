@@ -61,9 +61,9 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
     }
   }
 
-  public void setMockTrace(File file) {
+  public void setMockTrace(String path, String filename) {
     if (mockMode) {
-      ((MockEngine) locationEngine).setTrace(file);
+      ((MockEngine) locationEngine).setTrace(new File(path, filename));
     }
   }
 

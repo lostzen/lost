@@ -142,8 +142,7 @@ public class LocationListenerActivity extends AppCompatActivity  implements
 
     if (prefs.getBoolean(getString(R.string.mock_mode_gpx_key), false)) {
       String filename = prefs.getString(getString(R.string.mock_gpx_file_key), null);
-      File file = new File(getExternalFilesDir(null), filename);
-      FusedLocationApi.setMockTrace(client, file);
+      FusedLocationApi.setMockTrace(client, getExternalFilesDir(null).getPath(), filename);
     }
 
     final Resources res = getResources();
@@ -357,4 +356,3 @@ public class LocationListenerActivity extends AppCompatActivity  implements
     }
   }
 }
-

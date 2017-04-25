@@ -18,8 +18,8 @@ import android.content.ServiceConnection;
 import android.location.Location;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 
-import java.io.File;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,9 +30,10 @@ public class FusedLocationProviderApiImpl
     implements FusedLocationProviderApi, EventCallbacks, ServiceConnection {
 
   private Context context;
-  private FusedLocationProviderService service;
   private FusedLocationServiceConnectionManager serviceConnectionManager;
   private boolean isBound;
+
+  IFusedLocationProviderService service;
 
   @Override public void onConnect(Context context) {
     this.context = context;
@@ -41,12 +42,8 @@ public class FusedLocationProviderApiImpl
   }
 
   @Override public void onServiceConnected(IBinder binder) {
-    FusedLocationProviderService.FusedLocationProviderBinder fusedBinder =
-        (FusedLocationProviderService.FusedLocationProviderBinder) binder;
-    if (fusedBinder != null) {
-      service = fusedBinder.getService();
+      service = IFusedLocationProviderService.Stub.asInterface(binder);
       isBound = true;
-    }
   }
 
   @Override public void onDisconnect() {
@@ -95,19 +92,31 @@ public class FusedLocationProviderApiImpl
 
   @Override public Location getLastLocation(LostApiClient client) {
     throwIfNotConnected(client);
-    return service.getLastLocation();
+    try {
+      return service.getLastLocation();
+    } catch (RemoteException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override public LocationAvailability getLocationAvailability(LostApiClient client) {
     throwIfNotConnected(client);
-    return service.getLocationAvailability();
+    try {
+      return service.getLocationAvailability();
+    } catch (RemoteException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
       LocationRequest request, LocationListener listener) {
     throwIfNotConnected(client);
     LostClientManager.shared().addListener(client, request, listener);
-    service.requestLocationUpdates(request);
+    try {
+      service.requestLocationUpdates(request);
+    } catch (RemoteException e) {
+      throw new RuntimeException(e);
+    }
     return new SimplePendingResult(true);
   }
 
@@ -120,7 +129,11 @@ public class FusedLocationProviderApiImpl
       LocationRequest request, LocationCallback callback, Looper looper) {
     throwIfNotConnected(client);
     LostClientManager.shared().addLocationCallback(client, request, callback, looper);
-    service.requestLocationUpdates(request);
+    try {
+      service.requestLocationUpdates(request);
+    } catch (RemoteException e) {
+      throw new RuntimeException(e);
+    }
     return new SimplePendingResult(true);
   }
 
@@ -128,7 +141,11 @@ public class FusedLocationProviderApiImpl
       LocationRequest request, PendingIntent callbackIntent) {
     throwIfNotConnected(client);
     LostClientManager.shared().addPendingIntent(client, request, callbackIntent);
-    service.requestLocationUpdates(request);
+    try {
+      service.requestLocationUpdates(request);
+    } catch (RemoteException e) {
+      throw new RuntimeException(e);
+    }
     return new SimplePendingResult(true);
   }
 
@@ -136,7 +153,11 @@ public class FusedLocationProviderApiImpl
       LocationListener listener) {
     throwIfNotConnected(client);
     boolean hasResult = LostClientManager.shared().removeListener(client, listener);
-    service.removeLocationUpdates();
+    try {
+      service.removeLocationUpdates();
+    } catch (RemoteException e) {
+      throw new RuntimeException(e);
+    }
     return new SimplePendingResult(hasResult);
   }
 
@@ -144,7 +165,11 @@ public class FusedLocationProviderApiImpl
       PendingIntent callbackIntent) {
     throwIfNotConnected(client);
     boolean hasResult = LostClientManager.shared().removePendingIntent(client, callbackIntent);
-    service.removeLocationUpdates();
+    try {
+      service.removeLocationUpdates();
+    } catch (RemoteException e) {
+      throw new RuntimeException(e);
+    }
     return new SimplePendingResult(hasResult);
   }
 
@@ -152,35 +177,48 @@ public class FusedLocationProviderApiImpl
       LocationCallback callback) {
     throwIfNotConnected(client);
     boolean hasResult = LostClientManager.shared().removeLocationCallback(client, callback);
-    service.removeLocationUpdates();
+    try {
+      service.removeLocationUpdates();
+    } catch (RemoteException e) {
+      throw new RuntimeException(e);
+    }
     return new SimplePendingResult(hasResult);
   }
 
   @Override public PendingResult<Status> setMockMode(LostApiClient client, boolean isMockMode) {
     throwIfNotConnected(client);
-    service.setMockMode(isMockMode);
+    try {
+      service.setMockMode(isMockMode);
+    } catch (RemoteException e) {
+      throw new RuntimeException(e);
+    }
     return new SimplePendingResult(true);
   }
 
   @Override public PendingResult<Status> setMockLocation(LostApiClient client,
       Location mockLocation) {
     throwIfNotConnected(client);
-    service.setMockLocation(mockLocation);
+    try {
+      service.setMockLocation(mockLocation);
+    } catch (RemoteException e) {
+      throw new RuntimeException(e);
+    }
     return new SimplePendingResult(true);
   }
 
-  @Override public PendingResult<Status> setMockTrace(LostApiClient client, File file) {
+  @Override public PendingResult<Status> setMockTrace(LostApiClient client, String path,
+      String filename) {
     throwIfNotConnected(client);
-    service.setMockTrace(file);
+    try {
+      service.setMockTrace(path, filename);
+    } catch (RemoteException e) {
+      throw new RuntimeException(e);
+    }
     return new SimplePendingResult(true);
   }
 
   public Map<LostApiClient, Set<LocationListener>> getLocationListeners() {
     return LostClientManager.shared().getLocationListeners();
-  }
-
-  public FusedLocationProviderService getService() {
-    return service;
   }
 
   void removeConnectionCallbacks(LostApiClient.ConnectionCallbacks callbacks) {

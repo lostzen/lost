@@ -14,14 +14,12 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import android.content.ComponentName;
 import android.location.Location;
 import android.location.LocationManager;
 
 import static android.content.Context.LOCATION_SERVICE;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 import static org.robolectric.Shadows.shadowOf;
 
@@ -35,12 +33,6 @@ public class LostApiClientImplTest extends BaseRobolectricTest {
     LostClientManager.shared().clearClients();
     callbacks = new TestConnectionCallbacks();
     client = new LostApiClientImpl(application, callbacks, LostClientManager.shared());
-
-    FusedLocationProviderService.FusedLocationProviderBinder stubBinder =
-        mock(FusedLocationProviderService.FusedLocationProviderBinder.class);
-    when(stubBinder.getService()).thenReturn(mock(FusedLocationProviderService.class));
-    shadowOf(application).setComponentNameAndServiceForBindService(
-        new ComponentName("com.mapzen.lost", "FusedLocationProviderService"), stubBinder);
   }
 
   @After public void tearDown() throws Exception {
@@ -149,6 +141,8 @@ public class LostApiClientImplTest extends BaseRobolectricTest {
 
   @Test public void disconnect_shouldUnregisterLocationUpdateListeners() throws Exception {
     client.connect();
+    ((FusedLocationProviderApiImpl) LocationServices.FusedLocationApi).service =
+        mock(IFusedLocationProviderService.class);
     LocationServices.FusedLocationApi.requestLocationUpdates(client, LocationRequest.create(),
         new LocationListener() {
           @Override public void onLocationChanged(Location location) {
