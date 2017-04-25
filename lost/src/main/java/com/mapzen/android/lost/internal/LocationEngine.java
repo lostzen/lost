@@ -6,6 +6,7 @@ import com.mapzen.android.lost.api.LocationRequest;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Looper;
 import android.support.annotation.RequiresPermission;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
@@ -63,6 +64,10 @@ public abstract class LocationEngine {
 
   protected Context getContext() {
     return context;
+  }
+
+  protected Looper getLooper() {
+    return context.getMainLooper();
   }
 
   protected Callback getCallback() {
