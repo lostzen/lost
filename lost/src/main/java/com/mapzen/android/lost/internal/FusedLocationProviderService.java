@@ -59,6 +59,6 @@ public class FusedLocationProviderService extends Service {
 
   @Override public void onCreate() {
     super.onCreate();
-    delegate = new FusedLocationProviderServiceDelegate(this, LostClientManager.shared());
+    delegate = new FusedLocationProviderServiceDelegate(this);
   }
 }

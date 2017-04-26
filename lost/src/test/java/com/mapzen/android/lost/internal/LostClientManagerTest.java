@@ -7,7 +7,6 @@ import com.mapzen.android.lost.api.LocationResult;
 import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.lost.BuildConfig;
 
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -15,13 +14,15 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowApplication;
 
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Looper;
 
 import java.util.ArrayList;
 
+import static android.location.LocationManager.GPS_PROVIDER;
+import static com.mapzen.android.lost.api.LocationAvailability.EXTRA_LOCATION_AVAILABILITY;
+import static com.mapzen.android.lost.api.LocationResult.EXTRA_LOCATION_RESULT;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.robolectric.RuntimeEnvironment.application;
@@ -30,13 +31,8 @@ import static org.robolectric.RuntimeEnvironment.application;
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
 public class LostClientManagerTest extends BaseRobolectricTest {
 
-  LostClientManager manager = LostClientManager.shared();
-  Context context = mock(Context.class);
-  LostApiClient client = new LostApiClient.Builder(context).build();
-
-  @After public void tearDown() {
-    manager.clearClients();
-  }
+  LostClientManager manager = new LostClientManager();
+  LostApiClient client = new LostApiClient.Builder(application).build();
 
   @Test public void shouldHaveZeroClientCount() {
     assertThat(manager.numberOfClients()).isEqualTo(0);
@@ -50,7 +46,7 @@ public class LostClientManagerTest extends BaseRobolectricTest {
 
   @Test public void removeClient_shouldDecreaseClientCount() {
     manager.addClient(client);
-    LostApiClient anotherClient = new LostApiClient.Builder(context).build();
+    LostApiClient anotherClient = new LostApiClient.Builder(application).build();
     manager.addClient(anotherClient);
     assertThat(manager.numberOfClients()).isEqualTo(2);
     manager.removeClient(client);
@@ -153,9 +149,9 @@ public class LostClientManagerTest extends BaseRobolectricTest {
     Intent nextStartedService = ShadowApplication.getInstance().getNextStartedService();
     assertThat(nextStartedService).isNotNull();
     assertThat(nextStartedService.getParcelableExtra(
-        LocationAvailability.EXTRA_LOCATION_AVAILABILITY)).isNotNull();
+        EXTRA_LOCATION_AVAILABILITY)).isNotNull();
     assertThat(nextStartedService.getParcelableExtra(
-        LocationResult.EXTRA_LOCATION_RESULT)).isNotNull();
+        EXTRA_LOCATION_RESULT)).isNotNull();
   }
 
   @Test public void reportLocationResult_shouldNotifyCallback() {
@@ -239,5 +235,165 @@ public class LostClientManagerTest extends BaseRobolectricTest {
     manager.addLocationCallback(client, request, callback, looper);
     manager.removeClient(client);
     assertThat(manager.getLocationCallbacks().get(client)).isNull();
+  }
+
+  @Test public void reportLocationChanged_shouldNotNotifyIfLessThanFastestInterval()
+      throws Exception {
+    final TestLocationListener listener = new TestLocationListener();
+    final LocationRequest request = LocationRequest.create()
+        .setFastestInterval(2000)
+        .setSmallestDisplacement(0);
+    manager.addClient(client);
+    manager.addListener(client, request, listener);
+
+    Location location1 = getTestLocation("test_provider", 0, 0, 0);
+    Location location2 = getTestLocation("test_provider", 1, 1, 1000);
+
+    ReportedChanges reportedChanges = manager.reportLocationChanged(location1);
+    manager.updateReportedValues(reportedChanges);
+    manager.reportLocationChanged(location2);
+    assertThat(listener.getMostRecentLocation()).isEqualTo(location1);
+  }
+
+  @Test public void reportLocationChanged_shouldNotNotifyIfLessThanSmallestDisplacement()
+      throws Exception {
+    final TestLocationListener listener = new TestLocationListener();
+    final LocationRequest locationRequest = LocationRequest.create()
+        .setFastestInterval(0)
+        .setSmallestDisplacement(1000000);
+    manager.addClient(client);
+    manager.addListener(client, locationRequest, listener);
+
+    Location location1 = getTestLocation("test_provider", 0, 0, 0);
+    Location location2 = getTestLocation("test_provider", 1, 1, 1);
+
+    ReportedChanges reportedChanges = manager.reportLocationChanged(location1);
+    manager.updateReportedValues(reportedChanges);
+    manager.reportLocationChanged(location2);
+    assertThat(listener.getMostRecentLocation()).isEqualTo(location1);
+  }
+
+  @Test public void sendPendingIntent_shouldNotifyPendingIntentWithLocationAvailability() {
+    Intent i = new Intent(application, FusedLocationProviderServiceDelegateTest.TestService.class);
+    PendingIntent pendingIntent = PendingIntent.getService(application, 0, i, 0);
+    Location location = new Location("test");
+    ArrayList<Location> locations = new ArrayList<>();
+    locations.add(location);
+    LocationResult result = LocationResult.create(locations);
+
+    manager.addClient(client);
+    manager.addPendingIntent(client, LocationRequest.create(), pendingIntent);
+    manager.sendPendingIntent(application, location, new LocationAvailability(true), result);
+
+    Intent next = ShadowApplication.getInstance().getNextStartedService();
+    assertThat(next).isNotNull();
+    assertThat(next.getParcelableExtra(EXTRA_LOCATION_AVAILABILITY)).isNotNull();
+    assertThat(next.getParcelableExtra(EXTRA_LOCATION_RESULT)).isNotNull();
+  }
+
+  @Test public void reportLocationResult_shouldNotifyLocationCallback() {
+    TestLocationCallback callback = new TestLocationCallback();
+    Location location = new Location("test");
+    ArrayList<Location> locations = new ArrayList<>();
+    locations.add(location);
+    LocationResult result = LocationResult.create(locations);
+
+    manager.addClient(client);
+    manager.addLocationCallback(client, LocationRequest.create(), callback, Looper.myLooper());
+    manager.reportLocationResult(location, result);
+
+    assertThat(callback.getResult().getLastLocation()).isEqualTo(location);
+  }
+
+  @Test public void sendPendingIntent_shouldNotNotifyRemovedPendingIntent() throws Exception {
+    Intent i1 = new Intent(application, FusedLocationProviderServiceDelegateTest.TestService.class);
+    Intent i2 = new Intent(application, FusedLocationProviderServiceDelegateTest.TestService.class);
+    PendingIntent pendingIntent = PendingIntent.getService(application, 0, i1, 0);
+    PendingIntent otherPendingIntent = PendingIntent.getService(application, 0, i2, 0);
+    Location location = new Location("test");
+    ArrayList<Location> locations = new ArrayList<>();
+    locations.add(location);
+    LocationResult result = LocationResult.create(locations);
+
+    manager.addClient(client);
+    manager.addPendingIntent(client, LocationRequest.create(), pendingIntent);
+    manager.addPendingIntent(client, LocationRequest.create(), otherPendingIntent);
+    manager.removePendingIntent(client, otherPendingIntent);
+    manager.sendPendingIntent(application, location, new LocationAvailability(true), result);
+
+    // Only one service should be started since the second pending intent request was removed.
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNull();
+  }
+
+  @Test public void reportLocationChanged_shouldNotifyBothListeners() {
+    TestLocationListener listener1 = new TestLocationListener();
+    TestLocationListener listener2 = new TestLocationListener();
+    manager.addClient(client);
+    manager.addListener(client, LocationRequest.create(), listener1);
+    manager.addListener(client, LocationRequest.create(), listener2);
+
+    Location location = new Location("test");
+    manager.reportLocationChanged(location);
+    assertThat(listener1.getAllLocations()).contains(location);
+    assertThat(listener2.getAllLocations()).contains(location);
+  }
+
+  @Test public void sendPendingIntent_shouldNotifyBothPendingIntents() throws Exception {
+    Intent i1 = new Intent(application, FusedLocationProviderServiceDelegateTest.TestService.class);
+    Intent i2 = new Intent(application, FusedLocationProviderServiceDelegateTest.TestService.class);
+    PendingIntent pendingIntent = PendingIntent.getService(application, 0, i1, 0);
+    PendingIntent otherPendingIntent = PendingIntent.getService(application, 0, i2, 0);
+    Location location = new Location("test");
+    ArrayList<Location> locations = new ArrayList<>();
+    locations.add(location);
+    LocationResult result = LocationResult.create(locations);
+
+    manager.addClient(client);
+    manager.addPendingIntent(client, LocationRequest.create(), pendingIntent);
+    manager.addPendingIntent(client, LocationRequest.create(), otherPendingIntent);
+    manager.sendPendingIntent(application, location, new LocationAvailability(true), result);
+
+    // Two services should be started.
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+    assertThat(ShadowApplication.getInstance().getNextStartedService()).isNotNull();
+  }
+
+  @Test public void reportLocationChanged_shouldNotifyBothCallbacks() {
+    TestLocationCallback callback1 = new TestLocationCallback();
+    TestLocationCallback callback2 = new TestLocationCallback();
+    manager.addClient(client);
+    manager.addLocationCallback(client, LocationRequest.create(), callback1, Looper.myLooper());
+    manager.addLocationCallback(client, LocationRequest.create(), callback2, Looper.myLooper());
+
+    Location location = new Location("test");
+    ArrayList<Location> locations = new ArrayList<>();
+    locations.add(location);
+    LocationResult locationResult = LocationResult.create(locations);
+    manager.reportLocationResult(location, locationResult);
+    assertThat(callback1.getResult()).isEqualTo(locationResult);
+    assertThat(callback2.getResult()).isEqualTo(locationResult);
+  }
+
+  @Test public void reportLocationChanged_shouldNotNotifyRemovedListener() {
+    LocationRequest request = LocationRequest.create();
+    TestLocationListener listener1 = new TestLocationListener();
+    TestLocationListener listener2 = new TestLocationListener();
+    manager.addClient(client);
+    manager.addListener(client, request, listener1);
+    manager.addListener(client, request, listener2);
+    manager.removeListener(client, listener2);
+    Location location = new Location(GPS_PROVIDER);
+    manager.reportLocationChanged(location);
+    assertThat(listener1.getAllLocations()).contains(location);
+    assertThat(listener2.getAllLocations()).doesNotContain(location);
+  }
+
+  private static Location getTestLocation(String provider, float lat, float lng, long time) {
+    Location location = new Location(provider);
+    location.setLatitude(lat);
+    location.setLongitude(lng);
+    location.setTime(time);
+    return location;
   }
 }

@@ -2,7 +2,6 @@ package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.api.LocationAvailability;
 import com.mapzen.android.lost.api.LocationRequest;
-import com.mapzen.android.lost.api.LocationResult;
 
 import android.content.Context;
 import android.location.Location;
@@ -13,7 +12,6 @@ import android.os.RemoteException;
 import android.support.annotation.RequiresPermission;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -24,13 +22,10 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
 
   private boolean mockMode;
   private LocationEngine locationEngine;
-
-  private ClientManager clientManager;
   private IFusedLocationProviderCallback callback;
 
-  public FusedLocationProviderServiceDelegate(Context context, ClientManager manager) {
+  public FusedLocationProviderServiceDelegate(Context context) {
     this.context = context;
-    this.clientManager = manager;
     locationEngine = new FusionEngine(context, this);
   }
 
@@ -83,21 +78,6 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
         throw new RuntimeException(e);
       }
     }
-
-    ReportedChanges changes = clientManager.reportLocationChanged(location);
-
-    LocationAvailability availability = locationEngine.createLocationAvailability();
-    ArrayList<Location> locations = new ArrayList<>();
-    locations.add(location);
-    final LocationResult result = LocationResult.create(locations);
-    ReportedChanges pendingIntentChanges = clientManager.sendPendingIntent(
-        context, location, availability, result);
-
-    ReportedChanges callbackChanges = clientManager.reportLocationResult(location, result);
-
-    changes.putAll(pendingIntentChanges);
-    changes.putAll(callbackChanges);
-    clientManager.updateReportedValues(changes);
   }
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})

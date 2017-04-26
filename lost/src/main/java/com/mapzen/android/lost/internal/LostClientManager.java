@@ -288,17 +288,17 @@ public class LostClientManager implements ClientManager {
           Long lastReportedTime = reportedChanges.timeChanges().get(request);
           Location lastReportedLocation = reportedChanges.locationChanges().get(request);
           if (lastReportedTime == null && lastReportedLocation == null) {
-            updatedRequestToReportedTime.put(request, System.currentTimeMillis());
+            updatedRequestToReportedTime.put(request, location.getTime());
             updatedRequestToReportedLocation.put(request, location);
             notifier.notify(client, obj);
           } else {
-            long intervalSinceLastReport = System.currentTimeMillis() - lastReportedTime;
+            long intervalSinceLastReport = location.getTime() - lastReportedTime;
             long fastestInterval = request.getFastestInterval();
             float smallestDisplacement = request.getSmallestDisplacement();
             float displacementSinceLastReport = location.distanceTo(lastReportedLocation);
             if (intervalSinceLastReport >= fastestInterval &&
                 displacementSinceLastReport >= smallestDisplacement) {
-              updatedRequestToReportedTime.put(request, System.currentTimeMillis());
+              updatedRequestToReportedTime.put(request, location.getTime());
               updatedRequestToReportedLocation.put(request, location);
               notifier.notify(client, obj);
             }

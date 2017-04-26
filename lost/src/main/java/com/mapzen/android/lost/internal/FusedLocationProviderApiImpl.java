@@ -5,6 +5,7 @@ import com.mapzen.android.lost.api.LocationAvailability;
 import com.mapzen.android.lost.api.LocationCallback;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
+import com.mapzen.android.lost.api.LocationResult;
 import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.android.lost.api.PendingResult;
 import com.mapzen.android.lost.api.Status;
@@ -21,6 +22,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,7 +43,27 @@ public class FusedLocationProviderApiImpl
     public void onLocationChanged(final Location location) throws RemoteException {
       new Handler(Looper.getMainLooper()).post(new Runnable() {
         @Override public void run() {
-          LostClientManager.shared().reportLocationChanged(location);
+          final LostClientManager clientManager = LostClientManager.shared();
+          ReportedChanges changes = clientManager.reportLocationChanged(location);
+
+          LocationAvailability availability;
+          try {
+            availability = service.getLocationAvailability();
+          } catch (RemoteException e) {
+            throw new RuntimeException(e);
+          }
+
+          ArrayList<Location> locations = new ArrayList<>();
+          locations.add(location);
+          final LocationResult result = LocationResult.create(locations);
+          ReportedChanges pendingIntentChanges = clientManager.sendPendingIntent(
+              context, location, availability, result);
+
+          ReportedChanges callbackChanges = clientManager.reportLocationResult(location, result);
+
+          changes.putAll(pendingIntentChanges);
+          changes.putAll(callbackChanges);
+          clientManager.updateReportedValues(changes);
         }
       });
     }
