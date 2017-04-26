@@ -32,8 +32,7 @@
 
     <activity android:name=".GeofencingApiActivity"/>
     <activity android:name=".SettingsApiActivity"/>
-    <activity android:name=".LocationListenerActivity"
-        android:process=":foo"/>
+    <activity android:name=".LocationListenerActivity"/>
     <activity android:name=".PendingIntentActivity"/>
     <activity android:name=".LocationAvailabilityActivity"/>
     <activity android:name=".MultipleLocationListenerMultipleClientsActivity"/>
