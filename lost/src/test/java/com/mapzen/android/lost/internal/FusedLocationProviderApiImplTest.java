@@ -49,6 +49,7 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
   private FusedLocationServiceConnectionManager connectionManager;
 
   @Before public void setUp() throws Exception {
+    LostClientManager.shared().clearClients();
     connectedClient = new LostApiClient.Builder(RuntimeEnvironment.application).build();
     connectedClient.connect();
 
@@ -346,6 +347,24 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
 
     assertThat(api.getLocationListeners().get(connectedClient)).isEmpty();
     assertThat(api.getLocationListeners().get(otherClient).size()).isEqualTo(1);
+  }
+
+  @Test public void removeLocationUpdates_shouldKillEngineIfNoListenersStillActive()
+      throws Exception {
+    TestLocationListener listener = new TestLocationListener();
+    api.requestLocationUpdates(connectedClient, LocationRequest.create(), listener);
+    api.removeLocationUpdates(connectedClient, listener);
+    verify(service).removeLocationUpdates();
+  }
+
+  @Test public void removeLocationUpdates_shouldNotKillEngineIfListenerStillActive()
+      throws Exception {
+    TestLocationListener listener1 = new TestLocationListener();
+    TestLocationListener listener2 = new TestLocationListener();
+    api.requestLocationUpdates(connectedClient, LocationRequest.create(), listener1);
+    api.requestLocationUpdates(connectedClient, LocationRequest.create(), listener2);
+    api.removeLocationUpdates(connectedClient, listener1);
+    verify(service, never()).removeLocationUpdates();
   }
 
   @Test public void requestLocationUpdates_listener_shouldReturnFusedLocationPendingResult() {

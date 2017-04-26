@@ -52,7 +52,7 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
   }
 
   public void removeLocationUpdates() {
-    checkAllListenersPendingIntentsAndCallbacks();
+    locationEngine.setRequest(null);
   }
 
   public void setMockMode(boolean isMockMode) {
@@ -130,16 +130,6 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
 
       }
     }, Looper.myLooper());
-  }
-
-  /**
-   * Checks if any listeners or pending intents are still registered for location updates. If not,
-   * then shutdown the location engines.
-   */
-  private void checkAllListenersPendingIntentsAndCallbacks() {
-    if (clientManager.hasNoListeners()) {
-      locationEngine.setRequest(null);
-    }
   }
 
   private void toggleMockMode() {

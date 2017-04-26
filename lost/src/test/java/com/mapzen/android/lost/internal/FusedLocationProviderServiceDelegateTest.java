@@ -562,28 +562,6 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
     assertThat(availability.isLocationAvailable()).isFalse();
   }
 
-  @Test public void removeLocationUpdates_shouldNotKillEngineIfListenerStillActive()
-      throws Exception {
-    TestLocationListener listener = new TestLocationListener();
-    delegate.requestLocationUpdates(LocationRequest.create());
-    LostClientManager.shared().addListener(client, LocationRequest.create(), listener);
-    delegate.requestLocationUpdates(LocationRequest.create());
-    delegate.removeLocationUpdates();
-    assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isNotEmpty();
-  }
-
-  @Test public void removeLocationUpdates_shouldNotKillEngineIfIntentStillActive()
-      throws Exception {
-    delegate.requestLocationUpdates(LocationRequest.create());
-
-    PendingIntent pendingIntent = PendingIntent.getService(application, 0, new Intent(), 0);
-    delegate.requestLocationUpdates(LocationRequest.create());
-    LostClientManager.shared().addPendingIntent(client, LocationRequest.create(), pendingIntent);
-
-    delegate.removeLocationUpdates();
-    assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isNotEmpty();
-  }
-
   @Test public void removeLocationUpdates_locationCallback_shouldUnregisterAllListeners() {
     LocationRequest request = LocationRequest.create();
     delegate.requestLocationUpdates(request);

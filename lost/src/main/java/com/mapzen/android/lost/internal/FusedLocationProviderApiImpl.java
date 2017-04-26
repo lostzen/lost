@@ -138,11 +138,7 @@ public class FusedLocationProviderApiImpl
       LocationRequest request, LocationListener listener) {
     throwIfNotConnected(client);
     LostClientManager.shared().addListener(client, request, listener);
-    try {
-      service.requestLocationUpdates(request);
-    } catch (RemoteException e) {
-      throw new RuntimeException(e);
-    }
+    requestLocationUpdatesInternal(request);
     return new SimplePendingResult(true);
   }
 
@@ -155,11 +151,7 @@ public class FusedLocationProviderApiImpl
       LocationRequest request, LocationCallback callback, Looper looper) {
     throwIfNotConnected(client);
     LostClientManager.shared().addLocationCallback(client, request, callback, looper);
-    try {
-      service.requestLocationUpdates(request);
-    } catch (RemoteException e) {
-      throw new RuntimeException(e);
-    }
+    requestLocationUpdatesInternal(request);
     return new SimplePendingResult(true);
   }
 
@@ -167,23 +159,27 @@ public class FusedLocationProviderApiImpl
       LocationRequest request, PendingIntent callbackIntent) {
     throwIfNotConnected(client);
     LostClientManager.shared().addPendingIntent(client, request, callbackIntent);
+    requestLocationUpdatesInternal(request);
+    return new SimplePendingResult(true);
+  }
+
+  /**
+   * Forwards location update request to the {@link FusedLocationProviderService} to initiate
+   * and/or update request params.
+   */
+  private void requestLocationUpdatesInternal(LocationRequest request) {
     try {
       service.requestLocationUpdates(request);
     } catch (RemoteException e) {
       throw new RuntimeException(e);
     }
-    return new SimplePendingResult(true);
   }
 
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       LocationListener listener) {
     throwIfNotConnected(client);
     boolean hasResult = LostClientManager.shared().removeListener(client, listener);
-    try {
-      service.removeLocationUpdates();
-    } catch (RemoteException e) {
-      throw new RuntimeException(e);
-    }
+    checkAllListenersPendingIntentsAndCallbacks();
     return new SimplePendingResult(hasResult);
   }
 
@@ -191,11 +187,7 @@ public class FusedLocationProviderApiImpl
       PendingIntent callbackIntent) {
     throwIfNotConnected(client);
     boolean hasResult = LostClientManager.shared().removePendingIntent(client, callbackIntent);
-    try {
-      service.removeLocationUpdates();
-    } catch (RemoteException e) {
-      throw new RuntimeException(e);
-    }
+    checkAllListenersPendingIntentsAndCallbacks();
     return new SimplePendingResult(hasResult);
   }
 
@@ -203,12 +195,22 @@ public class FusedLocationProviderApiImpl
       LocationCallback callback) {
     throwIfNotConnected(client);
     boolean hasResult = LostClientManager.shared().removeLocationCallback(client, callback);
-    try {
-      service.removeLocationUpdates();
-    } catch (RemoteException e) {
-      throw new RuntimeException(e);
-    }
+    checkAllListenersPendingIntentsAndCallbacks();
     return new SimplePendingResult(hasResult);
+  }
+
+  /**
+   * Checks if any listeners or pending intents are still registered for location updates. If not,
+   * then shutdown the location engines.
+   */
+  private void checkAllListenersPendingIntentsAndCallbacks() {
+    if (LostClientManager.shared().hasNoListeners()) {
+      try {
+        service.removeLocationUpdates();
+      } catch (RemoteException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 
   @Override public PendingResult<Status> setMockMode(LostApiClient client, boolean isMockMode) {
