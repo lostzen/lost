@@ -93,8 +93,7 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
     ReportedChanges pendingIntentChanges = clientManager.sendPendingIntent(
         context, location, availability, result);
 
-    ReportedChanges callbackChanges = clientManager.reportLocationResult(
-        location, result);
+    ReportedChanges callbackChanges = clientManager.reportLocationResult(location, result);
 
     changes.putAll(pendingIntentChanges);
     changes.putAll(callbackChanges);
@@ -156,6 +155,12 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   private void notifyLocationAvailabilityChanged() {
     final LocationAvailability availability = locationEngine.createLocationAvailability();
-    clientManager.notifyLocationAvailability(availability);
+    if (callback != null) {
+      try {
+        callback.onLocationAvailabilityChanged(availability);
+      } catch (RemoteException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 }

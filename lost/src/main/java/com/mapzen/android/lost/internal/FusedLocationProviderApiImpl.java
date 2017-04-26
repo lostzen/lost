@@ -45,6 +45,11 @@ public class FusedLocationProviderApiImpl
         }
       });
     }
+
+    @Override public void onLocationAvailabilityChanged(LocationAvailability locationAvailability)
+        throws RemoteException {
+      LostClientManager.shared().notifyLocationAvailability(locationAvailability);
+    }
   };
 
   @Override public void onConnect(Context context) {
