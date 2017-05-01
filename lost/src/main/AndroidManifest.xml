@@ -16,7 +16,9 @@
 
   <application>
 
-    <service android:name="com.mapzen.android.lost.internal.FusedLocationProviderService"/>
+    <service
+        android:name="com.mapzen.android.lost.internal.FusedLocationProviderService"
+        android:process=":lost"/>
     <service android:name="com.mapzen.android.lost.internal.GeofencingIntentService">
       <intent-filter>
         <action android:name="com.mapzen.lost.action.ACTION_GEOFENCING_SERVICE"/>

@@ -143,7 +143,7 @@ public class FusionEngine extends LocationEngine implements LocationListener {
 
   private void enableGps(long interval) throws SecurityException {
     try {
-      locationManager.requestLocationUpdates(GPS_PROVIDER, interval, 0, this);
+      locationManager.requestLocationUpdates(GPS_PROVIDER, interval, 0, this, getLooper());
     } catch (IllegalArgumentException e) {
       Log.e(TAG, "Unable to register for GPS updates.", e);
     }
@@ -151,7 +151,7 @@ public class FusionEngine extends LocationEngine implements LocationListener {
 
   private void enableNetwork(long interval) throws SecurityException {
     try {
-      locationManager.requestLocationUpdates(NETWORK_PROVIDER, interval, 0, this);
+      locationManager.requestLocationUpdates(NETWORK_PROVIDER, interval, 0, this, getLooper());
     } catch (IllegalArgumentException e) {
       Log.e(TAG, "Unable to register for network updates.", e);
     }
@@ -159,7 +159,7 @@ public class FusionEngine extends LocationEngine implements LocationListener {
 
   private void enablePassive(long interval) throws SecurityException {
     try {
-      locationManager.requestLocationUpdates(PASSIVE_PROVIDER, interval, 0, this);
+      locationManager.requestLocationUpdates(PASSIVE_PROVIDER, interval, 0, this, getLooper());
     } catch (IllegalArgumentException e) {
       Log.e(TAG, "Unable to register for passive updates.", e);
     }

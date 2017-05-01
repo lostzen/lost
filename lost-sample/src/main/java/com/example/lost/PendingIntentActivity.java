@@ -54,7 +54,7 @@ public class PendingIntentActivity extends LostApiClientActivity {
 
   private void requestLocationUpdates() {
     LocationRequest request = LocationRequest.create();
-    request.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+    request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     request.setInterval(100);
 
     Intent intent = new Intent(PendingIntentService.ACTION);
