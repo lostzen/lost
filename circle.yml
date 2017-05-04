@@ -20,7 +20,8 @@ deployment:
   master:
     branch: master
     commands:
-      - ./gradlew uploadArchives -PsonatypeUsername=$SONATYPE_NEXUS_SNAPSHOTS_USERNAME -PsonatypePassword=$SONATYPE_NEXUS_SNAPSHOTS_PASSWORD
+      - scripts/deploy-snapshot.sh
+      - scripts/release.sh
   release:
     tag: /lost-[0-9]+(\.[0-9]+)*(-rc[0-9])?/
     owner: mapzen
