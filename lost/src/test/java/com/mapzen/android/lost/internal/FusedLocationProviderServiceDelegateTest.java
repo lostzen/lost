@@ -21,7 +21,6 @@ import org.robolectric.shadows.ShadowEnvironment;
 import org.robolectric.shadows.ShadowLooper;
 
 import android.app.IntentService;
-import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
@@ -56,8 +55,8 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
   private LostApiClient otherClient;
 
   @Before public void setUp() throws Exception {
-    client = new LostApiClient.Builder(mock(Context.class)).build();
-    otherClient = new LostApiClient.Builder(mock(Context.class)).build();
+    client = new LostApiClient.Builder(application).build();
+    otherClient = new LostApiClient.Builder(application).build();
     delegate = new FusedLocationProviderServiceDelegate(application);
     locationManager = (LocationManager) application.getSystemService(LOCATION_SERVICE);
     shadowLocationManager = (LostShadowLocationManager) ShadowExtractor.extract(locationManager);
