@@ -4,8 +4,8 @@ package com.mapzen.android.lost.api;
  * Used for receiving notifications from the FusedLocationProviderApi when the device location has
  * changed or can no longer be determined. The methods are called if the LocationCallback has been
  * registered with the location client using the
- * {@link FusedLocationProviderApi#requestLocationUpdates(LocationRequest, LocationCallback,
- * android.os.Looper) method.
+ * {@link FusedLocationProviderApi#requestLocationUpdates(LostApiClient, LocationRequest,
+ * LocationCallback, android.os.Looper)} method.
  */
 public interface LocationCallback {
   /**
