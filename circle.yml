@@ -22,6 +22,7 @@ deployment:
     commands:
       - scripts/deploy-snapshot.sh
       - scripts/release.sh
+      - scripts/deploy-javadocs.sh
   release:
     tag: /lost-[0-9]+(\.[0-9]+)*(-rc[0-9])?/
     owner: mapzen
