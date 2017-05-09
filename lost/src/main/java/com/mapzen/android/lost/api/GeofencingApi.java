@@ -35,6 +35,7 @@ public interface GeofencingApi {
    * @param client Connected client to receive geofence updates for.
    * @param geofencingRequest Request containing geofences to receive updates for.
    * @param pendingIntent Intent to be notified when geofences are entered/exited.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   PendingResult<Status> addGeofences(LostApiClient client, GeofencingRequest geofencingRequest,
@@ -51,6 +52,7 @@ public interface GeofencingApi {
    * @param client Connected client to receive geofence updates for.
    * @param geofences Geofences to receive updates for.
    * @param pendingIntent Intent to be notified when geofences are entered/exited.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   PendingResult<Status> addGeofences(LostApiClient client, List<Geofence> geofences,
@@ -61,6 +63,7 @@ public interface GeofencingApi {
    *
    * @param client Connected client to remove geofence updates for.
    * @param geofenceRequestIds Geofence ids to remove updates for.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   PendingResult<Status> removeGeofences(LostApiClient client, List<String> geofenceRequestIds);
@@ -69,6 +72,7 @@ public interface GeofencingApi {
    * Removes geofences for a given {@link PendingIntent}
    * @param client Connected client to remove geofence updates for.
    * @param pendingIntent Intent to remove updates for.
+   * @throws IllegalStateException if the client is not connected at the time of this call.
    */
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   PendingResult<Status> removeGeofences(LostApiClient client, PendingIntent pendingIntent);

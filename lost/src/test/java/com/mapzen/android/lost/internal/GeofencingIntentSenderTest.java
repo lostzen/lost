@@ -4,6 +4,7 @@ import com.mapzen.android.lost.BaseRobolectricTest;
 import com.mapzen.android.lost.api.Geofence;
 import com.mapzen.android.lost.api.GeofencingApi;
 import com.mapzen.android.lost.api.GeofencingIntentSender;
+import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.lost.BuildConfig;
 
 import org.junit.Before;
@@ -34,6 +35,7 @@ public class GeofencingIntentSenderTest extends BaseRobolectricTest {
   GeofencingApiImpl geofencingApi;
   Context context;
   int geofenceId = 123;
+  LostApiClient client;
 
   @Before public void setup() {
     IdGenerator idGenerator = new TestIdGenerator();
@@ -44,6 +46,8 @@ public class GeofencingIntentSenderTest extends BaseRobolectricTest {
     when(context.getSystemService(Context.LOCATION_SERVICE)).thenReturn(
         mock(LocationManager.class));
     geofencingApi.connect(context);
+    client = mock(LostApiClient.class);
+    when(client.isConnected()).thenReturn(true);
   }
 
   @Test public void generateIntent_shouldHaveExtras() {
@@ -52,7 +56,7 @@ public class GeofencingIntentSenderTest extends BaseRobolectricTest {
         Geofence.GEOFENCE_TRANSITION_ENTER, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
-    geofencingApi.addGeofences(null, allGeofences, null);
+    geofencingApi.addGeofences(client, allGeofences, null);
 
     Intent intent = new Intent("");
     Bundle extras = new Bundle();
@@ -83,7 +87,7 @@ public class GeofencingIntentSenderTest extends BaseRobolectricTest {
         Geofence.GEOFENCE_TRANSITION_ENTER, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
-    geofencingApi.addGeofences(null, allGeofences, null);
+    geofencingApi.addGeofences(client, allGeofences, null);
 
     boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
     assertThat(shouldSendIntent).isTrue();
@@ -102,7 +106,7 @@ public class GeofencingIntentSenderTest extends BaseRobolectricTest {
         Geofence.GEOFENCE_TRANSITION_EXIT, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
-    geofencingApi.addGeofences(null, allGeofences, null);
+    geofencingApi.addGeofences(client, allGeofences, null);
 
     boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
     assertThat(shouldSendIntent).isFalse();
@@ -121,7 +125,7 @@ public class GeofencingIntentSenderTest extends BaseRobolectricTest {
         Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
-    geofencingApi.addGeofences(null, allGeofences, null);
+    geofencingApi.addGeofences(client, allGeofences, null);
 
     boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
     assertThat(shouldSendIntent).isTrue();
@@ -140,7 +144,7 @@ public class GeofencingIntentSenderTest extends BaseRobolectricTest {
         Geofence.GEOFENCE_TRANSITION_DWELL, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
-    geofencingApi.addGeofences(null, allGeofences, null);
+    geofencingApi.addGeofences(client, allGeofences, null);
 
     boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
     assertThat(shouldSendIntent).isFalse();
@@ -159,7 +163,7 @@ public class GeofencingIntentSenderTest extends BaseRobolectricTest {
         Geofence.GEOFENCE_TRANSITION_ENTER, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
-    geofencingApi.addGeofences(null, allGeofences, null);
+    geofencingApi.addGeofences(client, allGeofences, null);
 
     boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
     assertThat(shouldSendIntent).isFalse();
@@ -178,7 +182,7 @@ public class GeofencingIntentSenderTest extends BaseRobolectricTest {
         Geofence.GEOFENCE_TRANSITION_EXIT, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
-    geofencingApi.addGeofences(null, allGeofences, null);
+    geofencingApi.addGeofences(client, allGeofences, null);
 
     boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
     assertThat(shouldSendIntent).isTrue();
@@ -197,7 +201,7 @@ public class GeofencingIntentSenderTest extends BaseRobolectricTest {
         Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
-    geofencingApi.addGeofences(null, allGeofences, null);
+    geofencingApi.addGeofences(client, allGeofences, null);
 
     boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
     assertThat(shouldSendIntent).isTrue();
@@ -216,7 +220,7 @@ public class GeofencingIntentSenderTest extends BaseRobolectricTest {
         Geofence.GEOFENCE_TRANSITION_DWELL, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
-    geofencingApi.addGeofences(null, allGeofences, null);
+    geofencingApi.addGeofences(client, allGeofences, null);
 
     boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
     assertThat(shouldSendIntent).isFalse();
@@ -234,7 +238,7 @@ public class GeofencingIntentSenderTest extends BaseRobolectricTest {
         Geofence.GEOFENCE_TRANSITION_ENTER, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
-    geofencingApi.addGeofences(null, allGeofences, null);
+    geofencingApi.addGeofences(client, allGeofences, null);
 
     boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
     assertThat(shouldSendIntent).isFalse();
@@ -252,7 +256,7 @@ public class GeofencingIntentSenderTest extends BaseRobolectricTest {
         Geofence.GEOFENCE_TRANSITION_EXIT, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
-    geofencingApi.addGeofences(null, allGeofences, null);
+    geofencingApi.addGeofences(client, allGeofences, null);
 
     boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
     assertThat(shouldSendIntent).isFalse();
@@ -271,7 +275,7 @@ public class GeofencingIntentSenderTest extends BaseRobolectricTest {
             | Geofence.GEOFENCE_TRANSITION_DWELL, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
-    geofencingApi.addGeofences(null, allGeofences, null);
+    geofencingApi.addGeofences(client, allGeofences, null);
 
     boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
     assertThat(shouldSendIntent).isTrue();
@@ -289,7 +293,7 @@ public class GeofencingIntentSenderTest extends BaseRobolectricTest {
         Geofence.GEOFENCE_TRANSITION_DWELL, 0);
     ArrayList<Geofence> allGeofences = new ArrayList<>();
     allGeofences.add(geofence);
-    geofencingApi.addGeofences(null, allGeofences, null);
+    geofencingApi.addGeofences(client, allGeofences, null);
 
     boolean shouldSendIntent = intentSender.shouldSendIntent(intent);
     assertThat(shouldSendIntent).isTrue();

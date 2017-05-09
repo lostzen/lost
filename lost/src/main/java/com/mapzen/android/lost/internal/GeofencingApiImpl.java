@@ -25,7 +25,7 @@ import static com.mapzen.android.lost.api.Geofence.LOITERING_DELAY_NONE;
 /**
  * Implementation of the {@link GeofencingApi}.
  */
-public class GeofencingApiImpl implements GeofencingApi {
+public class GeofencingApiImpl extends ApiImpl implements GeofencingApi {
 
   private Context context;
   private LocationManager locationManager;
@@ -64,6 +64,7 @@ public class GeofencingApiImpl implements GeofencingApi {
   @Override
   public PendingResult<Status> addGeofences(LostApiClient client,
       GeofencingRequest geofencingRequest, PendingIntent pendingIntent) throws SecurityException {
+    throwIfNotConnected(client);
     List<Geofence> geofences = geofencingRequest.getGeofences();
     addGeofences(client, geofences, pendingIntent);
     return new SimplePendingResult(true);
@@ -72,6 +73,7 @@ public class GeofencingApiImpl implements GeofencingApi {
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   @Override public PendingResult<Status> addGeofences(LostApiClient client,
       List<Geofence> geofences, PendingIntent pendingIntent) throws SecurityException {
+    throwIfNotConnected(client);
     for (Geofence geofence : geofences) {
       addGeofence(client, geofence, pendingIntent);
     }
@@ -81,9 +83,7 @@ public class GeofencingApiImpl implements GeofencingApi {
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   private PendingResult<Status> addGeofence(LostApiClient client, Geofence geofence,
       PendingIntent pendingIntent) throws SecurityException {
-
     checkGeofence(geofence);
-
     int pendingIntentId = idGenerator.generateId();
     internalIntent = geofencingServiceIntentFactory.createIntent(context);
     internalIntent.addCategory(String.valueOf(pendingIntentId));
@@ -112,6 +112,7 @@ public class GeofencingApiImpl implements GeofencingApi {
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   @Override public PendingResult<Status> removeGeofences(LostApiClient client,
       List<String> geofenceRequestIds) {
+    throwIfNotConnected(client);
     boolean hasResult = false;
     for (String geofenceRequestId : geofenceRequestIds) {
       if (pendingIntentMap.containsKey(geofenceRequestId)) {
@@ -132,6 +133,7 @@ public class GeofencingApiImpl implements GeofencingApi {
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   @Override public PendingResult<Status> removeGeofences(LostApiClient client,
       PendingIntent pendingIntent) throws SecurityException {
+    throwIfNotConnected(client);
     boolean hasResult = false;
     if (pendingIntentMap.values().contains(pendingIntent)) {
       hasResult = true;
