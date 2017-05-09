@@ -7,6 +7,7 @@ import com.mapzen.android.lost.api.LocationResult;
 import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.lost.BuildConfig;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -32,7 +33,11 @@ import static org.robolectric.RuntimeEnvironment.application;
 public class LostClientManagerTest extends BaseRobolectricTest {
 
   LostClientManager manager = new LostClientManager();
-  LostApiClient client = new LostApiClient.Builder(application).build();
+  LostApiClient client;
+
+  @Before public void setup() throws Exception {
+    client = new LostApiClient.Builder(application).build();
+  }
 
   @Test public void shouldHaveZeroClientCount() {
     assertThat(manager.numberOfClients()).isEqualTo(0);

@@ -23,7 +23,7 @@ public interface LostApiClient {
     private ConnectionCallbacks connectionCallbacks;
 
     public Builder(Context context) {
-      this.context = context;
+      this.context = context.getApplicationContext();
     }
 
     public Builder addConnectionCallbacks(ConnectionCallbacks callbacks) {
