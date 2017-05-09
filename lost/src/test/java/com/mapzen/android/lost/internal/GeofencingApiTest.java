@@ -39,6 +39,7 @@ public class GeofencingApiTest {
   IntentFactory geofencingIntentFactory;
   IntentFactory dwellIntentFactory;
   AlarmManager alarmManager;
+  LostApiClient disconnectedClient;
 
   @Before public void setUp() throws Exception {
     context = mock(Context.class);
@@ -51,7 +52,9 @@ public class GeofencingApiTest {
     geofencingApi = new GeofencingApiImpl(geofencingIntentFactory, dwellIntentFactory,
         new PendingIntentIdGenerator());
     geofencingApi.connect(context);
-    client = new LostApiClient.Builder(context).build();
+    client = mock(LostApiClientImpl.class);
+    when(client.isConnected()).thenReturn(true);
+    disconnectedClient = mock(LostApiClientImpl.class);
   }
 
   @Test public void shouldNotBeNull() throws Exception {
@@ -288,5 +291,25 @@ public class GeofencingApiTest {
     GeofencingRequest request = new GeofencingRequest.Builder().addGeofence(geofence).build();
     PendingIntent intent = Mockito.mock(PendingIntent.class);
     geofencingApi.addGeofences(client, request, intent);
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void addGeofences_request_shouldThrowException() {
+    geofencingApi.addGeofences(disconnectedClient, mock(GeofencingRequest.class), null);
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void addGeofences_list_shouldThrowException() {
+    geofencingApi.addGeofences(disconnectedClient, mock(ArrayList.class), null);
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void removeGeofences_intent_shouldThrowException() {
+    geofencingApi.removeGeofences(disconnectedClient, mock(PendingIntent.class));
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void removeGeofences_list_shouldThrowException() {
+    geofencingApi.removeGeofences(disconnectedClient, mock(ArrayList.class));
   }
 }

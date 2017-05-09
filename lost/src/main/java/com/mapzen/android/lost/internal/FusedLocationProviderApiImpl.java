@@ -29,7 +29,7 @@ import java.util.Set;
 /**
  * Implementation of the {@link FusedLocationProviderApi}.
  */
-public class FusedLocationProviderApiImpl
+public class FusedLocationProviderApiImpl extends ApiImpl
     implements FusedLocationProviderApi, EventCallbacks, ServiceConnection {
 
   private Context context;
@@ -277,11 +277,5 @@ public class FusedLocationProviderApiImpl
 
   FusedLocationServiceConnectionManager getServiceConnectionManager() {
     return serviceConnectionManager;
-  }
-
-  private void throwIfNotConnected(LostApiClient client) {
-    if (!client.isConnected()) {
-      throw new IllegalStateException("LostApiClient is not connected.");
-    }
   }
 }
