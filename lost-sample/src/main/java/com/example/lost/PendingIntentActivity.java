@@ -16,6 +16,8 @@ import android.widget.Toast;
  */
 public class PendingIntentActivity extends LostApiClientActivity {
 
+  PendingIntent pendingIntent;
+
   @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_pending_intent);
@@ -47,6 +49,7 @@ public class PendingIntentActivity extends LostApiClientActivity {
     Button disconnect = (Button) findViewById(R.id.disconnect);
     disconnect.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
+        LocationServices.FusedLocationApi.removeLocationUpdates(client, pendingIntent);
         disconnect();
       }
     });
@@ -58,7 +61,7 @@ public class PendingIntentActivity extends LostApiClientActivity {
     request.setInterval(100);
 
     Intent intent = new Intent(PendingIntentService.ACTION);
-    PendingIntent pendingIntent = PendingIntent.getService(PendingIntentActivity.this, 1,
+    pendingIntent = PendingIntent.getService(PendingIntentActivity.this, 1,
         intent, 0);
     LocationServices.FusedLocationApi.requestLocationUpdates(client, request, pendingIntent);
 
