@@ -8,11 +8,11 @@ import android.os.Parcelable;
  * Status on the availability of location data.
  *
  * Delivered from LocationCallback registered via
- * {@link FusedLocationProviderApi#requestLocationUpdates(
- * LocationRequest,LocationCallback,android.os.Looper) or from a PendingIntent registered via
- * {@link FusedLocationProviderApi##requestLocationUpdates(LocationRequest,
- * android.app.PendingIntent). It is also available on demand via
- * {@link FusedLocationProviderApi#getLocationAvailability()}.
+ * {@link FusedLocationProviderApi#requestLocationUpdates(LostApiClient, LocationRequest,
+ * LocationCallback, android.os.Looper)} or from a PendingIntent registered via
+ * {@link FusedLocationProviderApi#requestLocationUpdates(LostApiClient, LocationRequest,
+ * android.app.PendingIntent)}. It is also available on demand via
+ * {@link FusedLocationProviderApi#getLocationAvailability(LostApiClient)}.
  */
 public class LocationAvailability implements Parcelable {
 
@@ -54,7 +54,7 @@ public class LocationAvailability implements Parcelable {
    * Returns true if an {@link Intent} contains a {@link LocationAvailability} extra.
    * @param intent an {@link Intent} that may or may not include {@link LocationAvailability}.
    * @return whether or not the {@link Intent} has {@link LocationAvailability} extra
-   * {@link LocationAvailability.EXTRA_LOCATION_AVAILABILITY}
+   * {@value #EXTRA_LOCATION_AVAILABILITY}
    */
   public static boolean hasLocationAvailability(Intent intent) {
     return intent.hasExtra(EXTRA_LOCATION_AVAILABILITY);

@@ -75,6 +75,23 @@ task checkstyle(type: Checkstyle) {
   classpath = files()
 }
 
+task javadocs(type: Javadoc) {
+  classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+  source = android.sourceSets.main.java.srcDirs
+  exclude '**/internal/*.java'
+  destinationDir = file("../gh-pages")
+}
+
+afterEvaluate {
+  javadocs.classpath += files(android.libraryVariants.collect { variant ->
+    variant.javaCompile.classpath.files
+  })
+}
+
+task printVersion << {
+  println version
+}
+
 dependencies {
   compile 'com.android.support:support-annotations:24.2.1'
   compile 'com.android.support:appcompat-v7:24.2.1'
