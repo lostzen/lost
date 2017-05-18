@@ -31,12 +31,12 @@ release {
 }
 
 android {
-  compileSdkVersion 24
+  compileSdkVersion 25
   buildToolsVersion '25.0.3'
 
   defaultConfig {
     minSdkVersion 15
-    targetSdkVersion 23
+    targetSdkVersion 25
   }
 
   compileOptions {
@@ -93,8 +93,8 @@ task printVersion << {
 }
 
 dependencies {
-  compile 'com.android.support:support-annotations:24.2.1'
-  compile 'com.android.support:appcompat-v7:24.2.1'
+  compile 'com.android.support:support-annotations:25.3.1'
+  compile 'com.android.support:appcompat-v7:25.3.1'
 
   testCompile 'com.google.guava:guava:18.0'
   testCompile 'junit:junit:4.12'
