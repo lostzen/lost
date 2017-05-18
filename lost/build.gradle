@@ -3,7 +3,7 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:2.2.3'
+    classpath 'com.android.tools.build:gradle:2.3.2'
     classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
     classpath 'net.researchgate:gradle-release:2.4.0'
   }
@@ -31,12 +31,12 @@ release {
 }
 
 android {
-  compileSdkVersion 24
-  buildToolsVersion "24.0.2"
+  compileSdkVersion 25
+  buildToolsVersion '25.0.3'
 
   defaultConfig {
     minSdkVersion 15
-    targetSdkVersion 23
+    targetSdkVersion 25
   }
 
   compileOptions {
@@ -93,8 +93,8 @@ task printVersion << {
 }
 
 dependencies {
-  compile 'com.android.support:support-annotations:24.2.1'
-  compile 'com.android.support:appcompat-v7:24.2.1'
+  compile 'com.android.support:support-annotations:25.3.1'
+  compile 'com.android.support:appcompat-v7:25.3.1'
 
   testCompile 'com.google.guava:guava:18.0'
   testCompile 'junit:junit:4.12'
