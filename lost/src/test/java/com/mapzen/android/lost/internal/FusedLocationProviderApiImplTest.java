@@ -260,6 +260,12 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
         Context.BIND_AUTO_CREATE);
   }
 
+  @Test public void onServiceConnected_shouldRegisterServiceCallbacks() throws Exception {
+    TestServiceStub binder = new TestServiceStub();
+    api.onServiceConnected(binder);
+    assertThat(binder.callback).isNotNull();
+  }
+
   @Test public void onDisconnect_shouldUnbindServiceIfBound() throws Exception {
     Context context = mock(Context.class);
     api.onConnect(context);
@@ -281,6 +287,13 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
     api.onDisconnect();
     api.onDisconnect();
     verify(context, times(1)).unbindService(api);
+  }
+
+  @Test public void onDisconnect_shouldUnregisterServiceCallbacks() throws Exception {
+    Context context = mock(Context.class);
+    api.onConnect(context);
+    api.onDisconnect();
+    verify(service).init(null);
   }
 
   @Test public void removeLocationUpdates_shouldReturnStatusSuccessIfListenerRemoved() {

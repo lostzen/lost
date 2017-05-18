@@ -83,19 +83,12 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   @Override public void onServiceConnected(IBinder binder) {
     service = IFusedLocationProviderService.Stub.asInterface(binder);
     isBound = true;
-
-    // Register remote callback
-    if (service != null) {
-      try {
-        service.init(remoteCallback);
-      } catch (RemoteException e) {
-        throw new RuntimeException(e);
-      }
-    }
+    registerRemoteCallback();
   }
 
   @Override public void onDisconnect() {
     if (isBound) {
+      unregisterRemoteCallback();
       context.unbindService(this);
       isBound = false;
     }
@@ -277,5 +270,25 @@ public class FusedLocationProviderApiImpl extends ApiImpl
 
   FusedLocationServiceConnectionManager getServiceConnectionManager() {
     return serviceConnectionManager;
+  }
+
+  void registerRemoteCallback() {
+    if (service != null) {
+      try {
+        service.init(remoteCallback);
+      } catch (RemoteException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
+  void unregisterRemoteCallback() {
+    if (service != null) {
+      try {
+        service.init(null);
+      } catch (RemoteException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 }
