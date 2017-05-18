@@ -42,8 +42,3 @@ The permissions that Lost requires are as follows:
 <uses-permission android:name="android.permission.BLUETOOTH"/>
 <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
 ```
-
-### Limitations
-
-#### Multiple Processes
-Currently LOST 2.x does not support being run in multiple processes due to the way we bind to the underlying service. This will be resolved in the near future and can be tracked in [this issue](https://github.com/mapzen/lost/issues/173)
