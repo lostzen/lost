@@ -1,4 +1,4 @@
-#Creating and Monitoring Geofences
+# Creating and Monitoring Geofences
 
 With Lost you can create `Geofence`s to monitor when a user enters or exits an area and get notifications when this occurs.
 
