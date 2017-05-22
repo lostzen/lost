@@ -46,7 +46,7 @@ public class GeofencingApiActivity extends LostApiClientActivity {
 
   @Override protected void disconnect() {
     if (pendingIntent != null) {
-      LocationServices.GeofencingApi.removeGeofences(client, pendingIntent);;
+      LocationServices.GeofencingApi.removeGeofences(client, pendingIntent);
     }
     super.disconnect();
   }
