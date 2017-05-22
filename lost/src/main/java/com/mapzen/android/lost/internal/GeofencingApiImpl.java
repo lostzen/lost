@@ -133,6 +133,7 @@ public class GeofencingApiImpl extends ApiImpl implements GeofencingApi {
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   @Override public PendingResult<Status> removeGeofences(LostApiClient client,
       PendingIntent pendingIntent) throws SecurityException {
+
     throwIfNotConnected(client);
     boolean hasResult = false;
     if (pendingIntentMap.values().contains(pendingIntent)) {
