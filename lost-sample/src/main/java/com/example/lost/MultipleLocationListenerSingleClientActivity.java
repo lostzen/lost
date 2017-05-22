@@ -20,7 +20,8 @@ import java.util.List;
 /**
  * Demonstrates one {@link LostApiClient}s receiving location updates at difference intervals
  */
-public class MultipleLocationListenerSingleClientActivity extends ListActivity {
+public class MultipleLocationListenerSingleClientActivity extends ListActivity implements
+    LostApiClient.ConnectionCallbacks {
 
   private static final int LOCATION_PERMISSION_REQUEST = 1;
 
@@ -50,18 +51,17 @@ public class MultipleLocationListenerSingleClientActivity extends ListActivity {
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    lostApiClient = new LostApiClient.Builder(this).addConnectionCallbacks(
-        new LostApiClient.ConnectionCallbacks() {
-          @Override
-          public void onConnected() {
-            initLocationTracking();
-          }
+    lostApiClient = new LostApiClient.Builder(this).addConnectionCallbacks(this).build();
+  }
 
-          @Override
-          public void onConnectionSuspended() {
+  @Override
+  public void onConnected() {
+    initLocationTracking();
+  }
 
-          }
-        }).build();
+  @Override
+  public void onConnectionSuspended() {
+
   }
 
   @Override public void onStart() {
@@ -74,6 +74,7 @@ public class MultipleLocationListenerSingleClientActivity extends ListActivity {
     LocationServices.FusedLocationApi.removeLocationUpdates(lostApiClient, listener);
     LocationServices.FusedLocationApi.removeLocationUpdates(lostApiClient, otherListener);
     lostApiClient.disconnect();
+    lostApiClient.unregisterConnectionCallbacks(this);
   }
 
   private void initLocationTracking() {

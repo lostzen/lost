@@ -22,7 +22,7 @@ import java.util.List;
  * Demonstrates two {@link LostApiClient}s receiving location updates at difference intervals
  */
 public class MultipleLocationListenerMultipleClientsActivity extends ListActivity
-    implements LocationListener {
+    implements LocationListener, LostApiClient.ConnectionCallbacks {
 
   private static final int LOCATION_PERMISSION_REQUEST = 1;
 
@@ -51,17 +51,17 @@ public class MultipleLocationListenerMultipleClientsActivity extends ListActivit
     }
 
     lostApiClient = new LostApiClient.Builder(this).addConnectionCallbacks(
-        new LostApiClient.ConnectionCallbacks() {
-          @Override
-          public void onConnected() {
-            initLocationTracking();
-          }
+        this).build();
+  }
 
-          @Override
-          public void onConnectionSuspended() {
+  @Override
+  public void onConnected() {
+    initLocationTracking();
+  }
 
-          }
-        }).build();
+  @Override
+  public void onConnectionSuspended() {
+
   }
 
   @Override public void onStart() {
@@ -74,6 +74,7 @@ public class MultipleLocationListenerMultipleClientsActivity extends ListActivit
     LocationServices.FusedLocationApi.removeLocationUpdates(lostApiClient,
         MultipleLocationListenerMultipleClientsActivity.this);
     lostApiClient.disconnect();
+    lostApiClient.unregisterConnectionCallbacks(this);
   }
 
   private void initLocationTracking() {
@@ -109,7 +110,8 @@ public class MultipleLocationListenerMultipleClientsActivity extends ListActivit
     adapter.notifyDataSetChanged();
   }
 
-  public static class LostClientFragment extends android.app.Fragment implements LocationListener {
+  public static class LostClientFragment extends android.app.Fragment implements LocationListener,
+      LostApiClient.ConnectionCallbacks {
 
     private static final int LOCATION_PERMISSION_REQUEST = 2;
 
@@ -117,18 +119,18 @@ public class MultipleLocationListenerMultipleClientsActivity extends ListActivit
 
     @Override public void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
-      fragmentClient = new LostApiClient.Builder(this.getActivity()).addConnectionCallbacks(
-          new LostApiClient.ConnectionCallbacks() {
-            @Override
-            public void onConnected() {
-              fragmentInitLocationTracking();
-            }
+      fragmentClient = new LostApiClient.Builder(this.getActivity()).addConnectionCallbacks(this).
+          build();
+    }
 
-            @Override
-            public void onConnectionSuspended() {
+    @Override
+    public void onConnected() {
+      fragmentInitLocationTracking();
+    }
 
-            }
-          }).build();
+    @Override
+    public void onConnectionSuspended() {
+
     }
 
     @Override public void onStart() {
@@ -140,6 +142,7 @@ public class MultipleLocationListenerMultipleClientsActivity extends ListActivit
       super.onStop();
       LocationServices.FusedLocationApi.removeLocationUpdates(fragmentClient, this);
       fragmentClient.disconnect();
+      fragmentClient.unregisterConnectionCallbacks(this);
     }
 
     private void fragmentInitLocationTracking() {

@@ -222,7 +222,11 @@ public class LocationListenerActivity extends AppCompatActivity  implements
 
   private void disconnect() {
     Log.d(TAG, "Disconnecting...");
-    client.disconnect();
+    if (client.isConnected()) {
+      FusedLocationApi.removeLocationUpdates(client, listener);
+      client.disconnect();
+    }
+    client.unregisterConnectionCallbacks(this);
   }
 
   private void reset() {

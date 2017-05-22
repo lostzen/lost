@@ -25,6 +25,7 @@ public class GeofencingApiActivity extends LostApiClientActivity {
   private TextView inputLatitude;
   private TextView inputLongitude;
   private TextView inputRadius;
+  private PendingIntent pendingIntent;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -34,6 +35,11 @@ public class GeofencingApiActivity extends LostApiClientActivity {
     initDisconnectButton();
     initInputFields();
     initCreateButton();
+  }
+
+  @Override protected void disconnect() {
+    LocationServices.GeofencingApi.removeGeofences(client, pendingIntent);
+    super.disconnect();
   }
 
   private void initConnectButton() {
@@ -94,7 +100,7 @@ public class GeofencingApiActivity extends LostApiClientActivity {
         .addGeofence(geofence)
         .build();
     Intent serviceIntent = new Intent(getApplicationContext(), GeofenceIntentService.class);
-    PendingIntent pendingIntent = PendingIntent.getService(this, 0, serviceIntent, 0);
+    pendingIntent = PendingIntent.getService(this, 0, serviceIntent, 0);
 
     LocationServices.GeofencingApi.addGeofences(client, request, pendingIntent);
   }

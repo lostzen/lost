@@ -10,7 +10,7 @@ import android.content.Context;
  */
 public class LostApiClientImpl implements LostApiClient {
   private final Context context;
-  private final ConnectionCallbacks connectionCallbacks;
+  private ConnectionCallbacks connectionCallbacks;
   private final ClientManager clientManager;
 
   public LostApiClientImpl(Context context, ConnectionCallbacks callbacks,
@@ -64,6 +64,11 @@ public class LostApiClientImpl implements LostApiClient {
   @Override public boolean isConnected() {
     return getGeofencingImpl().isConnected() && getSettingsApiImpl().isConnected()
         && getFusedLocationProviderApiImpl().isConnected() && clientManager.containsClient(this);
+  }
+
+  @Override public void unregisterConnectionCallbacks(ConnectionCallbacks callbacks) {
+    getFusedLocationProviderApiImpl().removeConnectionCallbacks(connectionCallbacks);
+    connectionCallbacks = null;
   }
 
   private GeofencingApiImpl getGeofencingImpl() {

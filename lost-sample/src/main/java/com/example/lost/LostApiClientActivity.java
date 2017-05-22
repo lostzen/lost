@@ -67,6 +67,7 @@ public class LostApiClientActivity extends AppCompatActivity implements
   protected void disconnect() {
     Log.d(TAG, "Disconnecting...");
     client.disconnect();
+    client.unregisterConnectionCallbacks(this);
     Toast.makeText(this, "LOST client disconnected", LENGTH_SHORT).show();
   }
 }

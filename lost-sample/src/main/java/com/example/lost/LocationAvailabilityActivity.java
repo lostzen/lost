@@ -43,7 +43,15 @@ public class LocationAvailabilityActivity extends AppCompatActivity {
         setupLocationAvailabilityBtn();
     }
 
-    private void setupLocationAvailabilityBtn() {
+  @Override protected void onDestroy() {
+    super.onDestroy();
+    if (client != null && client.isConnected()) {
+      LocationServices.FusedLocationApi.removeLocationUpdates(client, callback);
+      client.disconnect();
+    }
+  }
+
+  private void setupLocationAvailabilityBtn() {
         Button connect = (Button) findViewById(R.id.check_availability);
         connect.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
