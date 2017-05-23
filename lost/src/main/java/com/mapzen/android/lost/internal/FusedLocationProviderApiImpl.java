@@ -43,6 +43,12 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     public void onLocationChanged(final Location location) throws RemoteException {
       new Handler(Looper.getMainLooper()).post(new Runnable() {
         @Override public void run() {
+          if (service == null) {
+            throw new IllegalStateException("Location update received after client was "
+                + "disconnected. Did you forget to unregister location updates before "
+                + "disconnecting?");
+          }
+
           final LostClientManager clientManager = LostClientManager.shared();
           ReportedChanges changes = clientManager.reportLocationChanged(location);
 
