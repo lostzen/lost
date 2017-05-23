@@ -21,41 +21,39 @@ import static com.mapzen.android.lost.api.Geofence.NEVER_EXPIRE;
  */
 public class GeofencingApiActivity extends LostApiClientActivity {
 
+  private Button createButton;
   private TextView inputRequestId;
   private TextView inputLatitude;
   private TextView inputLongitude;
   private TextView inputRadius;
+  private PendingIntent pendingIntent;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_geofencing);
 
-    initConnectButton();
-    initDisconnectButton();
     initInputFields();
     initCreateButton();
+
+    connect();
   }
 
-  private void initConnectButton() {
-    Button connectButton = (Button) findViewById(R.id.button_connect);
-    if (connectButton != null) {
-      connectButton.setOnClickListener(new View.OnClickListener() {
-        @Override public void onClick(View v) {
-          connect();
-        }
-      });
-    }
+  @Override protected void onDestroy() {
+    disconnect();
+    createButton.setEnabled(false);
+    super.onDestroy();
   }
 
-  private void initDisconnectButton() {
-    Button disconnectButton = (Button) findViewById(R.id.button_disconnect);
-    if (disconnectButton != null) {
-      disconnectButton.setOnClickListener(new View.OnClickListener() {
-        @Override public void onClick(View v) {
-          disconnect();
-        }
-      });
+  @Override protected void disconnect() {
+    if (pendingIntent != null) {
+      LocationServices.GeofencingApi.removeGeofences(client, pendingIntent);
     }
+    super.disconnect();
+  }
+
+  @Override public void onConnected() {
+    super.onConnected();
+    createButton.setEnabled(true);
   }
 
   private void initInputFields() {
@@ -66,7 +64,7 @@ public class GeofencingApiActivity extends LostApiClientActivity {
   }
 
   private void initCreateButton() {
-    Button createButton = (Button) findViewById(R.id.button_create);
+    createButton = (Button) findViewById(R.id.button_create);
     if (createButton != null) {
       createButton.setOnClickListener(new View.OnClickListener() {
         @Override public void onClick(View v) {
@@ -94,7 +92,7 @@ public class GeofencingApiActivity extends LostApiClientActivity {
         .addGeofence(geofence)
         .build();
     Intent serviceIntent = new Intent(getApplicationContext(), GeofenceIntentService.class);
-    PendingIntent pendingIntent = PendingIntent.getService(this, 0, serviceIntent, 0);
+    pendingIntent = PendingIntent.getService(this, 0, serviceIntent, 0);
 
     LocationServices.GeofencingApi.addGeofences(client, request, pendingIntent);
   }

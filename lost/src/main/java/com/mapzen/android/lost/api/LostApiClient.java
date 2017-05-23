@@ -5,6 +5,8 @@ import com.mapzen.android.lost.internal.LostClientManager;
 
 import android.content.Context;
 
+import java.lang.ref.WeakReference;
+
 public interface LostApiClient {
 
   interface ConnectionCallbacks {
@@ -18,21 +20,27 @@ public interface LostApiClient {
 
   boolean isConnected();
 
+  void unregisterConnectionCallbacks(ConnectionCallbacks callbacks);
+
   final class Builder {
     private final Context context;
-    private ConnectionCallbacks connectionCallbacks;
+    private WeakReference<ConnectionCallbacks> connectionCallbacks;
 
     public Builder(Context context) {
       this.context = context.getApplicationContext();
     }
 
     public Builder addConnectionCallbacks(ConnectionCallbacks callbacks) {
-      this.connectionCallbacks = callbacks;
+      this.connectionCallbacks = new WeakReference(callbacks);
       return this;
     }
 
     public LostApiClient build() {
-      return new LostApiClientImpl(context, connectionCallbacks, LostClientManager.shared());
+      ConnectionCallbacks callbacks = null;
+      if (connectionCallbacks != null) {
+        callbacks = connectionCallbacks.get();
+      }
+      return new LostApiClientImpl(context, callbacks, LostClientManager.shared());
     }
   }
 }
