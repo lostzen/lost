@@ -2,6 +2,7 @@ package com.mapzen.android.lost.api;
 
 import com.mapzen.android.lost.internal.DwellServiceIntentFactory;
 import com.mapzen.android.lost.internal.FusedLocationProviderApiImpl;
+import com.mapzen.android.lost.internal.FusedLocationServiceCallbackManager;
 import com.mapzen.android.lost.internal.FusedLocationServiceConnectionManager;
 import com.mapzen.android.lost.internal.GeofencingApiImpl;
 import com.mapzen.android.lost.internal.GeofencingServiceIntentFactory;
@@ -17,7 +18,8 @@ public class LocationServices {
    * Entry point for APIs concerning location updates.
    */
   public static final FusedLocationProviderApi FusedLocationApi =
-      new FusedLocationProviderApiImpl(new FusedLocationServiceConnectionManager());
+      new FusedLocationProviderApiImpl(new FusedLocationServiceConnectionManager(),
+          new FusedLocationServiceCallbackManager());
 
   /**
    * Entry point for APIs concerning geofences.
