@@ -5,7 +5,6 @@ import com.mapzen.android.lost.api.LocationAvailability;
 import com.mapzen.android.lost.api.LocationCallback;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationRequest;
-import com.mapzen.android.lost.api.LocationResult;
 import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.android.lost.api.PendingResult;
 import com.mapzen.android.lost.api.Status;
@@ -22,7 +21,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,6 +32,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
 
   private Context context;
   private FusedLocationServiceConnectionManager serviceConnectionManager;
+  private FusedLocationServiceCallbackManager serviceCallbackManager;
   private boolean isBound;
 
   IFusedLocationProviderService service;
@@ -44,33 +43,15 @@ public class FusedLocationProviderApiImpl extends ApiImpl
       new Handler(Looper.getMainLooper()).post(new Runnable() {
         @Override public void run() {
           final LostClientManager clientManager = LostClientManager.shared();
-          ReportedChanges changes = clientManager.reportLocationChanged(location);
-
-          LocationAvailability availability;
-          try {
-            availability = service.getLocationAvailability();
-          } catch (RemoteException e) {
-            throw new RuntimeException(e);
-          }
-
-          ArrayList<Location> locations = new ArrayList<>();
-          locations.add(location);
-          final LocationResult result = LocationResult.create(locations);
-          ReportedChanges pendingIntentChanges = clientManager.sendPendingIntent(
-              context, location, availability, result);
-
-          ReportedChanges callbackChanges = clientManager.reportLocationResult(location, result);
-
-          changes.putAll(pendingIntentChanges);
-          changes.putAll(callbackChanges);
-          clientManager.updateReportedValues(changes);
+          serviceCallbackManager.onLocationChanged(context, location, clientManager, service);
         }
       });
     }
 
     @Override public void onLocationAvailabilityChanged(LocationAvailability locationAvailability)
         throws RemoteException {
-      LostClientManager.shared().notifyLocationAvailability(locationAvailability);
+      LostClientManager clientManager = LostClientManager.shared();
+      serviceCallbackManager.onLocationAvailabilityChanged(locationAvailability, clientManager);
     }
   };
 
@@ -106,8 +87,10 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     isBound = false;
   }
 
-  public FusedLocationProviderApiImpl(FusedLocationServiceConnectionManager connectionManager) {
+  public FusedLocationProviderApiImpl(FusedLocationServiceConnectionManager connectionManager,
+      FusedLocationServiceCallbackManager callbackManager) {
     serviceConnectionManager = connectionManager;
+    serviceCallbackManager = callbackManager;
     serviceConnectionManager.setEventCallbacks(this);
   }
 

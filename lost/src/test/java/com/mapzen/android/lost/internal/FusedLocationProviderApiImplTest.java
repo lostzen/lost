@@ -61,7 +61,8 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
         FusedLocationServiceConnectionManager.EventCallbacks.class));
     Mockito.doCallRealMethod().when(connectionManager).connect(any(Context.class), any(
         LostApiClient.ConnectionCallbacks.class));
-    api = new FusedLocationProviderApiImpl(connectionManager);
+    api = new FusedLocationProviderApiImpl(connectionManager,
+        new FusedLocationServiceCallbackManager());
     api.connect(application, null);
     api.service = service;
   }
