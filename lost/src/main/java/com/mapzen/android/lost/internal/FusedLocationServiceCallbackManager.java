@@ -9,8 +9,22 @@ import android.os.RemoteException;
 
 import java.util.ArrayList;
 
+/**
+ * Handles callbacks received in {@link FusedLocationProviderApiImpl} from
+ * {@link FusedLocationProviderService}.
+ */
 public class FusedLocationServiceCallbackManager {
 
+  /**
+   * Called when a new location has been received. This method handles dispatching changes to all
+   * {@link com.mapzen.android.lost.api.LocationListener}s, {@link android.app.PendingIntent}s, and
+   * {@link com.mapzen.android.lost.api.LocationCallback}s which are registered. If the
+   * {@link IFusedLocationProviderService} is null, an {@link IllegalStateException} will be thrown.
+   * @param context
+   * @param location
+   * @param clientManager
+   * @param service
+   */
   void onLocationChanged(Context context, Location location, LostClientManager clientManager,
       IFusedLocationProviderService service) {
     if (service == null) {
@@ -41,6 +55,12 @@ public class FusedLocationServiceCallbackManager {
     clientManager.updateReportedValues(changes);
   }
 
+  /**
+   * Handles notifying all registered {@link LocationCallback}s that {@link LocationAvailability}
+   * has changed.
+   * @param locationAvailability
+   * @param clientManager
+   */
   void onLocationAvailabilityChanged(LocationAvailability locationAvailability,
       LostClientManager clientManager) {
     clientManager.notifyLocationAvailability(locationAvailability);
