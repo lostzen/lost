@@ -42,7 +42,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     public void onLocationChanged(final Location location) throws RemoteException {
       new Handler(Looper.getMainLooper()).post(new Runnable() {
         @Override public void run() {
-          LostClientManager clientManager = LostClientManager.shared();
+          final LostClientManager clientManager = LostClientManager.shared();
           serviceCallbackManager.onLocationChanged(context, location, clientManager, service);
         }
       });
