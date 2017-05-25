@@ -16,6 +16,10 @@ test:
   override:
     - ./gradlew -PdisablePreDex
 
+branches:
+  ignore:
+    - gh-pages
+
 deployment:
   master:
     branch: master
