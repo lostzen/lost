@@ -70,6 +70,8 @@
   <string name="pending_intent">Pending Intent</string>
   <string name="sample_pending_intent_title">PendingIntent</string>
   <string name="sample_pending_intent_description">Demonstrates how to use a PendingIntent to receive location updates</string>
+  <string name="sample_bg_pending_intent_title">Background PendingIntent</string>
+  <string name="sample_bg_pending_intent_description">Demonstrates how to use a PendingIntent to receive location updates when requesting updates from a background thread.</string>
   <string name="requested">Requested</string>
   <string name="sample_location_availability_title">Location Availability</string>
   <string name="sample_location_availability_description">Demonstrates how to determine if location requested is available</string>

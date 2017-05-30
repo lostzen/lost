@@ -34,6 +34,7 @@
     <activity android:name=".SettingsApiActivity"/>
     <activity android:name=".LocationListenerActivity"/>
     <activity android:name=".PendingIntentActivity"/>
+    <activity android:name=".BackgroundPendingIntentActivity"/>
     <activity android:name=".LocationAvailabilityActivity"/>
     <activity android:name=".MultipleLocationListenerMultipleClientsActivity"/>
     <activity android:name=".MultipleLocationListenerSingleClientActivity"/>
