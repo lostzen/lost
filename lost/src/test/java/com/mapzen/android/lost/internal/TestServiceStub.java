@@ -26,7 +26,7 @@ public class TestServiceStub extends IFusedLocationProviderService.Stub {
 
   }
 
-  @Override public void removeLocationUpdates() throws RemoteException {
+  @Override public void removeLocationUpdates(LocationRequest request) throws RemoteException {
 
   }
 

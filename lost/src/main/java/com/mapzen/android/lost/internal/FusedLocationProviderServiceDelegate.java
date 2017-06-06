@@ -43,11 +43,11 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
   }
 
   public void requestLocationUpdates(LocationRequest request) {
-    locationEngine.setRequest(request);
+    locationEngine.addRequest(request);
   }
 
-  public void removeLocationUpdates() {
-    locationEngine.setRequest(null);
+  public void removeLocationUpdates(LocationRequest request) {
+    locationEngine.removeRequest(request);
   }
 
   public void setMockMode(boolean isMockMode) {
@@ -114,7 +114,7 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
 
   private void toggleMockMode() {
     mockMode = !mockMode;
-    locationEngine.setRequest(null);
+    locationEngine.removeAllRequests();
     if (mockMode) {
       locationEngine = new MockEngine(context, this, new GpxTraceThreadFactory());
     } else {

@@ -134,8 +134,9 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
   }
 
   @Test public void removeLocationUpdates_shouldUnregisterAllListeners() throws Exception {
-    delegate.requestLocationUpdates(LocationRequest.create());
-    delegate.removeLocationUpdates();
+    LocationRequest request = LocationRequest.create();
+    delegate.requestLocationUpdates(request);
+    delegate.removeLocationUpdates(request);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 
@@ -265,7 +266,7 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
     LocationRequest locationRequest =
         LocationRequest.create().setPriority(PRIORITY_BALANCED_POWER_ACCURACY);
     delegate.requestLocationUpdates(locationRequest);
-    delegate.removeLocationUpdates();
+    delegate.removeLocationUpdates(locationRequest);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 
@@ -338,7 +339,7 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
   @Test public void removeLocationUpdates_locationCallback_shouldUnregisterAllListeners() {
     LocationRequest request = LocationRequest.create();
     delegate.requestLocationUpdates(request);
-    delegate.removeLocationUpdates();
+    delegate.removeLocationUpdates(request);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 

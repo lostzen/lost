@@ -36,8 +36,9 @@ public class FusedLocationProviderService extends Service {
           delegate.requestLocationUpdates(request);
         }
 
-        @Override public void removeLocationUpdates() throws RemoteException {
-          delegate.removeLocationUpdates();
+        @Override public void removeLocationUpdates(LocationRequest request)
+            throws RemoteException {
+          delegate.removeLocationUpdates(request);
         }
 
         @Override public void setMockMode(boolean isMockMode) throws RemoteException {
