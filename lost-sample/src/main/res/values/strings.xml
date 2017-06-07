@@ -80,5 +80,7 @@
   <string name="sample_multiple_clients_diff_intervals_description">Demonstrates how multiple clients can request location updates at different fastest intervals</string>
   <string name="sample_single_client_diff_intervals_title">Single Client w/different Intervals</string>
   <string name="sample_single_client_diff_intervals_description">Demonstrates how a single client can request location updates at different fastest intervals</string>
+  <string name="sample_multiple_clients_priorities_title">Multiple Clients w/different request priorities</string>
+  <string name="sample_multiple_clients_priorities_description">Demonstrates multiple clients receiving location requests for different location priorities</string>
 
 </resources>

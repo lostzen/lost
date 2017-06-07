@@ -10,8 +10,6 @@ import com.mapzen.android.lost.api.ResultCallback;
 import com.mapzen.android.lost.api.Status;
 import com.mapzen.lost.BuildConfig;
 
-import com.google.common.collect.Lists;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

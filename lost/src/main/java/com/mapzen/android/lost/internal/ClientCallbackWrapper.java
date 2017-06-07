@@ -1,14 +1,11 @@
 package com.mapzen.android.lost.internal;
 
-import com.mapzen.android.lost.api.LocationCallback;
-import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LostApiClient;
 
-import android.app.PendingIntent;
 
 /**
- * Wraps a {@link LostApiClient} to either a {@link LocationListener}, {@link PendingIntent}, or
- * {@link LocationCallback}.
+ * Wraps a {@link LostApiClient} to either a {@link com.mapzen.android.lost.api.LocationListener},
+ * {@link android.app.PendingIntent}, or {@link com.mapzen.android.lost.api.LocationCallback}.
  */
 class ClientCallbackWrapper {
 

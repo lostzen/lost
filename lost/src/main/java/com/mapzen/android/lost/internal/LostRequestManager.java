@@ -50,17 +50,20 @@ public class LostRequestManager implements RequestManager {
     registerRequest(wrapper, request);
   }
 
-  @Override public Set<LocationRequest> removeLocationUpdates(LostApiClient client, LocationListener listener) {
+  @Override public Set<LocationRequest> removeLocationUpdates(LostApiClient client,
+      LocationListener listener) {
     ClientCallbackWrapper wrapper = getWrapper(client, listener);
     return getRequestOnlyUsedBy(wrapper);
   }
 
-  @Override public Set<LocationRequest> removeLocationUpdates(LostApiClient client, PendingIntent callbackIntent) {
+  @Override public Set<LocationRequest> removeLocationUpdates(LostApiClient client,
+      PendingIntent callbackIntent) {
     ClientCallbackWrapper wrapper = getWrapper(client, callbackIntent);
     return getRequestOnlyUsedBy(wrapper);
   }
 
-  @Override public Set<LocationRequest> removeLocationUpdates(LostApiClient client, LocationCallback callback) {
+  @Override public Set<LocationRequest> removeLocationUpdates(LostApiClient client,
+      LocationCallback callback) {
     ClientCallbackWrapper wrapper = getWrapper(client, callback);
     return getRequestOnlyUsedBy(wrapper);
   }

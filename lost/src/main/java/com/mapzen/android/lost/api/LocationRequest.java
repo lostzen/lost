@@ -74,14 +74,24 @@ public final class LocationRequest implements Parcelable {
   }
 
   @Override public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     LocationRequest that = (LocationRequest) o;
 
-    if (interval != that.interval) return false;
-    if (fastestInterval != that.fastestInterval) return false;
-    if (Float.compare(that.smallestDisplacement, smallestDisplacement) != 0) return false;
+    if (interval != that.interval) {
+      return false;
+    }
+    if (fastestInterval != that.fastestInterval) {
+      return false;
+    }
+    if (Float.compare(that.smallestDisplacement, smallestDisplacement) != 0) {
+      return false;
+    }
     return priority == that.priority;
   }
 
