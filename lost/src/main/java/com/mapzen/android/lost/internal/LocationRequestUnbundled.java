@@ -20,8 +20,8 @@ public class LocationRequestUnbundled {
     requests.add(request);
   }
 
-  public void removeRequest(LocationRequest request) {
-    requests.remove(request);
+  public void removeRequests(List<LocationRequest> requests) {
+    this.requests.removeAll(requests);
     fastestInterval = calculateFastestInterval();
   }
 

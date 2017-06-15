@@ -12,6 +12,7 @@ import android.os.RemoteException;
 import android.support.annotation.RequiresPermission;
 
 import java.io.File;
+import java.util.List;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -46,8 +47,8 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
     locationEngine.addRequest(request);
   }
 
-  public void removeLocationUpdates(LocationRequest request) {
-    locationEngine.removeRequest(request);
+  public void removeLocationUpdates(List<LocationRequest> requests) {
+    locationEngine.removeRequests(requests);
   }
 
   public void setMockMode(boolean isMockMode) {

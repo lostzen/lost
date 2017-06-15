@@ -181,8 +181,10 @@ public class FusionEngineTest extends BaseRobolectricTest {
 
   @Test public void addRequest_shouldDisableLocationUpdatesForNullRequest() throws Exception {
     LocationRequest request = LocationRequest.create();
+    List requests = new ArrayList();
+    requests.add(request);
     fusionEngine.addRequest(request);
-    fusionEngine.removeRequest(request);
+    fusionEngine.removeRequests(requests);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 

@@ -7,10 +7,10 @@ import com.mapzen.android.lost.api.LostApiClient;
 
 import android.app.PendingIntent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Manages requests for {@link ClientCallbackWrapper}s so that the system can properly remove
@@ -19,7 +19,7 @@ import java.util.Set;
 public class LostRequestManager implements RequestManager {
 
   private static LostRequestManager instance;
-  private Map<ClientCallbackWrapper, Set<LocationRequest>> clientCallbackToLocationRequests;
+  private Map<ClientCallbackWrapper, List<LocationRequest>> clientCallbackToLocationRequests;
 
   LostRequestManager() {
     clientCallbackToLocationRequests = new HashMap<>();
@@ -50,19 +50,19 @@ public class LostRequestManager implements RequestManager {
     registerRequest(wrapper, request);
   }
 
-  @Override public Set<LocationRequest> removeLocationUpdates(LostApiClient client,
+  @Override public List<LocationRequest> removeLocationUpdates(LostApiClient client,
       LocationListener listener) {
     ClientCallbackWrapper wrapper = getWrapper(client, listener);
     return getRequestOnlyUsedBy(wrapper);
   }
 
-  @Override public Set<LocationRequest> removeLocationUpdates(LostApiClient client,
+  @Override public List<LocationRequest> removeLocationUpdates(LostApiClient client,
       PendingIntent callbackIntent) {
     ClientCallbackWrapper wrapper = getWrapper(client, callbackIntent);
     return getRequestOnlyUsedBy(wrapper);
   }
 
-  @Override public Set<LocationRequest> removeLocationUpdates(LostApiClient client,
+  @Override public List<LocationRequest> removeLocationUpdates(LostApiClient client,
       LocationCallback callback) {
     ClientCallbackWrapper wrapper = getWrapper(client, callback);
     return getRequestOnlyUsedBy(wrapper);
@@ -73,28 +73,25 @@ public class LostRequestManager implements RequestManager {
   }
 
   private void registerRequest(ClientCallbackWrapper wrapper, LocationRequest request) {
-    Set<LocationRequest> requests = clientCallbackToLocationRequests.get(wrapper);
+    List<LocationRequest> requests = clientCallbackToLocationRequests.get(wrapper);
     if (requests == null) {
-      requests = new HashSet<>();
+      requests = new ArrayList();
       clientCallbackToLocationRequests.put(wrapper, requests);
     }
-    requests.add(request);
+    LocationRequest r = new LocationRequest(request);
+    requests.add(r);
   }
 
-  private Set<LocationRequest> getRequestOnlyUsedBy(ClientCallbackWrapper wrapper) {
-    Set<LocationRequest> requestsToRemove = clientCallbackToLocationRequests.get(wrapper);
+  private List<LocationRequest> getRequestOnlyUsedBy(ClientCallbackWrapper wrapper) {
+    List<LocationRequest> requestsToRemove = clientCallbackToLocationRequests.get(wrapper);
     if (requestsToRemove == null) {
-      return requestsToRemove;
+      return null;
     }
     clientCallbackToLocationRequests.remove(wrapper);
-    for (ClientCallbackWrapper w : clientCallbackToLocationRequests.keySet()) {
-      Set<LocationRequest> requests = clientCallbackToLocationRequests.get(w);
-      requestsToRemove.removeAll(requests);
-    }
     return requestsToRemove;
   }
 
-  Map<ClientCallbackWrapper, Set<LocationRequest>> getClientCallbackMap() {
+  Map<ClientCallbackWrapper, List<LocationRequest>> getClientCallbackMap() {
     return clientCallbackToLocationRequests;
   }
 }

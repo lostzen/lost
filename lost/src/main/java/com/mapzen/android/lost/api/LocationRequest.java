@@ -25,6 +25,13 @@ public final class LocationRequest implements Parcelable {
     return new LocationRequest();
   }
 
+  public LocationRequest(LocationRequest incoming) {
+    this.setInterval(incoming.getInterval());
+    this.setFastestInterval(incoming.getFastestInterval());
+    this.setSmallestDisplacement(incoming.getSmallestDisplacement());
+    this.setPriority(incoming.getPriority());
+  }
+
   public long getInterval() {
     return interval;
   }

@@ -9,6 +9,8 @@ import android.location.LocationManager;
 import android.os.Looper;
 import android.support.annotation.RequiresPermission;
 
+import java.util.List;
+
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
@@ -51,9 +53,9 @@ public abstract class LocationEngine {
    *
    * @param request Valid location request to enable.
    */
-  public void removeRequest(LocationRequest request) {
+  public void removeRequests(List<LocationRequest> requests) {
     if (request != null) {
-      this.request.removeRequest(request);
+      this.request.removeRequests(requests);
       disable();
       if (!this.request.getRequests().isEmpty()) {
         enable();

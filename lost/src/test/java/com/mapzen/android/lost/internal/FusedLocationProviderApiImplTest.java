@@ -26,8 +26,8 @@ import android.location.Location;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -204,34 +204,34 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
   @Test public void removeLocationUpdates_listener_shouldCallService() throws Exception {
     LocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
-    Set<LocationRequest> requests = new HashSet<>();
+    List<LocationRequest> requests = new ArrayList<>();
     requests.add(request);
     when(requestManager.removeLocationUpdates(connectedClient, listener)).
         thenReturn(requests);
     api.removeLocationUpdates(connectedClient, listener);
-    verify(service).removeLocationUpdates(any(LocationRequest.class));
+    verify(service).removeLocationUpdates(any(List.class));
   }
 
   @Test public void removeLocationUpdates_pendingIntent_shouldCallService() throws Exception {
     PendingIntent callbackIntent = mock(PendingIntent.class);
     LocationRequest request = LocationRequest.create();
-    Set<LocationRequest> requests = new HashSet<>();
+    List<LocationRequest> requests = new ArrayList<>();
     requests.add(request);
     when(requestManager.removeLocationUpdates(connectedClient, callbackIntent)).
         thenReturn(requests);
     api.removeLocationUpdates(connectedClient, callbackIntent);
-    verify(service).removeLocationUpdates(request);
+    verify(service).removeLocationUpdates(requests);
   }
 
   @Test public void removeLocationUpdates_callback_shouldCallService() throws Exception {
     TestLocationCallback callback = new TestLocationCallback();
     LocationRequest request = LocationRequest.create();
-    Set<LocationRequest> requests = new HashSet<>();
+    List<LocationRequest> requests = new ArrayList<>();
     requests.add(request);
     when(requestManager.removeLocationUpdates(connectedClient, callback)).
         thenReturn(requests);
     api.removeLocationUpdates(connectedClient, callback);
-    verify(service).removeLocationUpdates(request);
+    verify(service).removeLocationUpdates(requests);
   }
 
   @Test(expected = IllegalStateException.class)
@@ -387,13 +387,13 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
       throws Exception {
     TestLocationListener listener = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
-    Set<LocationRequest> requests = new HashSet<>();
+    List<LocationRequest> requests = new ArrayList<>();
     requests.add(request);
     when(requestManager.removeLocationUpdates(connectedClient, listener)).
         thenReturn(requests);
     api.requestLocationUpdates(connectedClient, request, listener);
     api.removeLocationUpdates(connectedClient, listener);
-    verify(service).removeLocationUpdates(request);
+    verify(service).removeLocationUpdates(requests);
   }
 
   @Test public void removeLocationUpdates_shouldNotKillEngineIfListenerStillActive()
@@ -401,14 +401,14 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
     TestLocationListener listener1 = new TestLocationListener();
     TestLocationListener listener2 = new TestLocationListener();
     LocationRequest request = LocationRequest.create();
-    Set<LocationRequest> requests = new HashSet<>();
+    List<LocationRequest> requests = new ArrayList<>();
     requests.add(request);
     when(requestManager.removeLocationUpdates(connectedClient, listener1)).
         thenReturn(requests);
     api.requestLocationUpdates(connectedClient, request, listener1);
     api.requestLocationUpdates(connectedClient, LocationRequest.create(), listener2);
     api.removeLocationUpdates(connectedClient, listener1);
-    verify(service).removeLocationUpdates(request);
+    verify(service).removeLocationUpdates(requests);
   }
 
   @Test public void removeLocationUpdates_listener_shouldCallRequestManager() {

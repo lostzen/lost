@@ -7,7 +7,7 @@ import com.mapzen.android.lost.api.LostApiClient;
 
 import android.app.PendingIntent;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * Keeps track of which {@link LocationListener}s, {@link PendingIntent}s, and
@@ -24,9 +24,9 @@ interface RequestManager {
   void requestLocationUpdates(LostApiClient client, LocationRequest request,
       PendingIntent callbackIntent);
 
-  Set<LocationRequest> removeLocationUpdates(LostApiClient client, LocationListener listener);
+  List<LocationRequest> removeLocationUpdates(LostApiClient client, LocationListener listener);
 
-  Set<LocationRequest> removeLocationUpdates(LostApiClient client, PendingIntent callbackIntent);
+  List<LocationRequest> removeLocationUpdates(LostApiClient client, PendingIntent callbackIntent);
 
-  Set<LocationRequest> removeLocationUpdates(LostApiClient client, LocationCallback callback);
+  List<LocationRequest> removeLocationUpdates(LostApiClient client, LocationCallback callback);
 }
