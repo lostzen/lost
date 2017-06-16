@@ -20,6 +20,11 @@ public class LocationRequestUnbundled {
     requests.add(request);
   }
 
+  public void removeRequests(List<LocationRequest> requests) {
+    this.requests.removeAll(requests);
+    fastestInterval = calculateFastestInterval();
+  }
+
   public void removeAllRequests() {
     fastestInterval = Long.MAX_VALUE;
     requests.clear();
@@ -31,5 +36,15 @@ public class LocationRequestUnbundled {
 
   public long getFastestInterval() {
     return fastestInterval;
+  }
+
+  public long calculateFastestInterval() {
+    long interval = Long.MAX_VALUE;
+    for (LocationRequest request : requests) {
+      if (request.getFastestInterval() < interval) {
+        interval = request.getFastestInterval();
+      }
+    }
+    return interval;
   }
 }

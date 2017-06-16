@@ -21,6 +21,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,6 +34,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   private Context context;
   private FusedLocationServiceConnectionManager serviceConnectionManager;
   private FusedLocationServiceCallbackManager serviceCallbackManager;
+  private RequestManager requestManager;
   private boolean isBound;
 
   IFusedLocationProviderService service;
@@ -88,9 +90,10 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   }
 
   public FusedLocationProviderApiImpl(FusedLocationServiceConnectionManager connectionManager,
-      FusedLocationServiceCallbackManager callbackManager) {
+      FusedLocationServiceCallbackManager callbackManager, RequestManager requestManager) {
     serviceConnectionManager = connectionManager;
     serviceCallbackManager = callbackManager;
+    this.requestManager = requestManager;
     serviceConnectionManager.setEventCallbacks(this);
   }
 
@@ -135,6 +138,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
       LocationRequest request, LocationListener listener) {
     throwIfNotConnected(client);
+    requestManager.requestLocationUpdates(client, request, listener);
     LostClientManager.shared().addListener(client, request, listener);
     requestLocationUpdatesInternal(request);
     return new SimplePendingResult(true);
@@ -148,6 +152,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
       LocationRequest request, LocationCallback callback, Looper looper) {
     throwIfNotConnected(client);
+    requestManager.requestLocationUpdates(client, request, callback);
     LostClientManager.shared().addLocationCallback(client, request, callback, looper);
     requestLocationUpdatesInternal(request);
     return new SimplePendingResult(true);
@@ -156,6 +161,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   @Override public PendingResult<Status> requestLocationUpdates(LostApiClient client,
       LocationRequest request, PendingIntent callbackIntent) {
     throwIfNotConnected(client);
+    requestManager.requestLocationUpdates(client, request, callbackIntent);
     LostClientManager.shared().addPendingIntent(client, request, callbackIntent);
     requestLocationUpdatesInternal(request);
     return new SimplePendingResult(true);
@@ -173,9 +179,22 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     }
   }
 
+  private void removeLocationUpdatesInternal(List<LocationRequest> requests) {
+    if (requests == null) {
+      return;
+    }
+    try {
+      service.removeLocationUpdates(requests);
+    } catch (RemoteException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       LocationListener listener) {
     throwIfNotConnected(client);
+    List<LocationRequest> requests = requestManager.removeLocationUpdates(client, listener);
+    removeLocationUpdatesInternal(requests);
     boolean hasResult = LostClientManager.shared().removeListener(client, listener);
     checkAllListenersPendingIntentsAndCallbacks();
     return new SimplePendingResult(hasResult);
@@ -184,6 +203,8 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       PendingIntent callbackIntent) {
     throwIfNotConnected(client);
+    List<LocationRequest> requests = requestManager.removeLocationUpdates(client, callbackIntent);
+    removeLocationUpdatesInternal(requests);
     boolean hasResult = LostClientManager.shared().removePendingIntent(client, callbackIntent);
     checkAllListenersPendingIntentsAndCallbacks();
     return new SimplePendingResult(hasResult);
@@ -192,6 +213,8 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   @Override public PendingResult<Status> removeLocationUpdates(LostApiClient client,
       LocationCallback callback) {
     throwIfNotConnected(client);
+    List<LocationRequest> requests = requestManager.removeLocationUpdates(client, callback);
+    removeLocationUpdatesInternal(requests);
     boolean hasResult = LostClientManager.shared().removeLocationCallback(client, callback);
     checkAllListenersPendingIntentsAndCallbacks();
     return new SimplePendingResult(hasResult);
@@ -202,13 +225,14 @@ public class FusedLocationProviderApiImpl extends ApiImpl
    * then shutdown the location engines.
    */
   private void checkAllListenersPendingIntentsAndCallbacks() {
-    if (LostClientManager.shared().hasNoListeners()) {
-      try {
-        service.removeLocationUpdates();
-      } catch (RemoteException e) {
-        throw new RuntimeException(e);
-      }
-    }
+    //TODO: potentially remove hasNoListeners method, not needed anymore
+    //if (LostClientManager.shared().hasNoListeners()) {
+    //  try {
+    //    service.removeAllLocationUpdates();
+    //  } catch (RemoteException e) {
+    //    throw new RuntimeException(e);
+    //  }
+    //}
   }
 
   @Override public PendingResult<Status> setMockMode(LostApiClient client, boolean isMockMode) {

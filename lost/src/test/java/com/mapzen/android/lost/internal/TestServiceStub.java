@@ -6,6 +6,8 @@ import com.mapzen.android.lost.api.LocationRequest;
 import android.location.Location;
 import android.os.RemoteException;
 
+import java.util.List;
+
 public class TestServiceStub extends IFusedLocationProviderService.Stub {
 
   IFusedLocationProviderCallback callback;
@@ -26,7 +28,8 @@ public class TestServiceStub extends IFusedLocationProviderService.Stub {
 
   }
 
-  @Override public void removeLocationUpdates() throws RemoteException {
+  @Override public void removeLocationUpdates(List<LocationRequest> request) throws
+      RemoteException {
 
   }
 

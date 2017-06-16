@@ -26,6 +26,8 @@ import android.location.Location;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -35,6 +37,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 
 @RunWith(RobolectricTestRunner.class)
@@ -44,6 +47,7 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
 
   private LostApiClient connectedClient;
   private LostApiClient disconnectedClient;
+  private RequestManager requestManager;
   private FusedLocationProviderApiImpl api;
   private IFusedLocationProviderService service = mock(IFusedLocationProviderService.class);
   private FusedLocationServiceConnectionManager connectionManager;
@@ -57,12 +61,13 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
     disconnectedClient = new LostApiClient.Builder(RuntimeEnvironment.application).build();
 
     connectionManager = spy(new FusedLocationServiceConnectionManager());
+    requestManager = mock(RequestManager.class);
     Mockito.doCallRealMethod().when(connectionManager).setEventCallbacks(any(
         FusedLocationServiceConnectionManager.EventCallbacks.class));
     Mockito.doCallRealMethod().when(connectionManager).connect(any(Context.class), any(
         LostApiClient.ConnectionCallbacks.class));
     api = new FusedLocationProviderApiImpl(connectionManager,
-        new FusedLocationServiceCallbackManager());
+        new FusedLocationServiceCallbackManager(), requestManager);
     api.connect(application, null);
     api.service = service;
   }
@@ -198,20 +203,35 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
 
   @Test public void removeLocationUpdates_listener_shouldCallService() throws Exception {
     LocationListener listener = new TestLocationListener();
+    LocationRequest request = LocationRequest.create();
+    List<LocationRequest> requests = new ArrayList<>();
+    requests.add(request);
+    when(requestManager.removeLocationUpdates(connectedClient, listener)).
+        thenReturn(requests);
     api.removeLocationUpdates(connectedClient, listener);
-    verify(service).removeLocationUpdates();
+    verify(service).removeLocationUpdates(any(List.class));
   }
 
   @Test public void removeLocationUpdates_pendingIntent_shouldCallService() throws Exception {
     PendingIntent callbackIntent = mock(PendingIntent.class);
+    LocationRequest request = LocationRequest.create();
+    List<LocationRequest> requests = new ArrayList<>();
+    requests.add(request);
+    when(requestManager.removeLocationUpdates(connectedClient, callbackIntent)).
+        thenReturn(requests);
     api.removeLocationUpdates(connectedClient, callbackIntent);
-    verify(service).removeLocationUpdates();
+    verify(service).removeLocationUpdates(requests);
   }
 
   @Test public void removeLocationUpdates_callback_shouldCallService() throws Exception {
     TestLocationCallback callback = new TestLocationCallback();
+    LocationRequest request = LocationRequest.create();
+    List<LocationRequest> requests = new ArrayList<>();
+    requests.add(request);
+    when(requestManager.removeLocationUpdates(connectedClient, callback)).
+        thenReturn(requests);
     api.removeLocationUpdates(connectedClient, callback);
-    verify(service).removeLocationUpdates();
+    verify(service).removeLocationUpdates(requests);
   }
 
   @Test(expected = IllegalStateException.class)
@@ -366,19 +386,68 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
   @Test public void removeLocationUpdates_shouldKillEngineIfNoListenersStillActive()
       throws Exception {
     TestLocationListener listener = new TestLocationListener();
-    api.requestLocationUpdates(connectedClient, LocationRequest.create(), listener);
+    LocationRequest request = LocationRequest.create();
+    List<LocationRequest> requests = new ArrayList<>();
+    requests.add(request);
+    when(requestManager.removeLocationUpdates(connectedClient, listener)).
+        thenReturn(requests);
+    api.requestLocationUpdates(connectedClient, request, listener);
     api.removeLocationUpdates(connectedClient, listener);
-    verify(service).removeLocationUpdates();
+    verify(service).removeLocationUpdates(requests);
   }
 
   @Test public void removeLocationUpdates_shouldNotKillEngineIfListenerStillActive()
       throws Exception {
     TestLocationListener listener1 = new TestLocationListener();
     TestLocationListener listener2 = new TestLocationListener();
-    api.requestLocationUpdates(connectedClient, LocationRequest.create(), listener1);
+    LocationRequest request = LocationRequest.create();
+    List<LocationRequest> requests = new ArrayList<>();
+    requests.add(request);
+    when(requestManager.removeLocationUpdates(connectedClient, listener1)).
+        thenReturn(requests);
+    api.requestLocationUpdates(connectedClient, request, listener1);
     api.requestLocationUpdates(connectedClient, LocationRequest.create(), listener2);
     api.removeLocationUpdates(connectedClient, listener1);
-    verify(service, never()).removeLocationUpdates();
+    verify(service).removeLocationUpdates(requests);
+  }
+
+  @Test public void removeLocationUpdates_listener_shouldCallRequestManager() {
+    LocationListener listener = mock(LocationListener.class);
+    api.removeLocationUpdates(connectedClient, listener);
+    verify(requestManager).removeLocationUpdates(connectedClient, listener);
+  }
+
+  @Test public void removeLocationUpdates_pendingIntent_shouldCallRequestManager() {
+    PendingIntent intent = mock(PendingIntent.class);
+    api.removeLocationUpdates(connectedClient, intent);
+    verify(requestManager).removeLocationUpdates(connectedClient, intent);
+  }
+
+  @Test public void removeLocationUpdates_callback_shouldCallRequestManager() {
+    LocationCallback callback = mock(LocationCallback.class);
+    api.removeLocationUpdates(connectedClient, callback);
+    verify(requestManager).removeLocationUpdates(connectedClient, callback);
+  }
+
+  @Test public void requestLocationUpdates_listener_shouldCallRequestManager() {
+    LocationRequest request = LocationRequest.create();
+    LocationListener listener = mock(LocationListener.class);
+    api.requestLocationUpdates(connectedClient, request, listener);
+    verify(requestManager).requestLocationUpdates(connectedClient, request, listener);
+  }
+
+  @Test public void requestLocationUpdates_pendingIntent_shouldCallRequestManager() {
+    LocationRequest request = LocationRequest.create();
+    PendingIntent intent = mock(PendingIntent.class);
+    api.requestLocationUpdates(connectedClient, request, intent);
+    verify(requestManager).requestLocationUpdates(connectedClient, request, intent);
+  }
+
+  @Test public void requestLocationUpdates_callback_shouldCallRequestManager() {
+    LocationRequest request = LocationRequest.create();
+    LocationCallback callback = mock(LocationCallback.class);
+    api.requestLocationUpdates(connectedClient, request, callback, mock(Looper.class));
+    verify(requestManager).requestLocationUpdates(connectedClient, request, callback);
   }
 
   @Test public void requestLocationUpdates_listener_shouldReturnFusedLocationPendingResult() {

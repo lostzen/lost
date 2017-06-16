@@ -149,51 +149,54 @@ public class FusionEngineTest extends BaseRobolectricTest {
     assertThat(fusionEngine.getLastLocation()).isNull();
   }
 
-  @Test public void setRequest_shouldRegisterGpsAndNetworkIfPriorityHighAccuracy()
+  @Test public void addRequest_shouldRegisterGpsAndNetworkIfPriorityHighAccuracy()
       throws Exception {
-    fusionEngine.setRequest(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY));
+    fusionEngine.addRequest(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY));
     Collection<String> providers = shadowLocationManager.getProvidersForListener(fusionEngine);
     assertThat(providers).hasSize(2);
     assertThat(providers).contains(GPS_PROVIDER);
     assertThat(providers).contains(NETWORK_PROVIDER);
   }
 
-  @Test public void setRequest_shouldRegisterNetworkOnlyIfPriorityBalanced() throws Exception {
-    fusionEngine.setRequest(LocationRequest.create().setPriority(PRIORITY_BALANCED_POWER_ACCURACY));
+  @Test public void addRequest_shouldRegisterNetworkOnlyIfPriorityBalanced() throws Exception {
+    fusionEngine.addRequest(LocationRequest.create().setPriority(PRIORITY_BALANCED_POWER_ACCURACY));
     Collection<String> providers = shadowLocationManager.getProvidersForListener(fusionEngine);
     assertThat(providers).hasSize(1);
     assertThat(providers).contains(NETWORK_PROVIDER);
   }
 
-  @Test public void setRequest_shouldRegisterNetworkOnlyIfPriorityLowPower() throws Exception {
-    fusionEngine.setRequest(LocationRequest.create().setPriority(PRIORITY_LOW_POWER));
+  @Test public void addRequest_shouldRegisterNetworkOnlyIfPriorityLowPower() throws Exception {
+    fusionEngine.addRequest(LocationRequest.create().setPriority(PRIORITY_LOW_POWER));
     Collection<String> providers = shadowLocationManager.getProvidersForListener(fusionEngine);
     assertThat(providers).hasSize(1);
     assertThat(providers).contains(NETWORK_PROVIDER);
   }
 
-  @Test public void setRequest_shouldRegisterPassiveProviderOnlyNoPower() throws Exception {
-    fusionEngine.setRequest(LocationRequest.create().setPriority(PRIORITY_NO_POWER));
+  @Test public void addRequest_shouldRegisterPassiveProviderOnlyNoPower() throws Exception {
+    fusionEngine.addRequest(LocationRequest.create().setPriority(PRIORITY_NO_POWER));
     Collection<String> providers = shadowLocationManager.getProvidersForListener(fusionEngine);
     assertThat(providers).hasSize(1);
     assertThat(providers).contains(PASSIVE_PROVIDER);
   }
 
-  @Test public void setRequest_shouldDisableLocationUpdatesForNullRequest() throws Exception {
-    fusionEngine.setRequest(LocationRequest.create());
-    fusionEngine.setRequest(null);
+  @Test public void addRequest_shouldDisableLocationUpdatesForNullRequest() throws Exception {
+    LocationRequest request = LocationRequest.create();
+    List requests = new ArrayList();
+    requests.add(request);
+    fusionEngine.addRequest(request);
+    fusionEngine.removeRequests(requests);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 
   @Test public void onLocationChanged_shouldReportGps() throws Exception {
-    fusionEngine.setRequest(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY));
+    fusionEngine.addRequest(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY));
     Location location = new Location(GPS_PROVIDER);
     shadowLocationManager.simulateLocation(location);
     assertThat(callback.location).isEqualTo(location);
   }
 
   @Test public void onLocationChanged_shouldReportNetwork() throws Exception {
-    fusionEngine.setRequest(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY));
+    fusionEngine.addRequest(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY));
     Location location = new Location(NETWORK_PROVIDER);
     shadowLocationManager.simulateLocation(location);
     assertThat(callback.location).isEqualTo(location);
@@ -202,7 +205,7 @@ public class FusionEngineTest extends BaseRobolectricTest {
   @Test public void onLocationChanged_shouldNotReportLessThanFastestIntervalGps() throws Exception {
     LocationRequest request =
         LocationRequest.create().setFastestInterval(5000).setPriority(PRIORITY_HIGH_ACCURACY);
-    fusionEngine.setRequest(request);
+    fusionEngine.addRequest(request);
 
     final long time = System.currentTimeMillis();
     Location location1 = getTestLocation(GPS_PROVIDER, 0, 0, time);
@@ -217,7 +220,7 @@ public class FusionEngineTest extends BaseRobolectricTest {
       throws Exception {
     LocationRequest request =
         LocationRequest.create().setFastestInterval(5000).setPriority(PRIORITY_HIGH_ACCURACY);
-    fusionEngine.setRequest(request);
+    fusionEngine.addRequest(request);
 
     final long time = System.currentTimeMillis();
     Location location1 = getTestLocation(NETWORK_PROVIDER, 0, 0, time);
@@ -232,7 +235,7 @@ public class FusionEngineTest extends BaseRobolectricTest {
     LocationRequest request = LocationRequest.create()
         .setSmallestDisplacement(200000)
         .setPriority(PRIORITY_HIGH_ACCURACY);
-    fusionEngine.setRequest(request);
+    fusionEngine.addRequest(request);
 
     final long time = System.currentTimeMillis();
     Location location1 = getTestLocation(GPS_PROVIDER, 0, 0, time);
@@ -246,7 +249,7 @@ public class FusionEngineTest extends BaseRobolectricTest {
   @Test public void onLocationChanged_shouldNotReportLessThanMinDisplacementNetwork()
       throws Exception {
     LocationRequest request = LocationRequest.create().setSmallestDisplacement(200000);
-    fusionEngine.setRequest(request);
+    fusionEngine.addRequest(request);
 
     final long time = System.currentTimeMillis();
     Location location1 = getTestLocation(NETWORK_PROVIDER, 0, 0, time);
@@ -260,7 +263,7 @@ public class FusionEngineTest extends BaseRobolectricTest {
   @Test public void onLocationChanged_shouldIgnoreNetworkWhenGpsIsMoreAccurate() throws Exception {
     LocationRequest request =
         LocationRequest.create().setFastestInterval(0).setPriority(PRIORITY_HIGH_ACCURACY);
-    fusionEngine.setRequest(request);
+    fusionEngine.addRequest(request);
 
     final long time = System.currentTimeMillis();
     Location gpsLocation = getTestLocation(GPS_PROVIDER, 0, 0, time);
@@ -275,7 +278,7 @@ public class FusionEngineTest extends BaseRobolectricTest {
 
   @Test public void onLocationChanged_shouldIgnoreGpsWhenNetworkIsMoreAccurate() throws Exception {
     LocationRequest request = LocationRequest.create().setFastestInterval(0);
-    fusionEngine.setRequest(request);
+    fusionEngine.addRequest(request);
 
     final long time = System.currentTimeMillis();
     Location networkLocation = getTestLocation(NETWORK_PROVIDER, 0, 0, time + 1);
@@ -293,7 +296,7 @@ public class FusionEngineTest extends BaseRobolectricTest {
     shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, gpsLocation);
 
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
-    fusionEngine.setRequest(request);
+    fusionEngine.addRequest(request);
 
     assertThat(callback.location).isEqualTo(gpsLocation);
   }
@@ -304,7 +307,7 @@ public class FusionEngineTest extends BaseRobolectricTest {
 
     LocationRequest request = LocationRequest.create().setPriority(
         PRIORITY_BALANCED_POWER_ACCURACY);
-    fusionEngine.setRequest(request);
+    fusionEngine.addRequest(request);
 
     assertThat(callback.location).isEqualTo(networkLocation);
   }
@@ -316,7 +319,7 @@ public class FusionEngineTest extends BaseRobolectricTest {
     shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, networkLocation);
 
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
-    fusionEngine.setRequest(request);
+    fusionEngine.addRequest(request);
 
     assertThat(callback.location).isEqualTo(networkLocation);
   }
@@ -329,7 +332,7 @@ public class FusionEngineTest extends BaseRobolectricTest {
     shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, networkLocation);
 
     LocationRequest request = LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY);
-    fusionEngine.setRequest(request);
+    fusionEngine.addRequest(request);
 
     assertThat(callback.numLocationReports).isEqualTo(1);
   }

@@ -9,6 +9,8 @@ import android.location.LocationManager;
 import android.os.Looper;
 import android.support.annotation.RequiresPermission;
 
+import java.util.List;
+
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
@@ -35,19 +37,35 @@ public abstract class LocationEngine {
   public abstract boolean isProviderEnabled(String provider);
 
   /**
-   * Enables the engine on receiving a valid location request. Disables the engine on receiving a
-   * {@code null} request.
+   * Enables the engine on receiving a valid location request.
    *
-   * @param request Valid location request to enable or {@code null} to disable.
+   * @param request Valid location request to enable.
    */
-  public void setRequest(LocationRequest request) {
+  public void addRequest(LocationRequest request) {
     if (request != null) {
       this.request.addRequest(request);
       enable();
-    } else {
-      this.request.removeAllRequests();
-      disable();
     }
+  }
+
+  /**
+   * Disables the engine when no requests remain, otherwise updates the engine's configuration.
+   *
+   * @param request Valid location request to enable.
+   */
+  public void removeRequests(List<LocationRequest> requests) {
+    if (request != null) {
+      this.request.removeRequests(requests);
+      disable();
+      if (!this.request.getRequests().isEmpty()) {
+        enable();
+      }
+    }
+  }
+
+  public void removeAllRequests() {
+    this.request.removeAllRequests();
+    disable();
   }
 
   /**

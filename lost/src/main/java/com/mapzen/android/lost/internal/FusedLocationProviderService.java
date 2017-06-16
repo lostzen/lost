@@ -10,6 +10,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 
+import java.util.List;
+
 /**
  * Service which runs the fused location provider in the background.
  */
@@ -36,8 +38,9 @@ public class FusedLocationProviderService extends Service {
           delegate.requestLocationUpdates(request);
         }
 
-        @Override public void removeLocationUpdates() throws RemoteException {
-          delegate.removeLocationUpdates();
+        @Override public void removeLocationUpdates(List<LocationRequest> requests)
+            throws RemoteException {
+          delegate.removeLocationUpdates(requests);
         }
 
         @Override public void setMockMode(boolean isMockMode) throws RemoteException {

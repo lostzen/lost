@@ -12,6 +12,7 @@ import android.os.RemoteException;
 import android.support.annotation.RequiresPermission;
 
 import java.io.File;
+import java.util.List;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -43,11 +44,11 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
   }
 
   public void requestLocationUpdates(LocationRequest request) {
-    locationEngine.setRequest(request);
+    locationEngine.addRequest(request);
   }
 
-  public void removeLocationUpdates() {
-    locationEngine.setRequest(null);
+  public void removeLocationUpdates(List<LocationRequest> requests) {
+    locationEngine.removeRequests(requests);
   }
 
   public void setMockMode(boolean isMockMode) {
@@ -114,7 +115,7 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
 
   private void toggleMockMode() {
     mockMode = !mockMode;
-    locationEngine.setRequest(null);
+    locationEngine.removeAllRequests();
     if (mockMode) {
       locationEngine = new MockEngine(context, this, new GpxTraceThreadFactory());
     } else {

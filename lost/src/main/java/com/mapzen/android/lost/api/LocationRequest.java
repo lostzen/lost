@@ -25,6 +25,13 @@ public final class LocationRequest implements Parcelable {
     return new LocationRequest();
   }
 
+  public LocationRequest(LocationRequest incoming) {
+    this.setInterval(incoming.getInterval());
+    this.setFastestInterval(incoming.getFastestInterval());
+    this.setSmallestDisplacement(incoming.getSmallestDisplacement());
+    this.setPriority(incoming.getPriority());
+  }
+
   public long getInterval() {
     return interval;
   }
@@ -71,6 +78,38 @@ public final class LocationRequest implements Parcelable {
 
     this.priority = priority;
     return this;
+  }
+
+  @Override public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    LocationRequest that = (LocationRequest) o;
+
+    if (interval != that.interval) {
+      return false;
+    }
+    if (fastestInterval != that.fastestInterval) {
+      return false;
+    }
+    if (Float.compare(that.smallestDisplacement, smallestDisplacement) != 0) {
+      return false;
+    }
+    return priority == that.priority;
+  }
+
+  @Override public int hashCode() {
+    int result = (int) (interval ^ (interval >>> 32));
+    result = 31 * result + (int) (fastestInterval ^ (fastestInterval >>> 32));
+    result =
+        31 * result + (smallestDisplacement != +0.0f ? Float.floatToIntBits(smallestDisplacement)
+            : 0);
+    result = 31 * result + priority;
+    return result;
   }
 
   @Override public int describeContents() {

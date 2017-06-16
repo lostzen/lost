@@ -50,7 +50,7 @@ public class MockEngineTest extends BaseRobolectricTest {
 
   @Test public void disable_shouldCancelTraceReplay() throws Exception {
     mockEngine.setTrace(getTestGpxTrace());
-    mockEngine.setRequest(LocationRequest.create().setFastestInterval(100));
+    mockEngine.addRequest(LocationRequest.create().setFastestInterval(100));
     mockEngine.disable();
     assertThat(traceThreadFactory.traceThread.isCanceled()).isTrue();
   }

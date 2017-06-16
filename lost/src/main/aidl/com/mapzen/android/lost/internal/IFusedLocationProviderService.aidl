@@ -14,7 +14,7 @@ interface IFusedLocationProviderService {
 
   void requestLocationUpdates(in LocationRequest request);
 
-  void removeLocationUpdates();
+  void removeLocationUpdates(in List<LocationRequest> requests);
 
   void setMockMode(boolean isMockMode);
 

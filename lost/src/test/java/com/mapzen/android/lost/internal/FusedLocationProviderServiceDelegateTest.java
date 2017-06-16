@@ -31,6 +31,8 @@ import android.os.RemoteException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.content.Context.LOCATION_SERVICE;
 import static android.location.LocationManager.GPS_PROVIDER;
@@ -134,8 +136,11 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
   }
 
   @Test public void removeLocationUpdates_shouldUnregisterAllListeners() throws Exception {
-    delegate.requestLocationUpdates(LocationRequest.create());
-    delegate.removeLocationUpdates();
+    LocationRequest request = LocationRequest.create();
+    List requests = new ArrayList();
+    requests.add(request);
+    delegate.requestLocationUpdates(request);
+    delegate.removeLocationUpdates(requests);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 
@@ -264,8 +269,10 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
       throws Exception {
     LocationRequest locationRequest =
         LocationRequest.create().setPriority(PRIORITY_BALANCED_POWER_ACCURACY);
+    List requests = new ArrayList();
+    requests.add(locationRequest);
     delegate.requestLocationUpdates(locationRequest);
-    delegate.removeLocationUpdates();
+    delegate.removeLocationUpdates(requests);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 
@@ -337,8 +344,10 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
 
   @Test public void removeLocationUpdates_locationCallback_shouldUnregisterAllListeners() {
     LocationRequest request = LocationRequest.create();
+    List requests = new ArrayList();
+    requests.add(request);
     delegate.requestLocationUpdates(request);
-    delegate.removeLocationUpdates();
+    delegate.removeLocationUpdates(requests);
     assertThat(shadowLocationManager.getRequestLocationUpdateListeners()).isEmpty();
   }
 

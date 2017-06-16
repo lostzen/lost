@@ -37,6 +37,7 @@
     <activity android:name=".LocationAvailabilityActivity"/>
     <activity android:name=".MultipleLocationListenerMultipleClientsActivity"/>
     <activity android:name=".MultipleLocationListenerSingleClientActivity"/>
+    <activity android:name=".MultiplePriorityMultipleClientsActivity"/>
 
     <service
         android:name=".GeofenceIntentService"
