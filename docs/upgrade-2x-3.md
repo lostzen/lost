@@ -3,7 +3,7 @@
 ### Explicitly Unregister Location Updates
 `LocationRequest`s are no longer automatically removed when a client disconnects, therefore you should ensure that you unregister all requests registered:
 
-1.x
+2.x
 ```
 // onConnected
 
@@ -12,7 +12,7 @@ LocationServices.FusedLocationApi.requestLocationUpdates(client, locationRequest
 client.disconnect();
 ```
 
-2.x
+3.x
 ```
 // onConnected
 
@@ -27,7 +27,7 @@ client.disconnect();
 ### Remove Deprecated Methods
 `onProviderDisabled` and `onProviderEnabled` have been removed from `LocationListener`:
 
-1.x
+2.x
 ```
 LocationListener listener = new LocationListener() {
     @Override public void onLocationChanged(Location location) {
@@ -44,7 +44,7 @@ LocationListener listener = new LocationListener() {
   };
 ```
 
-2.x
+3.x
 ```
 LocationListener listener = new LocationListener() {
     @Override public void onLocationChanged(Location location) {
@@ -55,12 +55,12 @@ LocationListener listener = new LocationListener() {
 
 `isProviderEnabled` has been removed from `FusedLocationProviderApi` in favor of `SettingsApi#checkLocationSettings(LostApiClient, LocationSettingsRequest)`
 
-1.x
+2.x
 ```
 boolean enabled = LocationServices.FusedLocationProviderApi.isProviderEnabled(client, GPS_PROVIDER);
 ```
 
-2.x
+3.x
 ```
 PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(apiClient, request);
 
