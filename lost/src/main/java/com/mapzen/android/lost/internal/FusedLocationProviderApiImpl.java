@@ -39,15 +39,9 @@ public class FusedLocationProviderApiImpl extends ApiImpl
 
   IFusedLocationProviderService service;
 
-  IFusedLocationProviderCallback.Stub remoteCallback
+  private IFusedLocationProviderCallback.Stub remoteCallback
       = new IFusedLocationProviderCallback.Stub() {
     public void onLocationChanged(final Location location) throws RemoteException {
-
-      if (service == null) {
-        throw new IllegalStateException("Location update received after client was "
-                + "disconnected. Did you forget to unregister location updates before "
-                + "disconnecting?");
-      }
 
       new Handler(Looper.getMainLooper()).post(new Runnable() {
         @Override public void run() {

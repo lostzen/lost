@@ -155,12 +155,6 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
         new TestLocationCallback(), Looper.myLooper());
   }
 
-  @Test(expected = IllegalStateException.class)
-  public void onLocationChanged_shouldThrowIfServiceDisconnected() throws RemoteException {
-    api.service = null;
-    api.remoteCallback.onLocationChanged(null);
-  }
-
   @Test public void requestLocationUpdates_listener_shouldCallService() throws Exception {
     LocationRequest request = LocationRequest.create();
     LocationListener listener = new TestLocationListener();
