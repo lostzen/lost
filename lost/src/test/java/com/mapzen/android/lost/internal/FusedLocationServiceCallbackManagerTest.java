@@ -20,12 +20,6 @@ public class FusedLocationServiceCallbackManagerTest {
   FusedLocationServiceCallbackManager callbackManager =
       new FusedLocationServiceCallbackManager();
 
-  @Test(expected = IllegalStateException.class)
-  public void onLocationChanged_shouldThrowIfServiceDisconnected() {
-    callbackManager.onLocationChanged(mock(Context.class), mock(Location.class),
-        mock(LostClientManager.class), null);
-  }
-
   @Test public void onLocationChanged_shouldReportLocationChanged() {
     LostClientManager clientManager = mock(LostClientManager.class);
     Location location = mock(Location.class);

@@ -42,10 +42,15 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   private IFusedLocationProviderCallback.Stub remoteCallback
       = new IFusedLocationProviderCallback.Stub() {
     public void onLocationChanged(final Location location) throws RemoteException {
+
       new Handler(Looper.getMainLooper()).post(new Runnable() {
         @Override public void run() {
-          final LostClientManager clientManager = LostClientManager.shared();
-          serviceCallbackManager.onLocationChanged(context, location, clientManager, service);
+          // #224: this call is async, service may have been legally set to null in the meantime
+          if (service != null)
+          {
+            final LostClientManager clientManager = LostClientManager.shared();
+            serviceCallbackManager.onLocationChanged(context, location, clientManager, service);
+          }
         }
       });
     }
