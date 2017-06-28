@@ -18,8 +18,7 @@ public class FusedLocationServiceCallbackManager {
   /**
    * Called when a new location has been received. This method handles dispatching changes to all
    * {@link com.mapzen.android.lost.api.LocationListener}s, {@link android.app.PendingIntent}s, and
-   * {@link com.mapzen.android.lost.api.LocationCallback}s which are registered. If the
-   * {@link IFusedLocationProviderService} is null, an {@link IllegalStateException} will be thrown.
+   * {@link com.mapzen.android.lost.api.LocationCallback}s which are registered.
    * @param context
    * @param location
    * @param clientManager
@@ -27,11 +26,6 @@ public class FusedLocationServiceCallbackManager {
    */
   void onLocationChanged(Context context, Location location, LostClientManager clientManager,
       IFusedLocationProviderService service) {
-    if (service == null) {
-      throw new IllegalStateException("Location update received after client was "
-          + "disconnected. Did you forget to unregister location updates before "
-          + "disconnecting?");
-    }
 
     ReportedChanges changes = clientManager.reportLocationChanged(location);
 

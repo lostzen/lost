@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
@@ -152,6 +153,12 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
     connectedClient.disconnect();
     api.requestLocationUpdates(connectedClient, LocationRequest.create(),
         new TestLocationCallback(), Looper.myLooper());
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void onLocationChanged_shouldThrowIfServiceDisconnected() throws RemoteException {
+    api.service = null;
+    api.remoteCallback.onLocationChanged(null);
   }
 
   @Test public void requestLocationUpdates_listener_shouldCallService() throws Exception {
