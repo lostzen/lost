@@ -46,8 +46,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
       new Handler(Looper.getMainLooper()).post(new Runnable() {
         @Override public void run() {
           // #224: this call is async, service may have been legally set to null in the meantime
-          if (service != null)
-          {
+          if (service != null) {
             final LostClientManager clientManager = LostClientManager.shared();
             serviceCallbackManager.onLocationChanged(context, location, clientManager, service);
           }
