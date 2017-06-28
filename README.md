@@ -13,6 +13,7 @@ Lost operates by making calls directly to the [LocationManger][1]. Lost can run 
 Set up:
 - [Installation](https://github.com/mapzen/lost/blob/master/docs/installation.md)
 - [Upgrading 1.x to 2.0](https://github.com/mapzen/lost/blob/master/docs/upgrade-1x-2.md)
+- [Upgrading 2.x to 3.0](https://github.com/mapzen/lost/blob/master/docs/upgrade-2x-3.md)
 - [Getting Started](https://github.com/mapzen/lost/blob/master/docs/getting-started.md)
 - [Getting the Last Known Location](https://github.com/mapzen/lost/blob/master/docs/last-known-location.md)
 - [Receiving Location Updates](https://github.com/mapzen/lost/blob/master/docs/location-updates.md)
