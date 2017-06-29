@@ -129,7 +129,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     try {
       location = service.getLastLocation();
     } catch (RemoteException e) {
-      Log.e(TAG, "Error occurred trying to get last Location " + e.getStackTrace());
+      Log.e(TAG, "Error occurred trying to get last Location", e);
     } finally {
       return location;
     }
@@ -141,7 +141,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     try {
       availability = service.getLocationAvailability();
     } catch (RemoteException e) {
-      Log.e(TAG, "Error occurred trying to get LocationAvailability " + e.getStackTrace());
+      Log.e(TAG, "Error occurred trying to get LocationAvailability", e);
     } finally {
       return availability;
     }
@@ -187,7 +187,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     try {
       service.requestLocationUpdates(request);
     } catch (RemoteException e) {
-      Log.e(TAG, "Error occurred trying to request location updates " + e.getStackTrace());
+      Log.e(TAG, "Error occurred trying to request location updates", e);
     }
   }
 
@@ -198,7 +198,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     try {
       service.removeLocationUpdates(requests);
     } catch (RemoteException e) {
-      Log.e(TAG, "Error occurred trying to remove location updates " + e.getStackTrace());
+      Log.e(TAG, "Error occurred trying to remove location updates", e);
     }
   }
 
@@ -253,7 +253,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
       service.setMockMode(isMockMode);
     } catch (RemoteException e) {
       String mode = isMockMode ? "enabled" : "disabled";
-      Log.e(TAG, "Error occurred trying to set mock mode " + mode + " " + e.getStackTrace());
+      Log.e(TAG, "Error occurred trying to set mock mode " + mode, e);
     }
     return new SimplePendingResult(true);
   }
@@ -264,7 +264,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     try {
       service.setMockLocation(mockLocation);
     } catch (RemoteException e) {
-      Log.e(TAG, "Error occurred trying to set mock location " + e.getStackTrace());
+      Log.e(TAG, "Error occurred trying to set mock location", e);
     }
     return new SimplePendingResult(true);
   }
@@ -275,7 +275,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     try {
       service.setMockTrace(path, filename);
     } catch (RemoteException e) {
-      Log.e(TAG, "Error occurred trying to set mock trace " + e.getStackTrace());
+      Log.e(TAG, "Error occurred trying to set mock trace", e);
     }
     return new SimplePendingResult(true);
   }
@@ -297,7 +297,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
       try {
         service.init(remoteCallback);
       } catch (RemoteException e) {
-        Log.e(TAG, "Error occurred trying to register remote callback " + e.getStackTrace());
+        Log.e(TAG, "Error occurred trying to register remote callback", e);
       }
     }
   }
@@ -307,7 +307,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
       try {
         service.init(null);
       } catch (RemoteException e) {
-        Log.e(TAG, "Error occurred trying to unregister remote callback " + e.getStackTrace());
+        Log.e(TAG, "Error occurred trying to unregister remote callback", e);
       }
     }
   }

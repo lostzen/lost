@@ -36,7 +36,7 @@ public class FusedLocationServiceCallbackManager {
     try {
       availability = service.getLocationAvailability();
     } catch (RemoteException e) {
-      Log.e(TAG, "Error occurred trying to get LocationAvailability" + e.getStackTrace());
+      Log.e(TAG, "Error occurred trying to get LocationAvailability", e);
     }
 
     ArrayList<Location> locations = new ArrayList<>();

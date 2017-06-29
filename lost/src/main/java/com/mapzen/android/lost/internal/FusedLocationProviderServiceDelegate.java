@@ -78,8 +78,7 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
       try {
         callback.onLocationChanged(location);
       } catch (RemoteException e) {
-        Log.e(TAG, "Error occurred trying to report a new Location. "
-            + e.getStackTrace().toString());
+        Log.e(TAG, "Error occurred trying to report a new Location", e);
       }
     }
   }
@@ -133,8 +132,7 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
       try {
         callback.onLocationAvailabilityChanged(availability);
       } catch (RemoteException e) {
-        Log.e(TAG, "Error occurred trying to report a new LocationAvailability. "
-            + e.getStackTrace().toString());
+        Log.e(TAG, "Error occurred trying to report a new LocationAvailability", e);
       }
     }
   }
