@@ -37,6 +37,8 @@ public interface FusedLocationProviderApi {
    * Network location is enabled and the {@link android.location.LocationManager} has a last known
    * Network location
    *
+   * This method can return null if there is a problem getting the availability.
+   *
    * @param client The client to return availability for.
    * @return The availability of location data.
    * @throws IllegalStateException if the client is not connected at the time of this call.
