@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.Log;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import java.util.Set;
 public class FusedLocationProviderApiImpl extends ApiImpl
     implements FusedLocationProviderApi, EventCallbacks, ServiceConnection {
 
+  private static final String TAG = FusedLocationProviderApiImpl.class.getSimpleName();
   private Context context;
   private FusedLocationServiceConnectionManager serviceConnectionManager;
   private FusedLocationServiceCallbackManager serviceCallbackManager;
@@ -123,19 +125,25 @@ public class FusedLocationProviderApiImpl extends ApiImpl
 
   @Override public Location getLastLocation(LostApiClient client) {
     throwIfNotConnected(client);
+    Location location = null;
     try {
-      return service.getLastLocation();
+      location = service.getLastLocation();
     } catch (RemoteException e) {
-      throw new RuntimeException(e);
+      Log.e(TAG, "Error occurred trying to get last Location", e);
+    } finally {
+      return location;
     }
   }
 
   @Override public LocationAvailability getLocationAvailability(LostApiClient client) {
     throwIfNotConnected(client);
+    LocationAvailability availability = null;
     try {
-      return service.getLocationAvailability();
+      availability = service.getLocationAvailability();
     } catch (RemoteException e) {
-      throw new RuntimeException(e);
+      Log.e(TAG, "Error occurred trying to get LocationAvailability", e);
+    } finally {
+      return availability;
     }
   }
 
@@ -179,7 +187,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     try {
       service.requestLocationUpdates(request);
     } catch (RemoteException e) {
-      throw new RuntimeException(e);
+      Log.e(TAG, "Error occurred trying to request location updates", e);
     }
   }
 
@@ -190,7 +198,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     try {
       service.removeLocationUpdates(requests);
     } catch (RemoteException e) {
-      throw new RuntimeException(e);
+      Log.e(TAG, "Error occurred trying to remove location updates", e);
     }
   }
 
@@ -244,7 +252,8 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     try {
       service.setMockMode(isMockMode);
     } catch (RemoteException e) {
-      throw new RuntimeException(e);
+      String mode = isMockMode ? "enabled" : "disabled";
+      Log.e(TAG, "Error occurred trying to set mock mode " + mode, e);
     }
     return new SimplePendingResult(true);
   }
@@ -255,7 +264,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     try {
       service.setMockLocation(mockLocation);
     } catch (RemoteException e) {
-      throw new RuntimeException(e);
+      Log.e(TAG, "Error occurred trying to set mock location", e);
     }
     return new SimplePendingResult(true);
   }
@@ -266,7 +275,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     try {
       service.setMockTrace(path, filename);
     } catch (RemoteException e) {
-      throw new RuntimeException(e);
+      Log.e(TAG, "Error occurred trying to set mock trace", e);
     }
     return new SimplePendingResult(true);
   }
@@ -288,7 +297,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
       try {
         service.init(remoteCallback);
       } catch (RemoteException e) {
-        throw new RuntimeException(e);
+        Log.e(TAG, "Error occurred trying to register remote callback", e);
       }
     }
   }
@@ -298,7 +307,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
       try {
         service.init(null);
       } catch (RemoteException e) {
-        throw new RuntimeException(e);
+        Log.e(TAG, "Error occurred trying to unregister remote callback", e);
       }
     }
   }

@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.support.annotation.RequiresPermission;
+import android.util.Log;
 
 import java.io.File;
 import java.util.List;
@@ -19,6 +20,7 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 public class FusedLocationProviderServiceDelegate implements LocationEngine.Callback {
 
+  private static final String TAG = FusedLocationProviderServiceDelegate.class.getSimpleName();
   private Context context;
 
   private boolean mockMode;
@@ -76,7 +78,7 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
       try {
         callback.onLocationChanged(location);
       } catch (RemoteException e) {
-        throw new RuntimeException(e);
+        Log.e(TAG, "Error occurred trying to report a new Location", e);
       }
     }
   }
@@ -130,7 +132,7 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
       try {
         callback.onLocationAvailabilityChanged(availability);
       } catch (RemoteException e) {
-        throw new RuntimeException(e);
+        Log.e(TAG, "Error occurred trying to report a new LocationAvailability", e);
       }
     }
   }

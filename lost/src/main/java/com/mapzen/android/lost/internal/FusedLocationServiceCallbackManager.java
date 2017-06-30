@@ -6,8 +6,11 @@ import com.mapzen.android.lost.api.LocationResult;
 import android.content.Context;
 import android.location.Location;
 import android.os.RemoteException;
+import android.util.Log;
 
 import java.util.ArrayList;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Handles callbacks received in {@link FusedLocationProviderApiImpl} from
@@ -29,11 +32,11 @@ public class FusedLocationServiceCallbackManager {
 
     ReportedChanges changes = clientManager.reportLocationChanged(location);
 
-    LocationAvailability availability;
+    LocationAvailability availability = null;
     try {
       availability = service.getLocationAvailability();
     } catch (RemoteException e) {
-      throw new RuntimeException(e);
+      Log.e(TAG, "Error occurred trying to get LocationAvailability", e);
     }
 
     ArrayList<Location> locations = new ArrayList<>();
