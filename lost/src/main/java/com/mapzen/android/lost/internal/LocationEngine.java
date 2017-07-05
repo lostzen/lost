@@ -51,7 +51,7 @@ public abstract class LocationEngine {
   /**
    * Disables the engine when no requests remain, otherwise updates the engine's configuration.
    *
-   * @param request Valid location request to enable.
+   * @param requests Valid location request to enable.
    */
   public void removeRequests(List<LocationRequest> requests) {
     if (request != null) {

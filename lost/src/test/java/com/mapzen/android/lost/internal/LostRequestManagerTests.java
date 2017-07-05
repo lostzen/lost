@@ -25,7 +25,7 @@ public class LostRequestManagerTests {
   @Test
   public void requestLocationUpdates_clientListener_oneRequest_shouldUpdateMap() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     LocationListener listener = mock(LocationListener.class);
     requestManager.requestLocationUpdates(client, request, listener);
 
@@ -35,10 +35,10 @@ public class LostRequestManagerTests {
   @Test
   public void requestLocationUpdates_clientListener_twoRequests_shouldUpdateMap() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     LocationListener listener = mock(LocationListener.class);
     requestManager.requestLocationUpdates(client, request, listener);
-    LocationRequest anotherRequest = LocationRequest.create();
+    LocationRequest anotherRequest = LocationRequest.create(new TestPidReader());
     requestManager.requestLocationUpdates(client, anotherRequest, listener);
 
     assertThat(requestManager.getClientCallbackMap().size()).isEqualTo(1);
@@ -51,11 +51,11 @@ public class LostRequestManagerTests {
   @Test
   public void requestLocationUpdates_twoClientListeners_twoRequests_shouldUpdateMap() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     LocationListener listener = mock(LocationListener.class);
     requestManager.requestLocationUpdates(client, request, listener);
     LostApiClient anotherClient = mock(LostApiClient.class);
-    LocationRequest anotherRequest = LocationRequest.create();
+    LocationRequest anotherRequest = LocationRequest.create(new TestPidReader());
     requestManager.requestLocationUpdates(anotherClient, anotherRequest, listener);
 
     assertThat(requestManager.getClientCallbackMap().size()).isEqualTo(2);
@@ -72,7 +72,7 @@ public class LostRequestManagerTests {
   @Test
   public void requestLocationUpdates_clientPendingIntent_oneRequest_shouldUpdateMap() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     PendingIntent intent = mock(PendingIntent.class);
     requestManager.requestLocationUpdates(client, request, intent);
 
@@ -82,10 +82,10 @@ public class LostRequestManagerTests {
   @Test
   public void requestLocationUpdates_clientPendingIntent_twoRequests_shouldUpdateMap() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     PendingIntent intent = mock(PendingIntent.class);
     requestManager.requestLocationUpdates(client, request, intent);
-    LocationRequest anotherRequest = LocationRequest.create();
+    LocationRequest anotherRequest = LocationRequest.create(new TestPidReader());
     requestManager.requestLocationUpdates(client, anotherRequest, intent);
 
     assertThat(requestManager.getClientCallbackMap().size()).isEqualTo(1);
@@ -98,11 +98,11 @@ public class LostRequestManagerTests {
   @Test
   public void requestLocationUpdates_twoClientPendingIntents_twoRequests_shouldUpdateMap() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     PendingIntent intent = mock(PendingIntent.class);
     requestManager.requestLocationUpdates(client, request, intent);
     LostApiClient anotherClient = mock(LostApiClient.class);
-    LocationRequest anotherRequest = LocationRequest.create();
+    LocationRequest anotherRequest = LocationRequest.create(new TestPidReader());
     requestManager.requestLocationUpdates(anotherClient, anotherRequest, intent);
 
     assertThat(requestManager.getClientCallbackMap().size()).isEqualTo(2);
@@ -119,7 +119,7 @@ public class LostRequestManagerTests {
   @Test
   public void requestLocationUpdates_clientCallback_oneRequest_shouldUpdateMap() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     LocationCallback callback = mock(LocationCallback.class);
     requestManager.requestLocationUpdates(client, request, callback);
 
@@ -129,10 +129,10 @@ public class LostRequestManagerTests {
   @Test
   public void requestLocationUpdates_clientCallback_twoRequests_shouldUpdateMap() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     LocationCallback callback = mock(LocationCallback.class);
     requestManager.requestLocationUpdates(client, request, callback);
-    LocationRequest anotherRequest = LocationRequest.create();
+    LocationRequest anotherRequest = LocationRequest.create(new TestPidReader());
     requestManager.requestLocationUpdates(client, anotherRequest, callback);
 
     assertThat(requestManager.getClientCallbackMap().size()).isEqualTo(1);
@@ -145,11 +145,11 @@ public class LostRequestManagerTests {
   @Test
   public void requestLocationUpdates_twoClientCallbacks_twoRequests_shouldUpdateMap() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     LocationCallback callback = mock(LocationCallback.class);
     requestManager.requestLocationUpdates(client, request, callback);
     LostApiClient anotherClient = mock(LostApiClient.class);
-    LocationRequest anotherRequest = LocationRequest.create();
+    LocationRequest anotherRequest = LocationRequest.create(new TestPidReader());
     requestManager.requestLocationUpdates(anotherClient, anotherRequest, callback);
 
     assertThat(requestManager.getClientCallbackMap().size()).isEqualTo(2);
@@ -166,7 +166,7 @@ public class LostRequestManagerTests {
   @Test
   public void removeLocationUpdates_clientListener_oneRequest_shouldRemoveAll() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     LocationListener listener = mock(LocationListener.class);
     requestManager.requestLocationUpdates(client, request, listener);
     requestManager.removeLocationUpdates(client, listener);
@@ -177,10 +177,10 @@ public class LostRequestManagerTests {
   @Test
   public void removeLocationUpdates_clientListener_twoRequests_shouldRemoveAll() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     LocationListener listener = mock(LocationListener.class);
     requestManager.requestLocationUpdates(client, request, listener);
-    LocationRequest anotherRequest = LocationRequest.create();
+    LocationRequest anotherRequest = LocationRequest.create(new TestPidReader());
     requestManager.requestLocationUpdates(client, anotherRequest, listener);
     requestManager.removeLocationUpdates(client, listener);
 
@@ -190,11 +190,11 @@ public class LostRequestManagerTests {
   @Test
   public void removeLocationUpdates_twoClientListeners_twoRequests_shouldRemoveOne() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     LocationListener listener = mock(LocationListener.class);
     requestManager.requestLocationUpdates(client, request, listener);
     LostApiClient anotherClient = mock(LostApiClient.class);
-    LocationRequest anotherRequest = LocationRequest.create();
+    LocationRequest anotherRequest = LocationRequest.create(new TestPidReader());
     requestManager.requestLocationUpdates(anotherClient, anotherRequest, listener);
     requestManager.removeLocationUpdates(client, listener);
 
@@ -207,7 +207,7 @@ public class LostRequestManagerTests {
   @Test
   public void removeLocationUpdates_clientPendingIntent_oneRequest_shouldRemoveAll() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     PendingIntent intent = mock(PendingIntent.class);
     requestManager.requestLocationUpdates(client, request, intent);
     requestManager.removeLocationUpdates(client, intent);
@@ -218,10 +218,10 @@ public class LostRequestManagerTests {
   @Test
   public void removeLocationUpdates_clientPendingIntent_twoRequests_shouldRemoveAll() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     PendingIntent intent = mock(PendingIntent.class);
     requestManager.requestLocationUpdates(client, request, intent);
-    LocationRequest anotherRequest = LocationRequest.create();
+    LocationRequest anotherRequest = LocationRequest.create(new TestPidReader());
     requestManager.requestLocationUpdates(client, anotherRequest, intent);
     requestManager.removeLocationUpdates(client, intent);
 
@@ -231,11 +231,11 @@ public class LostRequestManagerTests {
   @Test
   public void removeLocationUpdates_twoClientPendingIntents_twoRequests_shouldRemoveOne() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     PendingIntent intent = mock(PendingIntent.class);
     requestManager.requestLocationUpdates(client, request, intent);
     LostApiClient anotherClient = mock(LostApiClient.class);
-    LocationRequest anotherRequest = LocationRequest.create();
+    LocationRequest anotherRequest = LocationRequest.create(new TestPidReader());
     requestManager.requestLocationUpdates(anotherClient, anotherRequest, intent);
     requestManager.removeLocationUpdates(client, intent);
 
@@ -248,7 +248,7 @@ public class LostRequestManagerTests {
   @Test
   public void removeLocationUpdates_clientCallback_oneRequest_shouldRemoveAll() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     LocationCallback callback = mock(LocationCallback.class);
     requestManager.requestLocationUpdates(client, request, callback);
     requestManager.removeLocationUpdates(client, callback);
@@ -259,10 +259,10 @@ public class LostRequestManagerTests {
   @Test
   public void removeLocationUpdates_clientCallback_twoRequests_shouldRemoveAll() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     LocationCallback callback = mock(LocationCallback.class);
     requestManager.requestLocationUpdates(client, request, callback);
-    LocationRequest anotherRequest = LocationRequest.create();
+    LocationRequest anotherRequest = LocationRequest.create(new TestPidReader());
     requestManager.requestLocationUpdates(client, anotherRequest, callback);
     requestManager.removeLocationUpdates(client, callback);
 
@@ -272,11 +272,11 @@ public class LostRequestManagerTests {
   @Test
   public void removeLocationUpdates_twoClientCallbacks_twoRequests_shouldRemoveOne() {
     LostApiClient client = mock(LostApiClient.class);
-    LocationRequest request = LocationRequest.create();
+    LocationRequest request = LocationRequest.create(new TestPidReader());
     LocationCallback callback = mock(LocationCallback.class);
     requestManager.requestLocationUpdates(client, request, callback);
     LostApiClient anotherClient = mock(LostApiClient.class);
-    LocationRequest anotherRequest = LocationRequest.create();
+    LocationRequest anotherRequest = LocationRequest.create(new TestPidReader());
     requestManager.requestLocationUpdates(anotherClient, anotherRequest, callback);
     requestManager.removeLocationUpdates(client, callback);
 
