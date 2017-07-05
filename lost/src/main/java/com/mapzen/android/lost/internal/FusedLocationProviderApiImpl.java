@@ -41,7 +41,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
 
   IFusedLocationProviderService service;
 
-  private IFusedLocationProviderCallback.Stub remoteCallback
+  IFusedLocationProviderCallback.Stub remoteCallback
       = new IFusedLocationProviderCallback.Stub() {
     public void onLocationChanged(final Location location) throws RemoteException {
 
@@ -295,7 +295,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   void registerRemoteCallback() {
     if (service != null) {
       try {
-        service.init(remoteCallback);
+        service.add(remoteCallback);
       } catch (RemoteException e) {
         Log.e(TAG, "Error occurred trying to register remote callback", e);
       }
@@ -305,7 +305,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   void unregisterRemoteCallback() {
     if (service != null) {
       try {
-        service.init(null);
+        service.remove(remoteCallback);
       } catch (RemoteException e) {
         Log.e(TAG, "Error occurred trying to unregister remote callback", e);
       }

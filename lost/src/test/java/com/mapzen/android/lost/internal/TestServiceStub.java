@@ -6,14 +6,19 @@ import com.mapzen.android.lost.api.LocationRequest;
 import android.location.Location;
 import android.os.RemoteException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TestServiceStub extends IFusedLocationProviderService.Stub {
 
-  IFusedLocationProviderCallback callback;
+  List<IFusedLocationProviderCallback> callbacks = new ArrayList<>();
 
-  @Override public void init(IFusedLocationProviderCallback callback) throws RemoteException {
-    this.callback = callback;
+  @Override public void add(IFusedLocationProviderCallback callback) throws RemoteException {
+    this.callbacks.add(callback);
+  }
+
+  @Override public void remove(IFusedLocationProviderCallback callback) throws RemoteException {
+    this.callbacks.remove(callback);
   }
 
   @Override public Location getLastLocation() throws RemoteException {
