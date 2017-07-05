@@ -26,7 +26,7 @@ public final class LocationRequest implements Parcelable {
       return myPid();
     }
   };
-  private long pid;
+  long pid;
 
   private LocationRequest() {
     commonInit();
@@ -54,6 +54,7 @@ public final class LocationRequest implements Parcelable {
     this.setFastestInterval(incoming.getFastestInterval());
     this.setSmallestDisplacement(incoming.getSmallestDisplacement());
     this.setPriority(incoming.getPriority());
+    this.pid = incoming.pid;
   }
 
   public long getInterval() {

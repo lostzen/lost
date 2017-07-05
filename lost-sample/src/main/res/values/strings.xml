@@ -82,5 +82,7 @@
   <string name="sample_single_client_diff_intervals_description">Demonstrates how a single client can request location updates at different fastest intervals</string>
   <string name="sample_multiple_clients_priorities_title">Multiple Clients w/different request priorities</string>
   <string name="sample_multiple_clients_priorities_description">Demonstrates multiple clients receiving location requests for different location priorities</string>
+  <string name="sample_multiple_process_title">Multiple processes w/different clients</string>
+  <string name="sample_multiple_process_description">Demonstrates using lost in the main app process as well as in a service running in its own process</string>
 
 </resources>
