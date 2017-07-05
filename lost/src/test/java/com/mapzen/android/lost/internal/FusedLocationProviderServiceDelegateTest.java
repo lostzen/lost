@@ -358,6 +358,19 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
     assertThat(callback.locationAvailability).isNotNull();
   }
 
+  @Test public void addCallback_shouldIncreaseCallbacksCount() {
+    TestFusedLocationProviderCallback callback = new TestFusedLocationProviderCallback();
+    delegate.add(callback);
+    assertThat(delegate.getCallbacks().size()).isEqualTo(1);
+  }
+
+  @Test public void removeCallback_shouldDecreaseCallbacksCount() {
+    TestFusedLocationProviderCallback callback = new TestFusedLocationProviderCallback();
+    delegate.add(callback);
+    delegate.remove(callback);
+    assertThat(delegate.getCallbacks().size()).isEqualTo(0);
+  }
+
   public class TestService extends IntentService {
     public TestService() {
       super("test service");
@@ -379,6 +392,10 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
   public class TestFusedLocationProviderCallback implements IFusedLocationProviderCallback {
     private Location location;
     private LocationAvailability locationAvailability;
+
+    @Override public long uniqueId() throws RemoteException {
+      return 1234;
+    }
 
     @Override public void onLocationChanged(Location location) throws RemoteException {
       this.location = location;

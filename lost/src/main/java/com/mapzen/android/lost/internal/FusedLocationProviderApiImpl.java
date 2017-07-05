@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static android.os.Process.myPid;
+
 /**
  * Implementation of the {@link FusedLocationProviderApi}.
  */
@@ -43,6 +45,13 @@ public class FusedLocationProviderApiImpl extends ApiImpl
 
   IFusedLocationProviderCallback.Stub remoteCallback
       = new IFusedLocationProviderCallback.Stub() {
+
+    final long id = System.currentTimeMillis() + myPid();
+
+    public long uniqueId() throws RemoteException {
+      return id;
+    }
+
     public void onLocationChanged(final Location location) throws RemoteException {
 
       new Handler(Looper.getMainLooper()).post(new Runnable() {
