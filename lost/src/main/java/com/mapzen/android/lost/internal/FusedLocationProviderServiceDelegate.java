@@ -38,7 +38,7 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
 
   public void add(IFusedLocationProviderCallback callback) {
     try {
-      callbacks.put(callback.uniqueId(), callback);
+      callbacks.put(callback.pid(), callback);
     } catch (RemoteException e) {
       Log.e(TAG, "Error getting callback's unique id", e);
     }
@@ -46,7 +46,7 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
 
   public void remove(IFusedLocationProviderCallback callback) {
     try {
-      callbacks.remove(callback.uniqueId());
+      callbacks.remove(callback.pid());
     } catch (RemoteException e) {
       Log.e(TAG, "Error getting callback's unique id", e);
     }

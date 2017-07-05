@@ -4,7 +4,7 @@ import com.mapzen.android.lost.api.LocationAvailability;
 
 interface IFusedLocationProviderCallback {
 
-  long uniqueId();
+  long pid();
 
   void onLocationChanged(in Location location);
 

@@ -46,10 +46,8 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   IFusedLocationProviderCallback.Stub remoteCallback
       = new IFusedLocationProviderCallback.Stub() {
 
-    final long id = System.currentTimeMillis() + myPid();
-
-    public long uniqueId() throws RemoteException {
-      return id;
+    public long pid() throws RemoteException {
+      return myPid();
     }
 
     public void onLocationChanged(final Location location) throws RemoteException {

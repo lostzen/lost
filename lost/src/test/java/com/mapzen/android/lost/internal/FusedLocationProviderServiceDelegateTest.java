@@ -393,7 +393,7 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
     private Location location;
     private LocationAvailability locationAvailability;
 
-    @Override public long uniqueId() throws RemoteException {
+    @Override public long pid() throws RemoteException {
       return 1234;
     }
 
