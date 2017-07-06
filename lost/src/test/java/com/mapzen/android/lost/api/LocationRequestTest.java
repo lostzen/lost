@@ -94,5 +94,6 @@ public class LocationRequestTest extends BaseRobolectricTest {
     assertThat(rehydrated.getFastestInterval()).isEqualTo(dehydrated.getFastestInterval());
     assertThat(rehydrated.getSmallestDisplacement())
         .isEqualTo(dehydrated.getSmallestDisplacement());
+    assertThat(rehydrated.pid).isEqualTo(dehydrated.pid);
   }
 }

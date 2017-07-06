@@ -38,6 +38,7 @@
     <activity android:name=".MultipleLocationListenerMultipleClientsActivity"/>
     <activity android:name=".MultipleLocationListenerSingleClientActivity"/>
     <activity android:name=".MultiplePriorityMultipleClientsActivity"/>
+    <activity android:name=".MultipleProcessesActivity"/>
 
     <service
         android:name=".GeofenceIntentService"
@@ -48,7 +49,7 @@
         <action android:name="com.mapzen.lost.intent.action.PENDING_INTENT_SERVICE"/>
       </intent-filter>
     </service>
-
+    <service android:name=".ListenerService" android:process=":listenerservice"/>
 
   </application>
 </manifest>

@@ -28,6 +28,8 @@ public class SamplesList {
           MultipleLocationListenerSingleClientActivity.class),
       new Sample(R.string.sample_pending_intent_title,
           R.string.sample_pending_intent_description, PendingIntentActivity.class),
+      new Sample(R.string.sample_multiple_process_title,
+          R.string.sample_multiple_process_description, MultipleProcessesActivity.class),
       new Sample(R.string.sample_location_availability_title,
           R.string.sample_location_availability_description, LocationAvailabilityActivity.class)
   };

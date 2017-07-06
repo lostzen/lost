@@ -1,7 +1,11 @@
 package com.mapzen.android.lost.api;
 
+import com.mapzen.android.lost.internal.PidReader;
+
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import static android.os.Process.myPid;
 
 public final class LocationRequest implements Parcelable {
   public static final int PRIORITY_HIGH_ACCURACY = 0x00000064;
@@ -17,12 +21,32 @@ public final class LocationRequest implements Parcelable {
   private long fastestInterval = DEFAULT_FASTEST_INTERVAL_IN_MS;
   private float smallestDisplacement = DEFAULT_SMALLEST_DISPLACEMENT_IN_METERS;
   private int priority = PRIORITY_BALANCED_POWER_ACCURACY;
+  private PidReader pidReader = new PidReader() {
+    @Override public long getPid() {
+      return myPid();
+    }
+  };
+  long pid;
 
   private LocationRequest() {
+    commonInit();
+  }
+
+  private LocationRequest(PidReader reader) {
+    pidReader = reader;
+    commonInit();
+  }
+
+  private void commonInit() {
+    pid = pidReader.getPid();
   }
 
   public static LocationRequest create() {
     return new LocationRequest();
+  }
+
+  public static LocationRequest create(PidReader reader) {
+    return new LocationRequest(reader);
   }
 
   public LocationRequest(LocationRequest incoming) {
@@ -30,6 +54,7 @@ public final class LocationRequest implements Parcelable {
     this.setFastestInterval(incoming.getFastestInterval());
     this.setSmallestDisplacement(incoming.getSmallestDisplacement());
     this.setPriority(incoming.getPriority());
+    this.pid = incoming.pid;
   }
 
   public long getInterval() {
@@ -90,6 +115,9 @@ public final class LocationRequest implements Parcelable {
 
     LocationRequest that = (LocationRequest) o;
 
+    if (pid != that.pid) {
+      return false;
+    }
     if (interval != that.interval) {
       return false;
     }
@@ -109,6 +137,7 @@ public final class LocationRequest implements Parcelable {
         31 * result + (smallestDisplacement != +0.0f ? Float.floatToIntBits(smallestDisplacement)
             : 0);
     result = 31 * result + priority;
+    result = 31 * result + (int) pid;
     return result;
   }
 
@@ -121,6 +150,7 @@ public final class LocationRequest implements Parcelable {
     dest.writeLong(this.fastestInterval);
     dest.writeFloat(this.smallestDisplacement);
     dest.writeInt(this.priority);
+    dest.writeLong(this.pid);
   }
 
   protected LocationRequest(Parcel in) {
@@ -128,6 +158,7 @@ public final class LocationRequest implements Parcelable {
     this.fastestInterval = in.readLong();
     this.smallestDisplacement = in.readFloat();
     this.priority = in.readInt();
+    this.pid = in.readLong();
   }
 
   public static final Parcelable.Creator<LocationRequest> CREATOR =

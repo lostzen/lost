@@ -41,7 +41,8 @@ import static org.mockito.Mockito.when;
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
     LocationRequest highAccuracy =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); //gps + wifi
+        LocationRequest.create(new TestPidReader()).setPriority(
+            LocationRequest.PRIORITY_HIGH_ACCURACY); //gps + wifi
     requests.add(highAccuracy);
     request = new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
         .setNeedBle(true)
@@ -166,9 +167,10 @@ import static org.mockito.Mockito.when;
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
     LocationRequest balanced =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        LocationRequest.create(new TestPidReader()).setPriority(
+            LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     LocationRequest lowPower =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_LOW_POWER);
+        LocationRequest.create(new TestPidReader()).setPriority(LocationRequest.PRIORITY_LOW_POWER);
     requests.add(balanced);
     requests.add(lowPower);
     LocationSettingsRequest settingsRequest =
@@ -189,9 +191,10 @@ import static org.mockito.Mockito.when;
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
     LocationRequest balanced =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        LocationRequest.create(new TestPidReader()).setPriority(
+            LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     LocationRequest lowPower =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_LOW_POWER);
+        LocationRequest.create(new TestPidReader()).setPriority(LocationRequest.PRIORITY_LOW_POWER);
     requests.add(balanced);
     requests.add(lowPower);
     LocationSettingsRequest settingsRequest =
@@ -213,9 +216,10 @@ import static org.mockito.Mockito.when;
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
     LocationRequest balanced =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        LocationRequest.create(new TestPidReader()).setPriority(
+            LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     LocationRequest lowPower =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_LOW_POWER);
+        LocationRequest.create(new TestPidReader()).setPriority(LocationRequest.PRIORITY_LOW_POWER);
     requests.add(balanced);
     requests.add(lowPower);
     LocationSettingsRequest settingsRequest =
@@ -236,7 +240,7 @@ import static org.mockito.Mockito.when;
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
     LocationRequest noPower =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_NO_POWER);
+        LocationRequest.create(new TestPidReader()).setPriority(LocationRequest.PRIORITY_NO_POWER);
     requests.add(noPower);
     LocationSettingsRequest settingsRequest =
         new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
@@ -256,7 +260,7 @@ import static org.mockito.Mockito.when;
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
     LocationRequest noPower =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_NO_POWER);
+        LocationRequest.create(new TestPidReader()).setPriority(LocationRequest.PRIORITY_NO_POWER);
     requests.add(noPower);
     LocationSettingsRequest settingsRequest =
         new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
@@ -417,9 +421,10 @@ import static org.mockito.Mockito.when;
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
     LocationRequest balanced =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        LocationRequest.create(new TestPidReader()).setPriority(
+            LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     LocationRequest lowPower =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_LOW_POWER);
+        LocationRequest.create(new TestPidReader()).setPriority(LocationRequest.PRIORITY_LOW_POWER);
     requests.add(balanced);
     requests.add(lowPower);
     LocationSettingsRequest settingsRequest =
@@ -444,9 +449,10 @@ import static org.mockito.Mockito.when;
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
     LocationRequest balanced =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        LocationRequest.create(new TestPidReader()).setPriority(
+            LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     LocationRequest lowPower =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_LOW_POWER);
+        LocationRequest.create(new TestPidReader()).setPriority(LocationRequest.PRIORITY_LOW_POWER);
     requests.add(balanced);
     requests.add(lowPower);
     LocationSettingsRequest settingsRequest =
@@ -471,9 +477,10 @@ import static org.mockito.Mockito.when;
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
     LocationRequest balanced =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        LocationRequest.create(new TestPidReader()).setPriority(
+            LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     LocationRequest lowPower =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_LOW_POWER);
+        LocationRequest.create(new TestPidReader()).setPriority(LocationRequest.PRIORITY_LOW_POWER);
     requests.add(balanced);
     requests.add(lowPower);
     LocationSettingsRequest settingsRequest =
@@ -497,7 +504,7 @@ import static org.mockito.Mockito.when;
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
     LocationRequest noPower =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_NO_POWER);
+        LocationRequest.create(new TestPidReader()).setPriority(LocationRequest.PRIORITY_NO_POWER);
     requests.add(noPower);
     LocationSettingsRequest settingsRequest =
         new LocationSettingsRequest.Builder().addAllLocationRequests(requests)
@@ -520,7 +527,7 @@ import static org.mockito.Mockito.when;
 
     ArrayList<LocationRequest> requests = new ArrayList<>();
     LocationRequest noPower =
-        LocationRequest.create().setPriority(LocationRequest.PRIORITY_NO_POWER);
+        LocationRequest.create(new TestPidReader()).setPriority(LocationRequest.PRIORITY_NO_POWER);
     requests.add(noPower);
     LocationSettingsRequest settingsRequest =
         new LocationSettingsRequest.Builder().addAllLocationRequests(requests)

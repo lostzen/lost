@@ -6,7 +6,9 @@ import com.mapzen.android.lost.internal.IFusedLocationProviderCallback;
 
 interface IFusedLocationProviderService {
 
-  void init(in IFusedLocationProviderCallback callback);
+  void add(in IFusedLocationProviderCallback callback);
+
+  void remove(in IFusedLocationProviderCallback callback);
 
   Location getLastLocation();
 

@@ -49,13 +49,12 @@ public class PendingIntentActivity extends LostApiClientActivity {
     Button disconnect = (Button) findViewById(R.id.disconnect);
     disconnect.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View v) {
-        LocationServices.FusedLocationApi.removeLocationUpdates(client, pendingIntent);
-        disconnect();
+        unregisterAndDisconnectClient();
       }
     });
   }
 
-  private void requestLocationUpdates() {
+  void requestLocationUpdates() {
     LocationRequest request = LocationRequest.create();
     request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     request.setInterval(100);
@@ -66,5 +65,10 @@ public class PendingIntentActivity extends LostApiClientActivity {
     LocationServices.FusedLocationApi.requestLocationUpdates(client, request, pendingIntent);
 
     Toast.makeText(PendingIntentActivity.this, R.string.requested, Toast.LENGTH_SHORT).show();
+  }
+
+  void unregisterAndDisconnectClient() {
+    LocationServices.FusedLocationApi.removeLocationUpdates(client, pendingIntent);
+    disconnect();
   }
 }

@@ -87,7 +87,7 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
 
   @Test public void requestLocationUpdates_shouldNotifyOnLocationChangedGps() throws Exception {
     TestFusedLocationProviderCallback callback = new TestFusedLocationProviderCallback();
-    delegate.init(callback);
+    delegate.add(callback);
     delegate.requestLocationUpdates(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY));
 
     Location location = new Location(GPS_PROVIDER);
@@ -97,7 +97,7 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
 
   @Test public void requestLocationUpdates_shouldNotifyOnLocationChangedNetwork() throws Exception {
     TestFusedLocationProviderCallback callback = new TestFusedLocationProviderCallback();
-    delegate.init(callback);
+    delegate.add(callback);
     delegate.requestLocationUpdates(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY));
 
     Location location = new Location(NETWORK_PROVIDER);
@@ -107,7 +107,7 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
 
   @Test public void requestLocationUpdates_shouldPreferGpsIfMoreAccurate() throws Exception {
     TestFusedLocationProviderCallback callback = new TestFusedLocationProviderCallback();
-    delegate.init(callback);
+    delegate.add(callback);
     delegate.requestLocationUpdates(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY));
 
     Location gpsLocation = getTestLocation(GPS_PROVIDER, 0, 0, 0);
@@ -122,7 +122,7 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
 
   @Test public void requestLocationUpdates_shouldPreferNetworkIfMoreAccurate() throws Exception {
     TestFusedLocationProviderCallback callback = new TestFusedLocationProviderCallback();
-    delegate.init(callback);
+    delegate.add(callback);
     delegate.requestLocationUpdates(LocationRequest.create().setPriority(PRIORITY_HIGH_ACCURACY));
 
     Location gpsLocation = getTestLocation(GPS_PROVIDER, 0, 0, 0);
@@ -177,7 +177,7 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
 
   @Test public void setMockLocation_shouldCallbackOnce() throws Exception {
     IFusedLocationProviderCallback callback = mock(IFusedLocationProviderCallback.class);
-    delegate.init(callback);
+    delegate.add(callback);
     Location mockLocation = new Location("mock");
     delegate.setMockMode(true);
     TestLocationListener listener = new TestLocationListener();
@@ -278,7 +278,7 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
 
   @Test public void requestLocationUpdates_shouldReportAvailability() {
     TestFusedLocationProviderCallback callback = new TestFusedLocationProviderCallback();
-    delegate.init(callback);
+    delegate.add(callback);
     Location location = new Location("test");
     shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, location);
     LocationRequest request = LocationRequest.create();
@@ -353,9 +353,22 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
 
   @Test public void reportProviderEnabled_shouldNotifyAvailabilityChanged() throws Exception {
     TestFusedLocationProviderCallback callback = new TestFusedLocationProviderCallback();
-    delegate.init(callback);
+    delegate.add(callback);
     delegate.reportProviderEnabled(GPS_PROVIDER);
     assertThat(callback.locationAvailability).isNotNull();
+  }
+
+  @Test public void addCallback_shouldIncreaseCallbacksCount() {
+    TestFusedLocationProviderCallback callback = new TestFusedLocationProviderCallback();
+    delegate.add(callback);
+    assertThat(delegate.getCallbacks().size()).isEqualTo(1);
+  }
+
+  @Test public void removeCallback_shouldDecreaseCallbacksCount() {
+    TestFusedLocationProviderCallback callback = new TestFusedLocationProviderCallback();
+    delegate.add(callback);
+    delegate.remove(callback);
+    assertThat(delegate.getCallbacks().size()).isEqualTo(0);
   }
 
   public class TestService extends IntentService {
@@ -379,6 +392,10 @@ public class FusedLocationProviderServiceDelegateTest extends BaseRobolectricTes
   public class TestFusedLocationProviderCallback implements IFusedLocationProviderCallback {
     private Location location;
     private LocationAvailability locationAvailability;
+
+    @Override public long pid() throws RemoteException {
+      return 1234;
+    }
 
     @Override public void onLocationChanged(Location location) throws RemoteException {
       this.location = location;

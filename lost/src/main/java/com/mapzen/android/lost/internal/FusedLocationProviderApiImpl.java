@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static android.os.Process.myPid;
+
 /**
  * Implementation of the {@link FusedLocationProviderApi}.
  */
@@ -41,8 +43,13 @@ public class FusedLocationProviderApiImpl extends ApiImpl
 
   IFusedLocationProviderService service;
 
-  private IFusedLocationProviderCallback.Stub remoteCallback
+  IFusedLocationProviderCallback.Stub remoteCallback
       = new IFusedLocationProviderCallback.Stub() {
+
+    public long pid() throws RemoteException {
+      return myPid();
+    }
+
     public void onLocationChanged(final Location location) throws RemoteException {
 
       new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -295,7 +302,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   void registerRemoteCallback() {
     if (service != null) {
       try {
-        service.init(remoteCallback);
+        service.add(remoteCallback);
       } catch (RemoteException e) {
         Log.e(TAG, "Error occurred trying to register remote callback", e);
       }
@@ -305,7 +312,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   void unregisterRemoteCallback() {
     if (service != null) {
       try {
-        service.init(null);
+        service.remove(remoteCallback);
       } catch (RemoteException e) {
         Log.e(TAG, "Error occurred trying to unregister remote callback", e);
       }

@@ -10,10 +10,13 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.support.annotation.RequiresPermission;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -25,15 +28,28 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
 
   private boolean mockMode;
   private LocationEngine locationEngine;
-  private IFusedLocationProviderCallback callback;
+  private Map<Long, IFusedLocationProviderCallback> callbacks;
 
   public FusedLocationProviderServiceDelegate(Context context) {
     this.context = context;
     locationEngine = new FusionEngine(context, this);
+    callbacks = new HashMap<>();
   }
 
-  public void init(IFusedLocationProviderCallback callback) {
-    this.callback = callback;
+  public void add(IFusedLocationProviderCallback callback) {
+    try {
+      callbacks.put(callback.pid(), callback);
+    } catch (RemoteException e) {
+      Log.e(TAG, "Error getting callback's unique id", e);
+    }
+  }
+
+  public void remove(IFusedLocationProviderCallback callback) {
+    try {
+      callbacks.remove(callback.pid());
+    } catch (RemoteException e) {
+      Log.e(TAG, "Error getting callback's unique id", e);
+    }
   }
 
   public Location getLastLocation() {
@@ -74,7 +90,7 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   public void reportLocation(Location location) {
     // Notify remote AIDL callback
-    if (callback != null) {
+    for (IFusedLocationProviderCallback callback : callbacks.values()) {
       try {
         callback.onLocationChanged(location);
       } catch (RemoteException e) {
@@ -128,12 +144,17 @@ public class FusedLocationProviderServiceDelegate implements LocationEngine.Call
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
   private void notifyLocationAvailabilityChanged() {
     final LocationAvailability availability = locationEngine.createLocationAvailability();
-    if (callback != null) {
+    for (IFusedLocationProviderCallback callback : callbacks.values()) {
       try {
         callback.onLocationAvailabilityChanged(availability);
       } catch (RemoteException e) {
         Log.e(TAG, "Error occurred trying to report a new LocationAvailability", e);
       }
     }
+  }
+
+  @VisibleForTesting
+  Map getCallbacks() {
+    return callbacks;
   }
 }

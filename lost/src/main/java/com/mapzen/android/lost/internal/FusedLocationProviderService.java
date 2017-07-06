@@ -21,8 +21,13 @@ public class FusedLocationProviderService extends Service {
 
   private final IFusedLocationProviderService.Stub binder =
       new IFusedLocationProviderService.Stub() {
-        @Override public void init(IFusedLocationProviderCallback callback) throws RemoteException {
-          delegate.init(callback);
+        @Override public void add(IFusedLocationProviderCallback callback) throws RemoteException {
+          delegate.add(callback);
+        }
+
+        @Override public void remove(IFusedLocationProviderCallback callback) throws
+            RemoteException {
+          delegate.remove(callback);
         }
 
         @Override public Location getLastLocation() throws RemoteException {
