@@ -41,6 +41,7 @@ public interface ClientManager {
   void updateReportedValues(ReportedChanges changes);
   void notifyLocationAvailability(final LocationAvailability availability);
   boolean hasNoListeners();
+  void shutdown();
   Map<LostApiClient, Set<LocationListener>> getLocationListeners();
   Map<LostApiClient, Set<PendingIntent>> getPendingIntents();
   Map<LostApiClient, Set<LocationCallback>> getLocationCallbacks();

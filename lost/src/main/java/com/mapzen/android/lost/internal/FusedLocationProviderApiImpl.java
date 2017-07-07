@@ -87,7 +87,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
       context.unbindService(this);
       isBound = false;
     }
-
+    clientManager.shutdown();
     service = null;
   }
 

@@ -212,6 +212,10 @@ public class LostClientManager implements ClientManager {
     return true;
   }
 
+  @Override public void shutdown() {
+    reportedChanges.clearAll();
+  }
+
   @VisibleForTesting void clearClients() {
     clients.clear();
   }

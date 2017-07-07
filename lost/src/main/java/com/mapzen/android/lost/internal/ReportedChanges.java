@@ -36,4 +36,9 @@ public class ReportedChanges {
     updatedRequestToReportedTime.putAll(changes.timeChanges());
     updatedRequestToReportedLocation.putAll(changes.locationChanges());
   }
+
+  public void clearAll() {
+    updatedRequestToReportedTime.clear();
+    updatedRequestToReportedLocation.clear();
+  }
 }
