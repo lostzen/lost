@@ -27,7 +27,7 @@ public class FusedLocationServiceCallbackManager {
    * @param clientManager
    * @param service
    */
-  void onLocationChanged(Context context, Location location, LostClientManager clientManager,
+  void onLocationChanged(Context context, Location location, ClientManager clientManager,
       IFusedLocationProviderService service) {
 
     ReportedChanges changes = clientManager.reportLocationChanged(location);
@@ -53,13 +53,13 @@ public class FusedLocationServiceCallbackManager {
   }
 
   /**
-   * Handles notifying all registered {@link LocationCallback}s that {@link LocationAvailability}
-   * has changed.
+   * Handles notifying all registered {@link com.mapzen.android.lost.api.LocationCallback}s that
+   * {@link LocationAvailability} has changed.
    * @param locationAvailability
    * @param clientManager
    */
   void onLocationAvailabilityChanged(LocationAvailability locationAvailability,
-      LostClientManager clientManager) {
+      ClientManager clientManager) {
     clientManager.notifyLocationAvailability(locationAvailability);
   }
 }
