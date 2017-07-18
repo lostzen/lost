@@ -39,6 +39,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   private FusedLocationServiceConnectionManager serviceConnectionManager;
   private FusedLocationServiceCallbackManager serviceCallbackManager;
   private RequestManager requestManager;
+  private ClientManager clientManager;
   private boolean isBound;
 
   IFusedLocationProviderService service;
@@ -56,7 +57,6 @@ public class FusedLocationProviderApiImpl extends ApiImpl
         @Override public void run() {
           // #224: this call is async, service may have been legally set to null in the meantime
           if (service != null) {
-            final LostClientManager clientManager = LostClientManager.shared();
             serviceCallbackManager.onLocationChanged(context, location, clientManager, service);
           }
         }
@@ -65,7 +65,6 @@ public class FusedLocationProviderApiImpl extends ApiImpl
 
     @Override public void onLocationAvailabilityChanged(LocationAvailability locationAvailability)
         throws RemoteException {
-      LostClientManager clientManager = LostClientManager.shared();
       serviceCallbackManager.onLocationAvailabilityChanged(locationAvailability, clientManager);
     }
   };
@@ -88,7 +87,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
       context.unbindService(this);
       isBound = false;
     }
-
+    clientManager.shutdown();
     service = null;
   }
 
@@ -103,10 +102,12 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   }
 
   public FusedLocationProviderApiImpl(FusedLocationServiceConnectionManager connectionManager,
-      FusedLocationServiceCallbackManager callbackManager, RequestManager requestManager) {
+      FusedLocationServiceCallbackManager callbackManager, RequestManager requestManager,
+      ClientManager clientManager) {
     serviceConnectionManager = connectionManager;
     serviceCallbackManager = callbackManager;
     this.requestManager = requestManager;
+    this.clientManager = clientManager;
     serviceConnectionManager.setEventCallbacks(this);
   }
 
@@ -158,7 +159,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
       LocationRequest request, LocationListener listener) {
     throwIfNotConnected(client);
     requestManager.requestLocationUpdates(client, request, listener);
-    LostClientManager.shared().addListener(client, request, listener);
+    clientManager.addListener(client, request, listener);
     requestLocationUpdatesInternal(request);
     return new SimplePendingResult(true);
   }
@@ -172,7 +173,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
       LocationRequest request, LocationCallback callback, Looper looper) {
     throwIfNotConnected(client);
     requestManager.requestLocationUpdates(client, request, callback);
-    LostClientManager.shared().addLocationCallback(client, request, callback, looper);
+    clientManager.addLocationCallback(client, request, callback, looper);
     requestLocationUpdatesInternal(request);
     return new SimplePendingResult(true);
   }
@@ -181,7 +182,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
       LocationRequest request, PendingIntent callbackIntent) {
     throwIfNotConnected(client);
     requestManager.requestLocationUpdates(client, request, callbackIntent);
-    LostClientManager.shared().addPendingIntent(client, request, callbackIntent);
+    clientManager.addPendingIntent(client, request, callbackIntent);
     requestLocationUpdatesInternal(request);
     return new SimplePendingResult(true);
   }
@@ -214,7 +215,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     throwIfNotConnected(client);
     List<LocationRequest> requests = requestManager.removeLocationUpdates(client, listener);
     removeLocationUpdatesInternal(requests);
-    boolean hasResult = LostClientManager.shared().removeListener(client, listener);
+    boolean hasResult = clientManager.removeListener(client, listener);
     checkAllListenersPendingIntentsAndCallbacks();
     return new SimplePendingResult(hasResult);
   }
@@ -224,7 +225,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     throwIfNotConnected(client);
     List<LocationRequest> requests = requestManager.removeLocationUpdates(client, callbackIntent);
     removeLocationUpdatesInternal(requests);
-    boolean hasResult = LostClientManager.shared().removePendingIntent(client, callbackIntent);
+    boolean hasResult = clientManager.removePendingIntent(client, callbackIntent);
     checkAllListenersPendingIntentsAndCallbacks();
     return new SimplePendingResult(hasResult);
   }
@@ -234,7 +235,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
     throwIfNotConnected(client);
     List<LocationRequest> requests = requestManager.removeLocationUpdates(client, callback);
     removeLocationUpdatesInternal(requests);
-    boolean hasResult = LostClientManager.shared().removeLocationCallback(client, callback);
+    boolean hasResult = clientManager.removeLocationCallback(client, callback);
     checkAllListenersPendingIntentsAndCallbacks();
     return new SimplePendingResult(hasResult);
   }
@@ -245,7 +246,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
    */
   private void checkAllListenersPendingIntentsAndCallbacks() {
     //TODO: potentially remove hasNoListeners method, not needed anymore
-    //if (LostClientManager.shared().hasNoListeners()) {
+    //if (clientManager.hasNoListeners()) {
     //  try {
     //    service.removeAllLocationUpdates();
     //  } catch (RemoteException e) {
@@ -288,7 +289,7 @@ public class FusedLocationProviderApiImpl extends ApiImpl
   }
 
   public Map<LostApiClient, Set<LocationListener>> getLocationListeners() {
-    return LostClientManager.shared().getLocationListeners();
+    return clientManager.getLocationListeners();
   }
 
   void removeConnectionCallbacks(LostApiClient.ConnectionCallbacks callbacks) {

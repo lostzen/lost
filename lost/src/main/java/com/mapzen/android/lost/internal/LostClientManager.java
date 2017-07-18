@@ -24,7 +24,7 @@ import static com.mapzen.android.lost.api.FusedLocationProviderApi.KEY_LOCATION_
 
 /**
  * Used by {@link LostApiClientImpl} to manage connected clients and by
- * {@link FusedLocationProviderServiceDelegate} to manage client's {@link LocationListener}s,
+ * {@link FusedLocationProviderApiImpl} to manage client's {@link LocationListener}s,
  * {@link PendingIntent}s, and {@link LocationCallback}s.
  */
 public class LostClientManager implements ClientManager {
@@ -210,6 +210,10 @@ public class LostClientManager implements ClientManager {
     }
 
     return true;
+  }
+
+  @Override public void shutdown() {
+    reportedChanges.clearAll();
   }
 
   @VisibleForTesting void clearClients() {
