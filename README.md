@@ -8,7 +8,7 @@ Location Open Source Tracker (for Android)
 
 This project seeks to provide an open source alternative to the [Google Play services location APIs][2] that depends only on the Android SDK. It provides 1:1 replacements for the [FusedLocationProviderApi][3], [GeofencingApi][4], and [SettingsApi][5].
 
-Lost operates by making calls directly to the [LocationManger][1]. Lost can run on any Android device running API 15 or higher regardless of whether or not it supports the Google Play ecosystem.
+Lost operates by making calls directly to the [LocationManager][1]. Lost can run on any Android device running API 15 or higher regardless of whether or not it supports the Google Play ecosystem.
 
 Set up:
 - [Installation](https://github.com/mapzen/lost/blob/master/docs/installation.md)
