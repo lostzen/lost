@@ -1,13 +1,16 @@
 package com.mapzen.android.lost.internal;
 
-public class TestClock implements Clock {
-  private long currentTimeInMillis;
+import android.location.Location;
 
-  @Override public long getCurrentTimeInMillis() {
-    return currentTimeInMillis;
+public class TestClock implements Clock {
+  long currentTimeInNanos;
+  long elapsedTimeInNanos;
+
+  @Override public long getSystemElapsedTimeInNanos() {
+    return currentTimeInNanos;
   }
 
-  public void setCurrentTimeInMillis(long currentTimeInMillis) {
-    this.currentTimeInMillis = currentTimeInMillis;
+  @Override public long getElapsedTimeInNanos(Location location) {
+    return elapsedTimeInNanos;
   }
 }

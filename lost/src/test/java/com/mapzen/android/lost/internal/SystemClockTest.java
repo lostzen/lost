@@ -15,12 +15,15 @@ import static org.fest.assertions.api.Assertions.assertThat;
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
 public class SystemClockTest {
+
+  SystemClock clock = new SystemClock();
+
   @Test @Config(sdk = 17) public void getTimeInNanos_shouldReturnElapsedRealtimeNanosForSdk17AndUp()
       throws Exception {
     final long nanos = 1000000;
     final Location location = new Location("mock");
     location.setElapsedRealtimeNanos(nanos);
-    assertThat(SystemClock.getTimeInNanos(location)).isEqualTo(nanos);
+    assertThat(clock.getElapsedTimeInNanos(location)).isEqualTo(nanos);
   }
 
   @Test @Config(sdk = 16) public void getTimeInNanos_shouldUseUtcTimeInMillisForSdk16AndLower()
@@ -28,6 +31,6 @@ public class SystemClockTest {
     final long millis = 1000;
     final Location location = new Location("mock");
     location.setTime(millis);
-    assertThat(SystemClock.getTimeInNanos(location)).isEqualTo(millis * MS_TO_NS);
+    assertThat(clock.getElapsedTimeInNanos(location)).isEqualTo(millis * MS_TO_NS);
   }
 }

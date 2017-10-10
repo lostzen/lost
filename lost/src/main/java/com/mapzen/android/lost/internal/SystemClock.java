@@ -4,13 +4,15 @@ import android.location.Location;
 import android.os.Build;
 
 public class SystemClock implements Clock {
-  public static final long MS_TO_NS = 1000000;
 
-  @Override public long getCurrentTimeInMillis() {
-    return System.currentTimeMillis();
+  @Override public long getSystemElapsedTimeInNanos() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+      return android.os.SystemClock.elapsedRealtimeNanos();
+    }
+    return android.os.SystemClock.elapsedRealtime() * MS_TO_NS;
   }
 
-  public static long getTimeInNanos(Location location) {
+  @Override public long getElapsedTimeInNanos(Location location) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
       return location.getElapsedRealtimeNanos();
     }

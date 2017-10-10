@@ -30,7 +30,7 @@ public class FusedLocationServiceCallbackManager {
   void onLocationChanged(Context context, Location location, ClientManager clientManager,
       IFusedLocationProviderService service) {
 
-    ReportedChanges changes = clientManager.reportLocationChanged(location);
+    clientManager.reportLocationChanged(location);
 
     LocationAvailability availability = null;
     try {
@@ -42,14 +42,9 @@ public class FusedLocationServiceCallbackManager {
     ArrayList<Location> locations = new ArrayList<>();
     locations.add(location);
     final LocationResult result = LocationResult.create(locations);
-    ReportedChanges pendingIntentChanges = clientManager.sendPendingIntent(
-        context, location, availability, result);
+    clientManager.sendPendingIntent(context, location, availability, result);
 
-    ReportedChanges callbackChanges = clientManager.reportLocationResult(location, result);
-
-    changes.putAll(pendingIntentChanges);
-    changes.putAll(callbackChanges);
-    clientManager.updateReportedValues(changes);
+    clientManager.reportLocationResult(location, result);
   }
 
   /**

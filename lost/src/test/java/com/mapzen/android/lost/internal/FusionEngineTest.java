@@ -94,35 +94,37 @@ public class FusionEngineTest extends BaseRobolectricTest {
     assertThat(fusionEngine.getLastLocation()).isEqualTo(passiveLocation);
   }
 
-  @Test public void getLastLocation_shouldIgnoreStaleLocations() throws Exception {
-    long time = System.currentTimeMillis();
+  @Test @Config(sdk = 17)
+  public void getLastLocation_shouldIgnoreStaleLocations() throws Exception {
+    long time = android.os.SystemClock.elapsedRealtime() * MS_TO_NS;
     initTestClock(time);
 
     Location gpsLocation = new Location(GPS_PROVIDER);
     gpsLocation.setAccuracy(100);
-    gpsLocation.setTime(time);
+    gpsLocation.setElapsedRealtimeNanos(time);
     shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, gpsLocation);
 
     Location networkLocation = new Location(NETWORK_PROVIDER);
     networkLocation.setAccuracy(100);
-    networkLocation.setTime(time - (2 * RECENT_UPDATE_THRESHOLD_IN_MILLIS));
+    networkLocation.setElapsedRealtimeNanos(time - (2 * RECENT_UPDATE_THRESHOLD_IN_MILLIS));
     shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, networkLocation);
 
     assertThat(fusionEngine.getLastLocation()).isEqualTo(gpsLocation);
   }
 
-  @Test public void getLastLocation_ifNoFreshLocationsShouldReturnMostRecent() throws Exception {
-    long time = System.currentTimeMillis();
+  @Test @Config(sdk = 17)
+  public void getLastLocation_ifNoFreshLocationsShouldReturnMostRecent() throws Exception {
+    long time = android.os.SystemClock.elapsedRealtime() * MS_TO_NS;
     initTestClock(time);
 
     Location gpsLocation = new Location(GPS_PROVIDER);
     gpsLocation.setAccuracy(100);
-    gpsLocation.setTime(time - (2 * RECENT_UPDATE_THRESHOLD_IN_MILLIS));
+    gpsLocation.setElapsedRealtimeNanos(time - (2 * RECENT_UPDATE_THRESHOLD_IN_MILLIS));
     shadowLocationManager.setLastKnownLocation(GPS_PROVIDER, gpsLocation);
 
     Location networkLocation = new Location(NETWORK_PROVIDER);
     networkLocation.setAccuracy(100);
-    networkLocation.setTime(time - (3 * RECENT_UPDATE_THRESHOLD_IN_MILLIS));
+    networkLocation.setElapsedRealtimeNanos(time - (3 * RECENT_UPDATE_THRESHOLD_IN_MILLIS));
     shadowLocationManager.setLastKnownLocation(NETWORK_PROVIDER, networkLocation);
 
     assertThat(fusionEngine.getLastLocation()).isEqualTo(gpsLocation);
@@ -404,9 +406,9 @@ public class FusionEngineTest extends BaseRobolectricTest {
     assertThat(FusionEngine.isBetterThan(locationA, locationB)).isFalse();
   }
 
-  private static void initTestClock(long time) {
+  private static void initTestClock(long nanos) {
     TestClock testClock = new TestClock();
-    testClock.setCurrentTimeInMillis(time);
+    testClock.currentTimeInNanos = nanos;
     FusionEngine.clock = testClock;
   }
 

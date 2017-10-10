@@ -28,6 +28,8 @@ import static org.robolectric.Shadows.shadowOf;
 public class LostApiClientImplTest extends BaseRobolectricTest {
   private LostApiClient client;
   private TestConnectionCallbacks callbacks;
+  private Clock clock = mock(Clock.class);
+  private HandlerFactory handlerFactory = mock(HandlerFactory.class);
 
   @Before public void setUp() throws Exception {
     LostClientManager.shared().clearClients();
@@ -73,7 +75,7 @@ public class LostApiClientImplTest extends BaseRobolectricTest {
     client.connect();
     TestConnectionCallbacks callbacks = new TestConnectionCallbacks();
     LostApiClient anotherClient =
-        new LostApiClientImpl(application, callbacks, new LostClientManager());
+        new LostApiClientImpl(application, callbacks, new LostClientManager(clock, handlerFactory));
     callbacks.setLostClient(anotherClient);
     anotherClient.connect();
     assertThat(callbacks.isClientConnectedOnConnect()).isTrue();
@@ -85,12 +87,12 @@ public class LostApiClientImplTest extends BaseRobolectricTest {
       @Override public void onConnected() {
         // Connect second Lost client with new connection callbacks once the service has connected.
         new LostApiClientImpl(application,  new TestConnectionCallbacks(),
-            new LostClientManager()).connect();
+            new LostClientManager(clock, handlerFactory)).connect();
       }
 
       @Override public void onConnectionSuspended() {
       }
-    }, new LostClientManager()).connect();
+    }, new LostClientManager(clock, handlerFactory)).connect();
 
     FusedLocationProviderApiImpl api =
         (FusedLocationProviderApiImpl) LocationServices.FusedLocationApi;
@@ -157,7 +159,7 @@ public class LostApiClientImplTest extends BaseRobolectricTest {
   @Test public void disconnect_multipleClients_shouldNotRemoveFusedLocationProviderApiImpl()
       throws Exception {
     LostApiClient anotherClient =
-        new LostApiClientImpl(application, callbacks, new LostClientManager());
+        new LostApiClientImpl(application, callbacks, new LostClientManager(clock, handlerFactory));
     anotherClient.connect();
     client.connect();
     client.disconnect();
@@ -166,7 +168,7 @@ public class LostApiClientImplTest extends BaseRobolectricTest {
 
   @Test public void disconnect_multipleClients_shouldNotRemoveGeofencingApiImpl() throws Exception {
     LostApiClient anotherClient =
-        new LostApiClientImpl(application, callbacks, new LostClientManager());
+        new LostApiClientImpl(application, callbacks, new LostClientManager(clock, handlerFactory));
     anotherClient.connect();
     client.connect();
     client.disconnect();
@@ -175,7 +177,7 @@ public class LostApiClientImplTest extends BaseRobolectricTest {
 
   @Test public void disconnect_multipleClients_shouldNotRemoveSettingsApiImpl() throws Exception {
     LostApiClient anotherClient =
-        new LostApiClientImpl(application, callbacks, new LostClientManager());
+        new LostApiClientImpl(application, callbacks, new LostClientManager(clock, handlerFactory));
     anotherClient.connect();
     client.connect();
     client.disconnect();
@@ -210,7 +212,7 @@ public class LostApiClientImplTest extends BaseRobolectricTest {
   @Test public void isConnected_multipleClients_shouldReturnFalseAfterDisconnected()
       throws Exception {
     LostApiClient anotherClient =
-        new LostApiClientImpl(application, callbacks, new LostClientManager());
+        new LostApiClientImpl(application, callbacks, new LostClientManager(clock, handlerFactory));
     anotherClient.connect();
     client.connect();
     client.disconnect();
