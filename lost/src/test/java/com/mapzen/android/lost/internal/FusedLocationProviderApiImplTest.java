@@ -51,7 +51,8 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
   private FusedLocationProviderApiImpl api;
   private IFusedLocationProviderService service = mock(IFusedLocationProviderService.class);
   private FusedLocationServiceConnectionManager connectionManager;
-  private ClientManager clientManager = new LostClientManager();
+  private ClientManager clientManager = new LostClientManager(new SystemClock(),
+      mock(HandlerFactory.class));
 
   @Before public void setUp() throws Exception {
     connectedClient = new LostApiClientImpl(RuntimeEnvironment.application, null,
@@ -317,16 +318,6 @@ public class FusedLocationProviderApiImplTest extends BaseRobolectricTest {
     api.onConnect(context);
     api.onDisconnect();
     verify(service).remove(api.remoteCallback);
-  }
-
-  @Test public void onDisconnect_shouldShutdownClientManager() throws Exception {
-    Context context = mock(Context.class);
-    clientManager = mock(LostClientManager.class);
-    FusedLocationProviderApiImpl apiImpl = new FusedLocationProviderApiImpl(connectionManager,
-        new FusedLocationServiceCallbackManager(), requestManager, clientManager);
-    apiImpl.onConnect(context);
-    apiImpl.onDisconnect();
-    verify(clientManager).shutdown();
   }
 
   @Test public void removeLocationUpdates_shouldReturnStatusSuccessIfListenerRemoved() {

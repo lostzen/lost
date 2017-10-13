@@ -40,7 +40,7 @@ public class FusionEngine extends LocationEngine implements LocationListener {
 
   @Override public Location getLastLocation() {
     final List<String> providers = locationManager.getAllProviders();
-    final long minTime = clock.getCurrentTimeInMillis() - RECENT_UPDATE_THRESHOLD_IN_MILLIS;
+    final long minTime = clock.getSystemElapsedTimeInNanos() - RECENT_UPDATE_THRESHOLD_IN_NANOS;
 
     Location bestLocation = null;
     float bestAccuracy = Float.MAX_VALUE;
@@ -51,7 +51,7 @@ public class FusionEngine extends LocationEngine implements LocationListener {
         final Location location = locationManager.getLastKnownLocation(provider);
         if (location != null) {
           final float accuracy = location.getAccuracy();
-          final long time = location.getTime();
+          final long time = clock.getElapsedTimeInNanos(location);
           if (time > minTime && accuracy < bestAccuracy) {
             bestLocation = location;
             bestAccuracy = accuracy;
@@ -224,8 +224,8 @@ public class FusionEngine extends LocationEngine implements LocationListener {
       return true;
     }
 
-    if (SystemClock.getTimeInNanos(locationA)
-        > SystemClock.getTimeInNanos(locationB) + RECENT_UPDATE_THRESHOLD_IN_NANOS) {
+    if (clock.getElapsedTimeInNanos(locationA)
+        > clock.getElapsedTimeInNanos(locationB) + RECENT_UPDATE_THRESHOLD_IN_NANOS) {
       return true;
     }
 

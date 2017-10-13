@@ -2,6 +2,7 @@ package com.mapzen.android.lost.internal;
 
 import com.mapzen.android.lost.BaseRobolectricTest;
 import com.mapzen.android.lost.api.LocationAvailability;
+import com.mapzen.android.lost.api.LocationCallback;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationResult;
 import com.mapzen.android.lost.api.LostApiClient;
@@ -15,27 +16,38 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowApplication;
 
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Looper;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static android.location.LocationManager.GPS_PROVIDER;
 import static com.mapzen.android.lost.api.LocationAvailability.EXTRA_LOCATION_AVAILABILITY;
 import static com.mapzen.android.lost.api.LocationResult.EXTRA_LOCATION_RESULT;
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.robolectric.RuntimeEnvironment.application;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
 public class LostClientManagerTest extends BaseRobolectricTest {
 
-  LostClientManager manager = new LostClientManager();
+  Clock clock;
+  HandlerFactory handlerFactory;
+  LostClientManager manager;
   LostApiClient client;
 
   @Before public void setup() throws Exception {
+    clock = mock(Clock.class);
+    handlerFactory = new TestHandlerFactory();
+    manager = new LostClientManager(clock, handlerFactory);
     client = new LostApiClient.Builder(application).build();
   }
 
@@ -109,6 +121,19 @@ public class LostClientManagerTest extends BaseRobolectricTest {
     assertThat(manager.getLocationListeners().get(client)).isEmpty();
   }
 
+  @Test public void removeListener_shouldSendUpdateImmediatelyOnReAdd() throws Exception {
+    manager.addClient(client);
+    LocationRequest request = LocationRequest.create();
+    TestLocationListener listener = new TestLocationListener();
+    manager.addListener(client, request, listener);
+    manager.reportLocationChanged(mock(Location.class));
+    assertThat(listener.getAllLocations().size()).isEqualTo(1);
+    manager.removeListener(client, listener);
+    manager.addListener(client, request, listener);
+    manager.reportLocationChanged(mock(Location.class));
+    assertThat(listener.getAllLocations().size()).isEqualTo(2);
+  }
+
   @Test public void removePendingIntent_shouldRemovePendingIntentForClient() {
     manager.addClient(client);
     LocationRequest request = LocationRequest.create();
@@ -116,6 +141,22 @@ public class LostClientManagerTest extends BaseRobolectricTest {
     manager.addPendingIntent(client, request, pendingIntent);
     manager.removePendingIntent(client, pendingIntent);
     assertThat(manager.getPendingIntents().get(client)).isEmpty();
+  }
+
+  @Test public void removePendingIntent_shouldSendUpdateImmediatelyOnReAdd() throws Exception {
+    manager.addClient(client);
+    LocationRequest request = LocationRequest.create();
+    PendingIntent pendingIntent = mock(PendingIntent.class);
+    manager.addPendingIntent(client, request, pendingIntent);
+    List<Location> locations = new ArrayList();
+    manager.sendPendingIntent(mock(Context.class), mock(Location.class),
+        mock(LocationAvailability.class), LocationResult.create(locations));
+    verify(pendingIntent).send(any(Context.class), anyInt(), any(Intent.class));
+    manager.removePendingIntent(client, pendingIntent);
+    manager.addPendingIntent(client, request, pendingIntent);
+    manager.sendPendingIntent(mock(Context.class), mock(Location.class),
+        mock(LocationAvailability.class), LocationResult.create(locations));
+    verify(pendingIntent, times(2)).send(any(Context.class), anyInt(), any(Intent.class));
   }
 
   @Test public void removeLocationCallback_shouldRemoveLocationCallbackForClient() {
@@ -126,6 +167,21 @@ public class LostClientManagerTest extends BaseRobolectricTest {
     manager.addLocationCallback(client, request, callback, looper);
     manager.removeLocationCallback(client, callback);
     assertThat(manager.getLocationCallbacks().get(client)).isEmpty();
+  }
+
+  @Test public void removeLocationCallback_shouldSendUpdateImmediatelyOnReAdd() throws Exception {
+    manager.addClient(client);
+    LocationRequest request = LocationRequest.create();
+    LocationCallback callback = mock(LocationCallback.class);
+    Looper looper = mock(Looper.class);
+    manager.addLocationCallback(client, request, callback, looper);
+    List<Location> locations = new ArrayList();
+    manager.reportLocationResult(mock(Location.class), LocationResult.create(locations));
+    verify(callback).onLocationResult(any(LocationResult.class));
+    manager.removeLocationCallback(client, callback);
+    manager.addLocationCallback(client, request, callback, looper);
+    manager.reportLocationResult(mock(Location.class), LocationResult.create(locations));
+    verify(callback, times(2)).onLocationResult(any(LocationResult.class));
   }
 
   @Test public void reportLocationChanged_shouldNotifyListener() {
@@ -254,8 +310,7 @@ public class LostClientManagerTest extends BaseRobolectricTest {
     Location location1 = getTestLocation("test_provider", 0, 0, 0);
     Location location2 = getTestLocation("test_provider", 1, 1, 1000);
 
-    ReportedChanges reportedChanges = manager.reportLocationChanged(location1);
-    manager.updateReportedValues(reportedChanges);
+    manager.reportLocationChanged(location1);
     manager.reportLocationChanged(location2);
     assertThat(listener.getMostRecentLocation()).isEqualTo(location1);
   }
@@ -272,8 +327,7 @@ public class LostClientManagerTest extends BaseRobolectricTest {
     Location location1 = getTestLocation("test_provider", 0, 0, 0);
     Location location2 = getTestLocation("test_provider", 1, 1, 1);
 
-    ReportedChanges reportedChanges = manager.reportLocationChanged(location1);
-    manager.updateReportedValues(reportedChanges);
+    manager.reportLocationChanged(location1);
     manager.reportLocationChanged(location2);
     assertThat(listener.getMostRecentLocation()).isEqualTo(location1);
   }

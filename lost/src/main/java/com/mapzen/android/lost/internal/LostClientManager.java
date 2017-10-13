@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.mapzen.android.lost.api.FusedLocationProviderApi.KEY_LOCATION_CHANGED;
+import static com.mapzen.android.lost.internal.Clock.MS_TO_NS;
 
 /**
  * Used by {@link LostApiClientImpl} to manage connected clients and by
@@ -31,27 +32,27 @@ public class LostClientManager implements ClientManager {
   private static final String TAG = ClientManager.class.getSimpleName();
 
   private static LostClientManager instance;
+  private final Clock clock;
+  private final HandlerFactory handlerFactory;
+
   private HashMap<LostApiClient, LostClientWrapper> clients;
+  private Map<LocationListener, LocationRequestReport> listenerToReports;
+  private Map<PendingIntent, LocationRequestReport> intentToReports;
+  private Map<LocationCallback, LocationRequestReport> callbackToReports;
 
-  private Map<LocationListener, LocationRequest> listenerToLocationRequests;
-  private Map<PendingIntent, LocationRequest> intentToLocationRequests;
-  private Map<LocationCallback, LocationRequest> callbackToLocationRequests;
-  private ReportedChanges reportedChanges;
+  LostClientManager(Clock clock, HandlerFactory handlerFactory) {
+    this.clock = clock;
+    this.handlerFactory = handlerFactory;
 
-  LostClientManager() {
     clients = new HashMap<>();
-
-    listenerToLocationRequests = new HashMap<>();
-    intentToLocationRequests = new HashMap<>();
-    callbackToLocationRequests = new HashMap<>();
-
-    reportedChanges = new ReportedChanges(new HashMap<LocationRequest, Long>(),
-        new HashMap<LocationRequest, Location>());
+    listenerToReports = new HashMap<>();
+    intentToReports = new HashMap<>();
+    callbackToReports = new HashMap<>();
   }
 
   public static LostClientManager shared() {
     if (instance == null) {
-      instance = new LostClientManager();
+      instance = new LostClientManager(new SystemClock(), new AndroidHandlerFactory());
     }
     return instance;
   }
@@ -76,14 +77,14 @@ public class LostClientManager implements ClientManager {
       LocationListener listener) {
     throwIfClientNotAdded(client);
     clients.get(client).locationListeners().add(listener);
-    listenerToLocationRequests.put(listener, request);
+    listenerToReports.put(listener, new LocationRequestReport(request));
   }
 
   @Override public void addPendingIntent(LostApiClient client, LocationRequest request,
       PendingIntent callbackIntent) {
     throwIfClientNotAdded(client);
     clients.get(client).pendingIntents().add(callbackIntent);
-    intentToLocationRequests.put(callbackIntent, request);
+    intentToReports.put(callbackIntent, new LocationRequestReport(request));
   }
 
   @Override public void addLocationCallback(LostApiClient client, LocationRequest request,
@@ -91,7 +92,7 @@ public class LostClientManager implements ClientManager {
     throwIfClientNotAdded(client);
     clients.get(client).locationCallbacks().add(callback);
     clients.get(client).looperMap().put(callback, looper);
-    callbackToLocationRequests.put(callback, request);
+    callbackToReports.put(callback, new LocationRequestReport(request));
   }
 
   private void throwIfClientNotAdded(LostApiClient client) {
@@ -109,7 +110,7 @@ public class LostClientManager implements ClientManager {
       removed = true;
     }
 
-    listenerToLocationRequests.remove(listener);
+    listenerToReports.remove(listener);
     return removed;
   }
 
@@ -122,7 +123,7 @@ public class LostClientManager implements ClientManager {
       removed = true;
     }
 
-    intentToLocationRequests.remove(callbackIntent);
+    intentToReports.remove(callbackIntent);
     return removed;
   }
 
@@ -136,7 +137,7 @@ public class LostClientManager implements ClientManager {
     }
 
     clients.get(client).looperMap().remove(callback);
-    callbackToLocationRequests.remove(callback);
+    callbackToReports.remove(callback);
     return removed;
   }
 
@@ -149,8 +150,8 @@ public class LostClientManager implements ClientManager {
    * @param location
    * @return
    */
-  @Override public ReportedChanges reportLocationChanged(final Location location) {
-    return iterateAndNotify(location, getLocationListeners(), listenerToLocationRequests,
+  @Override public void reportLocationChanged(final Location location) {
+    iterateAndNotify(location, getLocationListeners(), listenerToReports,
         new Notifier<LocationListener>() {
           @Override public void notify(LostApiClient client, LocationListener listener) {
             listener.onLocationChanged(location);
@@ -167,29 +168,25 @@ public class LostClientManager implements ClientManager {
    * @param location
    * @return
    */
-  @Override public ReportedChanges sendPendingIntent(final Context context,
+  @Override public void sendPendingIntent(final Context context,
       final Location location, final LocationAvailability availability,
       final LocationResult result) {
-    return iterateAndNotify(location,
-        getPendingIntents(), intentToLocationRequests, new Notifier<PendingIntent>() {
+    iterateAndNotify(location,
+        getPendingIntents(), intentToReports, new Notifier<PendingIntent>() {
           @Override public void notify(LostApiClient client, PendingIntent pendingIntent) {
             fireIntent(context, pendingIntent, location, availability, result);
           }
         });
   }
 
-  @Override public ReportedChanges reportLocationResult(Location location,
+  @Override public void reportLocationResult(Location location,
       final LocationResult result) {
-    return iterateAndNotify(location,
-        getLocationCallbacks(), callbackToLocationRequests, new Notifier<LocationCallback>() {
+    iterateAndNotify(location,
+        getLocationCallbacks(), callbackToReports, new Notifier<LocationCallback>() {
           @Override public void notify(LostApiClient client, LocationCallback callback) {
             notifyCallback(client, callback, result);
           }
         });
-  }
-
-  @Override public void updateReportedValues(ReportedChanges changes) {
-    reportedChanges.putAll(changes);
   }
 
   @Override public void notifyLocationAvailability(final LocationAvailability availability) {
@@ -210,10 +207,6 @@ public class LostClientManager implements ClientManager {
     }
 
     return true;
-  }
-
-  @Override public void shutdown() {
-    reportedChanges.clearAll();
   }
 
   @VisibleForTesting void clearClients() {
@@ -261,8 +254,7 @@ public class LostClientManager implements ClientManager {
   private void notifyCallback(LostApiClient client, final LocationCallback callback,
       final LocationResult result) {
     final Looper looper = clients.get(client).looperMap().get(callback);
-    final Handler handler = new Handler(looper);
-    handler.post(new Runnable() {
+    handlerFactory.run(looper, new Runnable() {
       @Override public void run() {
         callback.onLocationResult(result);
       }
@@ -280,37 +272,34 @@ public class LostClientManager implements ClientManager {
     });
   }
 
-  private <T> ReportedChanges iterateAndNotify(Location location,
-      Map<LostApiClient, Set<T>> clientToObj, Map<T, LocationRequest> objToLocationRequest,
+  private <T> void iterateAndNotify(Location location,
+      Map<LostApiClient, Set<T>> clientToObj, Map<T, LocationRequestReport> objToLocationRequest,
       Notifier notifier) {
-    Map<LocationRequest, Long> updatedRequestToReportedTime = new HashMap<>();
-    Map<LocationRequest, Location> updatedRequestToReportedLocation = new HashMap<>();
     for (LostApiClient client : clientToObj.keySet()) {
       if (clientToObj.get(client) != null) {
         for (final T obj : clientToObj.get(client)) {
-          LocationRequest request = objToLocationRequest.get(obj);
-          Long lastReportedTime = reportedChanges.timeChanges().get(request);
-          Location lastReportedLocation = reportedChanges.locationChanges().get(request);
-          if (lastReportedTime == null && lastReportedLocation == null) {
-            updatedRequestToReportedTime.put(request, location.getTime());
-            updatedRequestToReportedLocation.put(request, location);
+          LocationRequestReport report = objToLocationRequest.get(obj);
+          LocationRequest request = report.locationRequest;
+          Location lastReportedLocation = report.location;
+          if (lastReportedLocation == null) {
+            report.location = location;
             notifier.notify(client, obj);
           } else {
-            long intervalSinceLastReport = location.getTime() - lastReportedTime;
+            long lastReportedTime = clock.getElapsedTimeInNanos(lastReportedLocation);
+            long locationTime = clock.getElapsedTimeInNanos(location);
+            long intervalSinceLastReport = (locationTime - lastReportedTime) / MS_TO_NS;
             long fastestInterval = request.getFastestInterval();
             float smallestDisplacement = request.getSmallestDisplacement();
             float displacementSinceLastReport = location.distanceTo(lastReportedLocation);
             if (intervalSinceLastReport >= fastestInterval &&
                 displacementSinceLastReport >= smallestDisplacement) {
-              updatedRequestToReportedTime.put(request, location.getTime());
-              updatedRequestToReportedLocation.put(request, location);
+              report.location = location;
               notifier.notify(client, obj);
             }
           }
         }
       }
     }
-    return new ReportedChanges(updatedRequestToReportedTime, updatedRequestToReportedLocation);
   }
 
   interface Notifier<T> {

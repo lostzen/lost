@@ -34,14 +34,12 @@ public interface ClientManager {
   boolean removeListener(LostApiClient client, LocationListener listener);
   boolean removePendingIntent(LostApiClient client, PendingIntent callbackIntent);
   boolean removeLocationCallback(LostApiClient client, LocationCallback callback);
-  ReportedChanges reportLocationChanged(Location location);
-  ReportedChanges sendPendingIntent(Context context, Location location,
+  void reportLocationChanged(Location location);
+  void sendPendingIntent(Context context, Location location,
       LocationAvailability availability, LocationResult result);
-  ReportedChanges reportLocationResult(Location location, final LocationResult result);
-  void updateReportedValues(ReportedChanges changes);
+  void reportLocationResult(Location location, final LocationResult result);
   void notifyLocationAvailability(final LocationAvailability availability);
   boolean hasNoListeners();
-  void shutdown();
   Map<LostApiClient, Set<LocationListener>> getLocationListeners();
   Map<LostApiClient, Set<PendingIntent>> getPendingIntents();
   Map<LostApiClient, Set<LocationCallback>> getLocationCallbacks();
