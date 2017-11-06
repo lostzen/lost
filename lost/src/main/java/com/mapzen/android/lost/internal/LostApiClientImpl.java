@@ -66,6 +66,10 @@ public class LostApiClientImpl implements LostApiClient {
         && getFusedLocationProviderApiImpl().isConnected() && clientManager.containsClient(this);
   }
 
+  @Override public void registerConnectionCallbacks(ConnectionCallbacks callbacks) {
+    connectionCallbacks = callbacks;
+  }
+
   @Override public void unregisterConnectionCallbacks(ConnectionCallbacks callbacks) {
     getFusedLocationProviderApiImpl().removeConnectionCallbacks(connectionCallbacks);
     connectionCallbacks = null;
