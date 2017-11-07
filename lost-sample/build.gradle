@@ -1,12 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'checkstyle'
 
-repositories {
-  mavenLocal()
-  mavenCentral()
-  maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-  maven { url "http://repo.maven.apache.org/maven2" }
-}
 
 group = GROUP
 version = VERSION_NAME
