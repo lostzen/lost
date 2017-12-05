@@ -36,7 +36,7 @@ public interface LostApiClient {
 
   /**
    * Registers callbacks added in {@link LostApiClient.Builder#addConnectionCallbacks(
-   * ConnectionCallbacks)}. Use this method to avoid leaking resources.
+   * ConnectionCallbacks)}.
    * @param callbacks
    */
   void registerConnectionCallbacks(ConnectionCallbacks callbacks);
