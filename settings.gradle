@@ -1,1 +1,1 @@
-include ':lost', ':lost-sample'
+include ':lost', ':lost-sample', ':rxlost', ':rxlost-sample'

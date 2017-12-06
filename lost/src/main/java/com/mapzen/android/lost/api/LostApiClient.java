@@ -35,6 +35,13 @@ public interface LostApiClient {
   boolean isConnected();
 
   /**
+   * Registers callbacks added in {@link LostApiClient.Builder#addConnectionCallbacks(
+   * ConnectionCallbacks)}.
+   * @param callbacks
+   */
+  void registerConnectionCallbacks(ConnectionCallbacks callbacks);
+
+  /**
    * Unregisters callbacks added in {@link LostApiClient.Builder#addConnectionCallbacks(
    * ConnectionCallbacks)}. Use this method to avoid leaking resources.
    * @param callbacks

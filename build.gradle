@@ -2,19 +2,23 @@
 
 buildscript {
   repositories {
+    mavenLocal()
     jcenter()
     mavenCentral()
+    google()
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:2.3.3'
+    classpath 'com.android.tools.build:gradle:3.0.0'
     classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+    classpath 'net.researchgate:gradle-release:2.4.0'
   }
 }
 
 allprojects {
   repositories {
     mavenCentral()
+    google()
   }
 }
 

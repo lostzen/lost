@@ -1,22 +1,6 @@
-buildscript {
-  repositories {
-    jcenter()
-  }
-
-  dependencies {
-    classpath 'com.android.tools.build:gradle:2.3.3'
-  }
-}
-
-repositories {
-  mavenLocal()
-  mavenCentral()
-  maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-  maven { url "http://repo.maven.apache.org/maven2" }
-}
-
 apply plugin: 'com.android.application'
 apply plugin: 'checkstyle'
+
 
 group = GROUP
 version = VERSION_NAME
@@ -24,13 +8,13 @@ version = VERSION_NAME
 description = """LOST Sample"""
 
 android {
-  compileSdkVersion 25
-  buildToolsVersion '25.0.3'
+  compileSdkVersion 26
+  buildToolsVersion '26.0.2'
 
   defaultConfig {
     applicationId "com.example.lost"
     minSdkVersion 15
-    targetSdkVersion 25
+    targetSdkVersion 26
     versionCode 1
     versionName "1.0"
   }
@@ -49,7 +33,7 @@ task checkstyle(type: Checkstyle) {
 dependencies {
   compile project(':lost')
   compile 'com.mapzen.android:prefs-plus:1.0.0'
-  compile 'com.android.support:appcompat-v7:25.3.1'
+  compile 'com.android.support:appcompat-v7:26.1.0'
 }
 
 apply from: file('../gradle-mvn-push.gradle')
