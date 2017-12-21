@@ -21,20 +21,20 @@ import io.reactivex.Single;
  */
 public interface RxGeofencingApi {
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  Single<Status> addGeofences(LostApiClient client, GeofencingRequest geofencingRequest,
+  Single<Status> addGeofences(RxLostApiClient client, GeofencingRequest geofencingRequest,
       PendingIntent pendingIntent);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  Single<Status> addGeofences(LostApiClient client, List<Geofence> geofences,
+  Single<Status> addGeofences(RxLostApiClient client, List<Geofence> geofences,
       PendingIntent pendingIntent);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  Single<Status> removeGeofences(LostApiClient client, List<String> geofenceRequestIds);
+  Single<Status> removeGeofences(RxLostApiClient client, List<String> geofenceRequestIds);
 
   @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-  Single<Status> removeGeofences(LostApiClient client, PendingIntent pendingIntent);
+  Single<Status> removeGeofences(RxLostApiClient client, PendingIntent pendingIntent);
 
-  Observable<Geofence> requestGeofences(LostApiClient client, GeofencingRequest geofencingRequest);
+  Observable<Geofence> requestGeofences(RxLostApiClient client, GeofencingRequest geofencingRequest);
 
-  Observable<Geofence> requestGeofences(LostApiClient client, List<Geofence> geofences);
+  Observable<Geofence> requestGeofences(RxLostApiClient client, List<Geofence> geofences);
 }

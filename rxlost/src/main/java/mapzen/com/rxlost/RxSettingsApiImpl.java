@@ -12,7 +12,7 @@ import io.reactivex.Single;
  */
 public class RxSettingsApiImpl implements RxSettingsApi {
 
-  @Override public Single<LocationSettingsResult> checkLocationSettings(LostApiClient apiClient,
+  @Override public Single<LocationSettingsResult> checkLocationSettings(RxLostApiClient apiClient,
       LocationSettingsRequest request) {
     throw new RuntimeException("Sorry, not yet implemented");
   }

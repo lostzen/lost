@@ -18,33 +18,33 @@ import io.reactivex.Single;
  */
 public class RxGeofencingApiImpl implements RxGeofencingApi {
   @Override
-  public Single<Status> addGeofences(LostApiClient client, GeofencingRequest geofencingRequest,
+  public Single<Status> addGeofences(RxLostApiClient client, GeofencingRequest geofencingRequest,
       PendingIntent pendingIntent) {
     throw new RuntimeException("Sorry, not yet implemented");
   }
 
-  @Override public Single<Status> addGeofences(LostApiClient client, List<Geofence> geofences,
+  @Override public Single<Status> addGeofences(RxLostApiClient client, List<Geofence> geofences,
       PendingIntent pendingIntent) {
     throw new RuntimeException("Sorry, not yet implemented");
   }
 
   @Override
-  public Single<Status> removeGeofences(LostApiClient client, List<String> geofenceRequestIds) {
+  public Single<Status> removeGeofences(RxLostApiClient client, List<String> geofenceRequestIds) {
     throw new RuntimeException("Sorry, not yet implemented");
   }
 
   @Override
-  public Single<Status> removeGeofences(LostApiClient client, PendingIntent pendingIntent) {
+  public Single<Status> removeGeofences(RxLostApiClient client, PendingIntent pendingIntent) {
     throw new RuntimeException("Sorry, not yet implemented");
   }
 
-  @Override public Observable<Geofence> requestGeofences(LostApiClient client,
+  @Override public Observable<Geofence> requestGeofences(RxLostApiClient client,
       GeofencingRequest geofencingRequest) {
     throw new RuntimeException("Sorry, not yet implemented");
   }
 
   @Override
-  public Observable<Geofence> requestGeofences(LostApiClient client, List<Geofence> geofences) {
+  public Observable<Geofence> requestGeofences(RxLostApiClient client, List<Geofence> geofences) {
     throw new RuntimeException("Sorry, not yet implemented");
   }
 }

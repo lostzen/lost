@@ -12,6 +12,6 @@ import io.reactivex.Single;
  */
 public interface RxSettingsApi {
 
-  Single<LocationSettingsResult> checkLocationSettings(LostApiClient apiClient,
+  Single<LocationSettingsResult> checkLocationSettings(RxLostApiClient apiClient,
       LocationSettingsRequest request);
 }

@@ -1,13 +1,15 @@
 package mapzen.com.rxlost;
 
 /**
- * Created by sarahlensing on 10/23/17.
+ * Main entry point for RxJava APIs cooresponding to
+ * {@link com.mapzen.android.lost.api.LocationServices}.
  */
-
 public class RxLocationServices {
 
   public static final RxFusedLocationProviderApi FusedLocationApi =
       new RxFusedLocationProviderApiImpl();
-  public static final RxGeofencingApi GeofencingApi;
-  public static final RxSettingsApi SettingsApi;
+
+  public static final RxGeofencingApi GeofencingApi = new RxGeofencingApiImpl();
+
+  public static final RxSettingsApi SettingsApi = new RxSettingsApiImpl();
 }
