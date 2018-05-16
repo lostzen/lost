@@ -98,6 +98,11 @@ public class FusionEngine extends LocationEngine implements LocationListener {
             passiveInterval = request.getInterval();
           }
           break;
+        case LocationRequest.PRIORITY_GPS_ONLY:
+          if (request.getInterval() < gpsInterval) {
+            gpsInterval = request.getInterval();
+          }
+          break;
         default:
           break;
       }
