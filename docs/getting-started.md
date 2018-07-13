@@ -11,7 +11,7 @@ LostApiClient lostApiClient = new LostApiClient.Builder(this).addConnectionCallb
 lostApiClient.connect();
 
 @Override public void onConnected() {
-  // Client is connected and ready to for use
+  // Client is connected and ready for use
 }
 
 @Override public void onConnectionSuspended() {
