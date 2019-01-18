@@ -7,6 +7,7 @@ import org.xml.sax.SAXException;
 
 import android.content.Context;
 import android.location.Location;
+import android.os.Build;
 import android.os.Handler;
 
 import java.io.File;
@@ -96,6 +97,9 @@ class TraceThread extends Thread {
     location.setLatitude(Double.parseDouble(lat));
     location.setLongitude(Double.parseDouble(lng));
     location.setTime(System.currentTimeMillis());
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+      location.setElapsedRealtimeNanos(android.os.SystemClock.elapsedRealtimeNanos());
+    }
     if (speedList.item(i) != null && speedList.item(i).getFirstChild() != null) {
       location.setSpeed(Float.parseFloat(speedList.item(i).getFirstChild().getNodeValue()));
     }
