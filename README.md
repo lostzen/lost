@@ -1,4 +1,5 @@
-#Deprecated
+# Deprecated
+
 This project is deprecated for use and not recommended for modern Android applications. The maintainers are no longer available to maintain it and the implementation is now fairly divergent from modern Android requirements. We appreciate everyone who has contributed to this project in the past. Thank you!
 
 # Lost
